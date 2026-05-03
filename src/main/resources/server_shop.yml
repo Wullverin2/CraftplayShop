@@ -1,0 +1,36 @@
+categories:
+  blocks:
+    displayName: "&6Blöcke"
+    icon: STONE
+    slot: 20
+    items:
+      stone:
+        material: STONE
+        displayName: "&7Stein"
+        buyPrice: 5.0
+        sellPrice: 1.0
+        buyEnabled: true
+        sellEnabled: true
+        slot: 10
+      cobblestone:
+        material: COBBLESTONE
+        displayName: "&8Bruchstein"
+        buyPrice: 3.0
+        sellPrice: 0.5
+        buyEnabled: true
+        sellEnabled: true
+        slot: 11
+
+  farming:
+    displayName: "&aFarmitems"
+    icon: WHEAT
+    slot: 22
+    items:
+      wheat:
+        material: WHEAT
+        displayName: "&eWeizen"
+        buyPrice: 10.0
+        sellPrice: 2.0
+        buyEnabled: true
+        sellEnabled: true
+        slot: 10

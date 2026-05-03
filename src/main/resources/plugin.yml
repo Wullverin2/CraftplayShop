@@ -1,0 +1,63 @@
+name: CraftplayShop
+version: 0.1.0
+main: de.craftplay.shop.CraftplayShopPlugin
+api-version: '1.21'
+author: Wullverin
+website: https://Craftplay.de
+depend:
+  - Vault
+softdepend:
+  - PlaceholderAPI
+  - HeadDatabase
+  - WorldGuard
+  - PlotSquared
+  - Lands
+  - BentoBox
+  - floodgate
+  - Citizens
+commands:
+  shop:
+    description: Öffnet CraftplayShop.
+    aliases: [craftplayshop]
+  cshop:
+    description: Admin-Befehl für CraftplayShop.
+  servershop:
+    description: Öffnet den ServerShop.
+  trade:
+    description: DirectTrade Einstellungen und später Handel.
+  asc:
+    description: AutoSellChest.
+    aliases: [autosellchest, sellchest, verkaufskiste]
+permissions:
+  craftplayshop.use:
+    default: true
+  craftplayshop.admin:
+    default: op
+  craftplayshop.reload:
+    default: op
+  craftplayshop.servershop.use:
+    default: true
+  craftplayshop.servershop.buy:
+    default: true
+  craftplayshop.servershop.sell:
+    default: true
+  craftplayshop.servershop.sellhand:
+    default: true
+  craftplayshop.servershop.sellall:
+    default: true
+  craftplayshop.language:
+    default: true
+  craftplayshop.trade.use:
+    default: true
+  craftplayshop.trade.toggle:
+    default: true
+  craftplayshop.trade.request:
+    default: true
+  craftplayshop.trade.accept:
+    default: true
+  craftplayshop.autosellchest.use:
+    default: true
+  craftplayshop.autosellchest.create:
+    default: true
+  craftplayshop.autosellchest.admin:
+    default: op

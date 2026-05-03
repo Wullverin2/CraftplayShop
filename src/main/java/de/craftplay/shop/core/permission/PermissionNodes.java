@@ -1,0 +1,20 @@
+package de.craftplay.shop.core.permission;
+
+public final class PermissionNodes {
+    public static final String USE = "craftplayshop.use";
+    public static final String ADMIN = "craftplayshop.admin";
+    public static final String RELOAD = "craftplayshop.reload";
+    public static final String SERVER_SHOP_USE = "craftplayshop.servershop.use";
+    public static final String SERVER_SHOP_BUY = "craftplayshop.servershop.buy";
+    public static final String SERVER_SHOP_SELL = "craftplayshop.servershop.sell";
+    public static final String SERVER_SHOP_SELL_HAND = "craftplayshop.servershop.sellhand";
+    public static final String SERVER_SHOP_SELL_ALL = "craftplayshop.servershop.sellall";
+    public static final String LANGUAGE = "craftplayshop.language";
+    public static final String TRADE_USE = "craftplayshop.trade.use";
+    public static final String TRADE_TOGGLE = "craftplayshop.trade.toggle";
+    public static final String TRADE_REQUEST = "craftplayshop.trade.request";
+    public static final String TRADE_ACCEPT = "craftplayshop.trade.accept";
+
+    private PermissionNodes() {
+    }
+}

@@ -1,0 +1,43 @@
+prefix: "&8[&6Shop&8] "
+
+general:
+  noPermission: "%prefix%&cYou do not have permission."
+  playerOnly: "%prefix%&cThis command can only be used by players."
+  unknownCommand: "%prefix%&cUnknown command."
+  featureNotAvailable: "%prefix%&cThis feature is not available yet."
+  reloadStart: "%prefix%&7Reloading CraftplayShop..."
+  reloadDone: "%prefix%&aCraftplayShop has been reloaded."
+  reloadSummary: "%prefix%&7Reload finished: &e%languages% &7languages, &e%guis% &7GUI files, &e%categories% &7categories."
+  vaultMissing: "%prefix%&cVault was not found. Disabling plugin."
+  databaseError: "%prefix%&cDatabase error. Please contact staff."
+
+language:
+  changed: "%prefix%&aYour language has been changed to &e%language%&a."
+  available: "%prefix%&7Available languages: &e%languages%"
+  invalid: "%prefix%&cThat language is not available."
+
+serverShop:
+  opened: "%prefix%&aServerShop opened."
+  categoryNotFound: "%prefix%&cCategory was not found."
+  itemNotBuyable: "%prefix%&cThis item cannot be bought."
+  itemNotSellable: "%prefix%&cThis item cannot be sold."
+  notEnoughMoney: "%prefix%&cYou do not have enough money."
+  notEnoughItems: "%prefix%&cYou do not have enough items."
+  inventoryFull: "%prefix%&cYour inventory is full."
+  bought: "%prefix%&aYou bought &e%amount%x %item% &afor &e%price%&a."
+  sold: "%prefix%&aYou sold &e%amount%x %item% &afor &e%price%&a."
+  sellHandNoItem: "%prefix%&cYou need to hold a sellable item."
+  sellAllNothing: "%prefix%&cYou do not have any sellable items."
+  sellAllDone: "%prefix%&aYou sold items for &e%price%&a."
+
+trade:
+  disabledSelf: "%prefix%&cYou disabled direct trade requests."
+  enabledSelf: "%prefix%&aYou enabled direct trade requests."
+  targetDisabled: "%prefix%&cThat player disabled direct trade requests."
+  toggleStatus: "%prefix%&7Direct trade: %status%"
+  statusEnabled: "&aenabled"
+  statusDisabled: "&cdisabled"
+
+gui:
+  missingFile: "%prefix%&cGUI file missing: %file%"
+  missingItem: "%prefix%&cGUI item missing: %item%"

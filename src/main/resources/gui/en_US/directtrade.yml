@@ -1,0 +1,12 @@
+title: "&8DirectTrade"
+size: 54
+items:
+  unavailable:
+    enabled: true
+    slot: 22
+    material: BARRIER
+    name: "&cNot available yet"
+    lore:
+      - "&7Phase 1 only includes the toggle."
+    leftClickActions:
+      - "MESSAGE:general.featureNotAvailable"

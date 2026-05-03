@@ -1,0 +1,199 @@
+# CraftplayShop Hauptkonfiguration.
+# Lizenz: Proprietär. Copyright Wullverin @ Craftplay.de.
+
+settings:
+  # Standardsprache des Plugins, wenn ein Spieler keine eigene Sprache gewählt hat.
+  defaultLanguage: "de_DE"
+
+  # Ersatzsprache, falls eine Übersetzung oder GUI-Datei fehlt.
+  fallbackLanguage: "en_US"
+
+  # Erlaubt Spielern, ihre Sprache selbst umzuschalten.
+  allowPlayerLanguageSwitch: true
+
+  # Aktiviert zusätzliche Debug-Ausgaben.
+  debug: false
+
+economy:
+  # Wenn true, wird Vault benötigt. Fehlt Vault, deaktiviert sich das Plugin.
+  requireVault: true
+
+  # Symbol oder Name der Währung.
+  currencySymbol: "Coins"
+
+  # Format für Geldbeträge.
+  format: "%amount% Coins"
+
+database:
+  # SQLITE oder MYSQL.
+  type: "SQLITE"
+
+  # Prefix für alle Datenbanktabellen.
+  tablePrefix: "craftplay_shop_"
+
+mysql:
+  # MySQL/MariaDB Host.
+  host: "localhost"
+  port: 3306
+  database: "minecraft"
+  username: "root"
+  password: ""
+  useSSL: false
+
+gui:
+  # Aktiviert externe GUI-Dateien aus dem /gui Ordner.
+  enabled: true
+
+  # Erstellt fehlende GUI-Dateien aus Ressourcen.
+  createMissingFiles: true
+
+  # Nutzt fallbackLanguage, wenn GUI-Datei oder Key fehlt.
+  useFallbackLanguage: true
+
+  # Cache für GUI-Items.
+  cacheGuiItems: true
+
+  # Erlaubt Console Commands auf GUI-Buttons.
+  allowConsoleCommands: true
+
+  # Erlaubt Player Commands auf GUI-Buttons.
+  allowPlayerCommands: true
+
+  # Blockiert gefährliche Befehle.
+  blockDangerousCommands: true
+
+  blockedCommandPrefixes:
+    - "op "
+    - "deop "
+    - "stop"
+    - "restart"
+    - "reload"
+
+language:
+  # Erstellt fehlende Sprachdateien.
+  createMissingFiles: true
+
+  # Spieler dürfen Sprache wechseln.
+  playerSwitchEnabled: true
+
+serverShop:
+  enabled: true
+  allowBuy: true
+  allowSell: true
+  defaultCurrency: "VAULT"
+
+  # Standard-Itemvergleich für einfache ServerShop-Items.
+  itemMatchMode: "MATERIAL_ONLY"
+
+sellCommands:
+  sellHand: true
+  sellAll: true
+  sellInventoryGui: true
+
+playerShops:
+  enabled: false
+  useGuiCreation: true
+
+autoSellChest:
+  enabled: false
+
+  selling:
+    mode: "BOTH"
+    intervalSeconds: 10
+    sellOnlyWhenOwnerOnline: false
+
+  performance:
+    scanIntervalSeconds: 10
+    maxChestsPerTick: 5
+    maxItemsPerScan: 2304
+    processOnlyDirtyChests: true
+    dirtyCooldownSeconds: 5
+    asyncDatabaseLogging: true
+
+  protection:
+    protectContainer: true
+    blockBreakingByOthers: true
+    blockExplosionDamage: true
+    blockHopperExtraction: true
+    allowHopperInsertion: true
+
+directTrade:
+  enabled: false
+
+  # Spieler können DirectTrade für sich selbst deaktivieren.
+  allowPlayerToggle: true
+
+  # Standardstatus für neue Spieler.
+  defaultEnabledForPlayers: true
+
+  # Wenn true, darf ein Spieler keine Anfragen erhalten, wenn er DirectTrade deaktiviert hat.
+  blockRequestsWhenDisabled: true
+
+  # Wenn true, darf ein Spieler keine Anfragen senden, wenn er DirectTrade deaktiviert hat.
+  blockSendingWhenDisabled: true
+
+  request:
+    timeoutSeconds: 30
+    cooldownSeconds: 10
+    requireSameWorld: true
+    maxDistance: 10.0
+
+  confirmation:
+    requireReady: true
+    requireFinalConfirm: true
+    resetReadyOnChange: true
+
+  money:
+    enabled: true
+    minAmount: 1.0
+    maxAmount: 1000000.0
+
+rankShop:
+  enabled: false
+
+permissionShop:
+  enabled: false
+
+referral:
+  enabled: false
+
+auctionHouse:
+  enabled: false
+
+integrations:
+  placeholderApi:
+    enabled: true
+
+  headDatabase:
+    enabled: true
+    fallbackMaterial: PLAYER_HEAD
+    warnIfMissing: true
+
+  floodgate:
+    enabled: true
+
+  discord:
+    enabled: false
+
+protection:
+  worldguard: true
+  plotsquared: true
+  lands: true
+  bentobox: true
+
+performance:
+  asyncDatabaseLogging: true
+  guiCacheEnabled: true
+  maxGuiBuildsPerTick: 10
+
+panel:
+  # Minecraft-Server, die ein externes Team Panel für den Adminshop anbieten kann.
+  servers:
+    - id: "lobby"
+      displayName: "Lobby"
+      host: "127.0.0.1"
+      port: 25565
+    - id: "survival"
+      displayName: "Survival"
+      host: "127.0.0.1"
+      port: 25566

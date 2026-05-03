@@ -1,0 +1,47 @@
+title: "&8Einstellungen"
+size: 27
+
+filler:
+  enabled: true
+  material: BLACK_STAINED_GLASS_PANE
+  name: " "
+  slots: [0, 1, 2, 3, 4, 5, 6, 7, 8, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+
+items:
+  languageDe:
+    enabled: true
+    slot: 10
+    material: BOOK
+    name: "&eDeutsch"
+    lore:
+      - "&7Sprache auf Deutsch setzen."
+    permission: "craftplayshop.language"
+    leftClickActions:
+      - "LANGUAGE_SET:de_DE"
+  languageEn:
+    enabled: true
+    slot: 12
+    material: BOOK
+    name: "&eEnglish"
+    lore:
+      - "&7Sprache auf Englisch setzen."
+    permission: "craftplayshop.language"
+    leftClickActions:
+      - "LANGUAGE_SET:en_US"
+  tradeToggle:
+    enabled: true
+    slot: 14
+    material: EMERALD
+    name: "&aDirectTrade umschalten"
+    lore:
+      - "&7Aktiviert oder deaktiviert Handelsanfragen."
+    permission: "craftplayshop.trade.toggle"
+    leftClickActions:
+      - "DIRECT_TRADE_TOGGLE"
+  back:
+    enabled: true
+    slot: 16
+    material: ARROW
+    name: "&cZurück"
+    leftClickActions:
+      - "OPEN_GUI:main"

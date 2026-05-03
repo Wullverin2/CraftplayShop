@@ -1,0 +1,43 @@
+prefix: "&8[&6Shop&8] "
+
+general:
+  noPermission: "%prefix%&cDazu hast du keine Rechte."
+  playerOnly: "%prefix%&cDieser Befehl ist nur für Spieler."
+  unknownCommand: "%prefix%&cUnbekannter Befehl."
+  featureNotAvailable: "%prefix%&cDiese Funktion ist noch nicht verfügbar."
+  reloadStart: "%prefix%&7CraftplayShop wird neu geladen..."
+  reloadDone: "%prefix%&aCraftplayShop wurde neu geladen."
+  reloadSummary: "%prefix%&7Reload abgeschlossen: &e%languages% &7Sprachen, &e%guis% &7GUI-Dateien, &e%categories% &7Kategorien."
+  vaultMissing: "%prefix%&cVault wurde nicht gefunden. Plugin wird deaktiviert."
+  databaseError: "%prefix%&cDatenbankfehler. Bitte informiere ein Teammitglied."
+
+language:
+  changed: "%prefix%&aDeine Sprache wurde auf &e%language% &ageändert."
+  available: "%prefix%&7Verfügbare Sprachen: &e%languages%"
+  invalid: "%prefix%&cDiese Sprache ist nicht verfügbar."
+
+serverShop:
+  opened: "%prefix%&aServerShop geöffnet."
+  categoryNotFound: "%prefix%&cKategorie wurde nicht gefunden."
+  itemNotBuyable: "%prefix%&cDieses Item kann nicht gekauft werden."
+  itemNotSellable: "%prefix%&cDieses Item kann nicht verkauft werden."
+  notEnoughMoney: "%prefix%&cDu hast nicht genug Geld."
+  notEnoughItems: "%prefix%&cDu hast nicht genug Items."
+  inventoryFull: "%prefix%&cDein Inventar ist voll."
+  bought: "%prefix%&aDu hast &e%amount%x %item% &afür &e%price% &agekauft."
+  sold: "%prefix%&aDu hast &e%amount%x %item% &afür &e%price% &averkauft."
+  sellHandNoItem: "%prefix%&cDu musst ein verkaufbares Item in der Hand halten."
+  sellAllNothing: "%prefix%&cDu hast keine verkaufbaren Items im Inventar."
+  sellAllDone: "%prefix%&aDu hast Items für insgesamt &e%price% &averkauft."
+
+trade:
+  disabledSelf: "%prefix%&cDu hast direkte Handelsanfragen deaktiviert."
+  enabledSelf: "%prefix%&aDu hast direkte Handelsanfragen aktiviert."
+  targetDisabled: "%prefix%&cDieser Spieler hat direkte Handelsanfragen deaktiviert."
+  toggleStatus: "%prefix%&7Direkter Handel: %status%"
+  statusEnabled: "&aaktiviert"
+  statusDisabled: "&cdeaktiviert"
+
+gui:
+  missingFile: "%prefix%&cGUI-Datei fehlt: %file%"
+  missingItem: "%prefix%&cGUI-Item fehlt: %item%"

@@ -1,0 +1,29 @@
+title: "&8CraftplayShop Admin"
+size: 54
+items:
+  reload:
+    enabled: true
+    slot: 20
+    material: REDSTONE
+    name: "&cReload"
+    permission: "craftplayshop.reload"
+    leftClickActions:
+      - "PLAYER_COMMAND:shop reload"
+  serverShopEditor:
+    enabled: true
+    slot: 22
+    material: WRITABLE_BOOK
+    name: "&aServerShop Editor"
+    lore:
+      - "&7Base for the in-game editor."
+      - "&8Editing follows in a later phase."
+    permission: "craftplayshop.admin"
+    leftClickActions:
+      - "MESSAGE:general.featureNotAvailable"
+  close:
+    enabled: true
+    slot: 24
+    material: BARRIER
+    name: "&cClose"
+    leftClickActions:
+      - "CLOSE"

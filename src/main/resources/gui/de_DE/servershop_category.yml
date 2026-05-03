@@ -1,0 +1,28 @@
+title: "&8%category%"
+size: 54
+
+filler:
+  enabled: true
+  material: BLACK_STAINED_GLASS_PANE
+  name: " "
+  slots: [0, 1, 2, 3, 4, 5, 6, 7, 8, 45, 46, 47, 48, 50, 51, 52, 53]
+
+items:
+  back:
+    enabled: true
+    slot: 49
+    material: ARROW
+    name: "&cZurück"
+    lore:
+      - "&7Zur Kategorienübersicht."
+    leftClickActions:
+      - "OPEN_GUI:servershop"
+
+shopItemLore:
+  - "&7Kaufen: &e%buy_price%"
+  - "&7Verkaufen: &e%sell_price%"
+  - ""
+  - "&eLinksklick: 1 kaufen"
+  - "&eShift-Linksklick: Stack kaufen"
+  - "&eRechtsklick: 1 verkaufen"
+  - "&eShift-Rechtsklick: Stack verkaufen"

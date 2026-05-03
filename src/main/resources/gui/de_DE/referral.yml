@@ -1,0 +1,10 @@
+title: "&8Referral"
+size: 27
+items:
+  unavailable:
+    enabled: true
+    slot: 13
+    material: BARRIER
+    name: "&cNoch nicht verfügbar"
+    leftClickActions:
+      - "MESSAGE:general.featureNotAvailable"

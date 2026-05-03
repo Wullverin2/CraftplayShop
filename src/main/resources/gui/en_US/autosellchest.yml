@@ -1,0 +1,10 @@
+title: "&8AutoSellChest"
+size: 27
+items:
+  unavailable:
+    enabled: true
+    slot: 13
+    material: BARRIER
+    name: "&cNot available yet"
+    leftClickActions:
+      - "MESSAGE:general.featureNotAvailable"
