@@ -49,3 +49,5 @@ adminShop:
   categoryUpdated: "%prefix%&aCategory has been updated."
   itemCreated: "%prefix%&aShop item has been created."
   itemUpdated: "%prefix%&aShop item has been updated."
+  moveSelected: "%prefix%&7Entry &e%entry% &7selected. Now click the target slot."
+  moveDone: "%prefix%&aLayout has been saved."

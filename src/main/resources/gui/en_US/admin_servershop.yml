@@ -13,6 +13,7 @@ items:
       - ""
       - "&eClick to edit"
       - "&eRight click: material picker"
+      - "&eShift-click: select for moving"
       - "&eDrag item onto slot: change icon"
   shopItem:
     lore:
@@ -26,6 +27,7 @@ items:
       - "&eClick to edit"
       - "&eRight click: material picker"
       - "&eClick the item in the editor: material picker"
+      - "&eShift-click: select for moving"
       - "&eDrag item onto slot: change item"
   material:
     lore:

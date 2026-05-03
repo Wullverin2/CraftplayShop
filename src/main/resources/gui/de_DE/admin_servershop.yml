@@ -13,6 +13,7 @@ items:
       - ""
       - "&eKlicken zum Bearbeiten"
       - "&eRechtsklick: Blockauswahl"
+      - "&eShift-Klick: zum Verschieben auswählen"
       - "&eItem auf Slot ziehen: Icon ändern"
   shopItem:
     lore:
@@ -26,6 +27,7 @@ items:
       - "&eKlicken zum Bearbeiten"
       - "&eRechtsklick: Materialauswahl"
       - "&eIm Editor auf das Item klicken: Materialauswahl"
+      - "&eShift-Klick: zum Verschieben auswählen"
       - "&eItem auf Slot ziehen: Item ändern"
   material:
     lore:

@@ -49,3 +49,5 @@ adminShop:
   categoryUpdated: "%prefix%&aKategorie wurde aktualisiert."
   itemCreated: "%prefix%&aShop-Item wurde erstellt."
   itemUpdated: "%prefix%&aShop-Item wurde aktualisiert."
+  moveSelected: "%prefix%&7Eintrag &e%entry% &7ausgewählt. Klicke jetzt auf den Zielslot."
+  moveDone: "%prefix%&aAnordnung wurde gespeichert."

@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 public class ServerShopAdminEditor {
     private static final int MATERIALS_PER_PAGE = 45;
@@ -39,6 +40,7 @@ public class ServerShopAdminEditor {
 
     private final CraftplayShopPlugin plugin;
     private final List<Material> selectableMaterials;
+    private final Map<UUID, MoveSelection> moveSelections = new HashMap<>();
 
     public ServerShopAdminEditor(CraftplayShopPlugin plugin) {
         this.plugin = plugin;
@@ -147,6 +149,18 @@ public class ServerShopAdminEditor {
             return;
         }
         String key = holder.keyAt(event.getRawSlot());
+        if (event.getRawSlot() >= 0 && event.getRawSlot() < event.getInventory().getSize()
+                && event.isShiftClick() && isMovableKey(holder, key)) {
+            selectMove(player, holder, key);
+            return;
+        }
+        if (event.getRawSlot() >= 0 && event.getRawSlot() < event.getInventory().getSize()
+                && !isControlKey(key) && handleMoveTarget(player, holder, event.getRawSlot())) {
+            return;
+        }
+        if (event.getRawSlot() >= 0 && event.getRawSlot() < event.getInventory().getSize() && isControlKey(key)) {
+            moveSelections.remove(player.getUniqueId());
+        }
         if (key == null) {
             return;
         }
@@ -344,6 +358,67 @@ public class ServerShopAdminEditor {
         openItems(player, categoryId);
     }
 
+    private void selectMove(Player player, ServerShopAdminHolder holder, String key) {
+        moveSelections.put(player.getUniqueId(), new MoveSelection(holder.view(), holder.categoryId(), key));
+        plugin.getLanguageService().send(player, "adminShop.moveSelected", Map.of("entry", key));
+    }
+
+    private boolean handleMoveTarget(Player player, ServerShopAdminHolder holder, int targetSlot) {
+        MoveSelection selection = moveSelections.get(player.getUniqueId());
+        if (selection == null || selection.view() != holder.view()) {
+            return false;
+        }
+        if (selection.view() == ServerShopAdminView.ITEMS && !selection.categoryId().equals(holder.categoryId())) {
+            return false;
+        }
+        moveSelections.remove(player.getUniqueId());
+        if (selection.view() == ServerShopAdminView.CATEGORIES) {
+            moveCategoryToSlot(selection.entryId(), targetSlot);
+            plugin.getLanguageService().send(player, "adminShop.moveDone");
+            openCategories(player);
+            return true;
+        }
+        if (selection.view() == ServerShopAdminView.ITEMS) {
+            moveItemToSlot(selection.categoryId(), selection.entryId(), targetSlot);
+            plugin.getLanguageService().send(player, "adminShop.moveDone");
+            openItems(player, selection.categoryId());
+            return true;
+        }
+        return false;
+    }
+
+    private void moveCategoryToSlot(String categoryId, int targetSlot) {
+        ServerShopCategory selected = plugin.getServerShopRegistry().category(categoryId);
+        if (selected == null) {
+            return;
+        }
+        ServerShopCategory target = categoryAtSlot(targetSlot);
+        YamlConfiguration configuration = loadShopFile();
+        if (target != null && !target.id().equals(categoryId)) {
+            configuration.set("categories." + target.id() + ".slot", selected.slot());
+        }
+        configuration.set("categories." + categoryId + ".slot", targetSlot);
+        save(configuration);
+    }
+
+    private void moveItemToSlot(String categoryId, String itemId, int targetSlot) {
+        ServerShopCategory category = plugin.getServerShopRegistry().category(categoryId);
+        if (category == null) {
+            return;
+        }
+        ServerShopItem selected = category.item(itemId);
+        if (selected == null) {
+            return;
+        }
+        ServerShopItem target = itemAtSlot(category, targetSlot);
+        YamlConfiguration configuration = loadShopFile();
+        if (target != null && !target.id().equals(itemId)) {
+            configuration.set(itemPath(categoryId, target.id()) + ".slot", selected.slot());
+        }
+        configuration.set(itemPath(categoryId, itemId) + ".slot", targetSlot);
+        save(configuration);
+    }
+
     private ServerShopCategory categoryAtSlot(int slot) {
         for (ServerShopCategory category : plugin.getServerShopRegistry().categories()) {
             if (category.slot() == slot) {
@@ -511,6 +586,13 @@ public class ServerShopAdminEditor {
                 || "next".equals(key)
                 || "create_category".equals(key)
                 || "create_item".equals(key);
+    }
+
+    private boolean isMovableKey(ServerShopAdminHolder holder, String key) {
+        if (key == null || isControlKey(key)) {
+            return false;
+        }
+        return holder.view() == ServerShopAdminView.CATEGORIES || holder.view() == ServerShopAdminView.ITEMS;
     }
 
     private boolean isCreateCategoryTarget(ServerShopAdminHolder holder) {
@@ -698,5 +780,8 @@ public class ServerShopAdminEditor {
     private String formatMaterialName(Material material) {
         String lower = material.name().toLowerCase(Locale.ROOT).replace('_', ' ');
         return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
+    }
+
+    private record MoveSelection(ServerShopAdminView view, String categoryId, String entryId) {
     }
 }
