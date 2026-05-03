@@ -103,7 +103,7 @@ public class ConfigService {
     }
 
     public String panelServerId() {
-        return config().getString("panel.serverId", "Testserver-1");
+        return config().getString("panel.serverId", "change-this-server-id");
     }
 
     public String panelToken() {

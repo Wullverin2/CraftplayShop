@@ -189,7 +189,8 @@ performance:
 panel:
   # Eindeutige ID dieses Minecraft-Servers für das externe Team Panel.
   # Im Panel muss dieselbe ID bei der CraftplayShop-Server-Konfiguration eingetragen werden.
-  serverId: "Testserver-1"
+  # Beispiel: "Testserver-1"
+  serverId: "change-this-server-id"
 
   # Geheimer Token für spätere Panel-API-Zugriffe auf dieses Plugin.
   # Trage denselben Token im Panel bei diesem Server ein. IP und Port werden nur im Panel gepflegt.
