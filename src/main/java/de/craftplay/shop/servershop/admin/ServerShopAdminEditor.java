@@ -28,6 +28,14 @@ import java.util.Map;
 
 public class ServerShopAdminEditor {
     private static final int MATERIALS_PER_PAGE = 45;
+    private static final String CREATE_CATEGORY_TARGET = "__create_category__";
+    private static final String CREATE_ITEM_TARGET = "__create_item__";
+    private static final List<Integer> EDITABLE_GRID_SLOTS = List.of(
+            9, 10, 11, 12, 13, 14, 15, 16, 17,
+            18, 19, 20, 21, 22, 23, 24, 25, 26,
+            27, 28, 29, 30, 31, 32, 33, 34, 35,
+            36, 37, 38, 39, 40, 41, 42, 43, 44
+    );
 
     private final CraftplayShopPlugin plugin;
     private final List<Material> selectableMaterials;
@@ -57,6 +65,8 @@ public class ServerShopAdminEditor {
             ))));
             keys.put(slot, category.id());
         }
+        inventory.setItem(53, configuredItem(gui, "createCategory", Map.of()));
+        keys.put(53, "create_category");
         inventory.setItem(49, configuredItem(gui, "backAdmin", Map.of()));
         keys.put(49, "back");
         player.openInventory(inventory);
@@ -80,6 +90,8 @@ public class ServerShopAdminEditor {
             inventory.setItem(slot, editorItem(gui, shopItem));
             keys.put(slot, shopItem.id());
         }
+        inventory.setItem(53, configuredItem(gui, "createItem", Map.of()));
+        keys.put(53, "create_item");
         inventory.setItem(49, configuredItem(gui, "backCategories", Map.of()));
         keys.put(49, "back");
         player.openInventory(inventory);
@@ -105,6 +117,7 @@ public class ServerShopAdminEditor {
         fill(inventory);
 
         inventory.setItem(4, editorItem(gui, shopItem));
+        keys.put(4, "item_preview");
         inventory.setItem(10, toggleItem(gui, "toggleBuy", shopItem.buyEnabled()));
         keys.put(10, "toggle_buy");
         priceButton(inventory, keys, gui, 12, "buyMinus10", "buy_-10", shopItem.buyPrice());
@@ -138,7 +151,7 @@ public class ServerShopAdminEditor {
             return;
         }
         switch (holder.view()) {
-            case CATEGORIES -> handleCategoryClick(player, key);
+            case CATEGORIES -> handleCategoryClick(player, key, event.isRightClick());
             case ITEMS -> handleItemListClick(player, holder.categoryId(), key, event.isRightClick());
             case ITEM_EDITOR -> handleItemEditorClick(player, holder.categoryId(), holder.itemId(), key);
             case MATERIAL_PICKER -> handleMaterialPickerClick(player, holder, key);
@@ -158,9 +171,17 @@ public class ServerShopAdminEditor {
         }
     }
 
-    private void handleCategoryClick(Player player, String key) {
+    private void handleCategoryClick(Player player, String key, boolean rightClick) {
         if ("back".equals(key)) {
             plugin.getGuiService().open(player, "admin");
+            return;
+        }
+        if ("create_category".equals(key)) {
+            openMaterialPicker(player, CREATE_CATEGORY_TARGET, "", 0);
+            return;
+        }
+        if (rightClick) {
+            openMaterialPicker(player, key, "", 0);
             return;
         }
         openItems(player, key);
@@ -169,6 +190,10 @@ public class ServerShopAdminEditor {
     private void handleItemListClick(Player player, String categoryId, String key, boolean rightClick) {
         if ("back".equals(key)) {
             openCategories(player);
+            return;
+        }
+        if ("create_item".equals(key)) {
+            openMaterialPicker(player, categoryId, CREATE_ITEM_TARGET, 0);
             return;
         }
         if (rightClick) {
@@ -198,7 +223,7 @@ public class ServerShopAdminEditor {
             openItemEditor(player, categoryId, itemId);
             return;
         }
-        if ("material_picker".equals(key)) {
+        if ("material_picker".equals(key) || "item_preview".equals(key)) {
             openMaterialPicker(player, categoryId, itemId, 0);
             return;
         }
@@ -215,7 +240,11 @@ public class ServerShopAdminEditor {
 
     private void handleMaterialPickerClick(Player player, ServerShopAdminHolder holder, String key) {
         if ("back".equals(key)) {
-            if (holder.itemId().isBlank()) {
+            if (isCreateCategoryTarget(holder)) {
+                openCategories(player);
+            } else if (isCreateItemTarget(holder)) {
+                openItems(player, holder.categoryId());
+            } else if (holder.itemId().isBlank()) {
                 openItems(player, holder.categoryId());
             } else {
                 openItemEditor(player, holder.categoryId(), holder.itemId());
@@ -237,6 +266,23 @@ public class ServerShopAdminEditor {
         if (material == null) {
             return;
         }
+        if (isCreateCategoryTarget(holder)) {
+            createCategoryFromMaterial(nextFreeCategorySlot(), material);
+            plugin.getLanguageService().send(player, "adminShop.categoryCreated");
+            openCategories(player);
+            return;
+        }
+        if (isCreateItemTarget(holder)) {
+            ServerShopCategory category = plugin.getServerShopRegistry().category(holder.categoryId());
+            if (category == null) {
+                plugin.getLanguageService().send(player, "serverShop.categoryNotFound");
+                return;
+            }
+            createItemFromMaterial(holder.categoryId(), nextFreeItemSlot(category), material);
+            plugin.getLanguageService().send(player, "adminShop.itemCreated");
+            openItems(player, holder.categoryId());
+            return;
+        }
         if (holder.itemId().isBlank()) {
             setCategoryIcon(holder.categoryId(), material);
             plugin.getLanguageService().send(player, "adminShop.categoryUpdated");
@@ -249,7 +295,7 @@ public class ServerShopAdminEditor {
     }
 
     private void handleSourceItemOnSlot(Player player, ServerShopAdminHolder holder, int slot, ItemStack source) {
-        if ("back".equals(holder.keyAt(slot)) || "previous".equals(holder.keyAt(slot)) || "next".equals(holder.keyAt(slot))) {
+        if (isControlKey(holder.keyAt(slot))) {
             return;
         }
         switch (holder.view()) {
@@ -327,12 +373,37 @@ public class ServerShopAdminEditor {
         save(configuration);
     }
 
+    private void createCategoryFromMaterial(int slot, Material material) {
+        YamlConfiguration configuration = loadShopFile();
+        String id = uniqueCategoryId(configuration, material);
+        String path = "categories." + id;
+        configuration.set(path + ".displayName", "&f" + formatMaterialName(material));
+        configuration.set(path + ".icon", material.name());
+        configuration.set(path + ".slot", slot);
+        configuration.createSection(path + ".items");
+        save(configuration);
+    }
+
     private void createItemFromStack(String categoryId, int slot, ItemStack source) {
         YamlConfiguration configuration = loadShopFile();
         String id = uniqueItemId(configuration, categoryId, source.getType());
         String path = itemPath(categoryId, id);
         configuration.set(path + ".material", source.getType().name());
         configuration.set(path + ".displayName", displayName(source));
+        configuration.set(path + ".buyPrice", 0.0D);
+        configuration.set(path + ".sellPrice", 0.0D);
+        configuration.set(path + ".buyEnabled", false);
+        configuration.set(path + ".sellEnabled", false);
+        configuration.set(path + ".slot", slot);
+        save(configuration);
+    }
+
+    private void createItemFromMaterial(String categoryId, int slot, Material material) {
+        YamlConfiguration configuration = loadShopFile();
+        String id = uniqueItemId(configuration, categoryId, material);
+        String path = itemPath(categoryId, id);
+        configuration.set(path + ".material", material.name());
+        configuration.set(path + ".displayName", "&f" + formatMaterialName(material));
         configuration.set(path + ".buyPrice", 0.0D);
         configuration.set(path + ".sellPrice", 0.0D);
         configuration.set(path + ".buyEnabled", false);
@@ -432,6 +503,40 @@ public class ServerShopAdminEditor {
             keys.put(50, "next");
         }
         player.openInventory(inventory);
+    }
+
+    private boolean isControlKey(String key) {
+        return "back".equals(key)
+                || "previous".equals(key)
+                || "next".equals(key)
+                || "create_category".equals(key)
+                || "create_item".equals(key);
+    }
+
+    private boolean isCreateCategoryTarget(ServerShopAdminHolder holder) {
+        return CREATE_CATEGORY_TARGET.equals(holder.categoryId());
+    }
+
+    private boolean isCreateItemTarget(ServerShopAdminHolder holder) {
+        return CREATE_ITEM_TARGET.equals(holder.itemId());
+    }
+
+    private int nextFreeCategorySlot() {
+        for (int slot : EDITABLE_GRID_SLOTS) {
+            if (categoryAtSlot(slot) == null) {
+                return slot;
+            }
+        }
+        return 44;
+    }
+
+    private int nextFreeItemSlot(ServerShopCategory category) {
+        for (int slot : EDITABLE_GRID_SLOTS) {
+            if (itemAtSlot(category, slot) == null) {
+                return slot;
+            }
+        }
+        return 44;
     }
 
     private YamlConfiguration loadShopFile() {

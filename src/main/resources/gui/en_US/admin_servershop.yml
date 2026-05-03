@@ -25,6 +25,7 @@ items:
       - ""
       - "&eClick to edit"
       - "&eRight click: material picker"
+      - "&eClick the item in the editor: material picker"
       - "&eDrag item onto slot: change item"
   material:
     lore:
@@ -109,6 +110,24 @@ items:
     name: "&bMaterial Picker"
     lore:
       - "&7Choose a material from a list."
+  createCategory:
+    material: NETHER_STAR
+    name: "&aNew Category"
+    lore:
+      - "&7Creates a new category"
+      - "&7with a selected material."
+      - ""
+      - "&eClick to choose"
+      - "&eOr drag an item onto a free slot"
+  createItem:
+    material: CHEST
+    name: "&aNew Shop Item"
+    lore:
+      - "&7Creates a new item"
+      - "&7inside this category."
+      - ""
+      - "&eClick to choose"
+      - "&eOr drag an item onto a free slot"
   previousPage:
     material: ARROW
     name: "&ePrevious Page"

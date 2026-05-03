@@ -25,6 +25,7 @@ items:
       - ""
       - "&eKlicken zum Bearbeiten"
       - "&eRechtsklick: Materialauswahl"
+      - "&eIm Editor auf das Item klicken: Materialauswahl"
       - "&eItem auf Slot ziehen: Item ändern"
   material:
     lore:
@@ -109,6 +110,24 @@ items:
     name: "&bMaterialauswahl"
     lore:
       - "&7Wähle ein Material aus einer Liste."
+  createCategory:
+    material: NETHER_STAR
+    name: "&aNeue Kategorie"
+    lore:
+      - "&7Erstellt eine neue Kategorie"
+      - "&7mit einem gewählten Material."
+      - ""
+      - "&eKlicken zum Auswählen"
+      - "&eOder Item auf freien Slot ziehen"
+  createItem:
+    material: CHEST
+    name: "&aNeues Shop-Item"
+    lore:
+      - "&7Erstellt ein neues Item"
+      - "&7in dieser Kategorie."
+      - ""
+      - "&eKlicken zum Auswählen"
+      - "&eOder Item auf freien Slot ziehen"
   previousPage:
     material: ARROW
     name: "&eVorherige Seite"
