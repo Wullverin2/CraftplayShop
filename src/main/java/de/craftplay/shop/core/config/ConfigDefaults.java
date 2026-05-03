@@ -15,7 +15,8 @@ public final class ConfigDefaults {
             "rankshop.yml",
             "permissionshop.yml",
             "referral.yml",
-            "admin.yml"
+            "admin.yml",
+            "admin_servershop.yml"
     );
 
     private ConfigDefaults() {

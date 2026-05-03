@@ -33,6 +33,18 @@ public class AdminCommand implements CommandExecutor {
             plugin.getLanguageService().send(sender, "general.reloadDone");
             return true;
         }
+        if (args.length > 0 && ("servershop".equalsIgnoreCase(args[0]) || "adminshop".equalsIgnoreCase(args[0]))) {
+            if (!(sender instanceof Player player)) {
+                plugin.getLanguageService().send(sender, "general.playerOnly");
+                return true;
+            }
+            if (!player.hasPermission(PermissionNodes.ADMIN)) {
+                plugin.getLanguageService().send(player, "general.noPermission");
+                return true;
+            }
+            plugin.getServerShopAdminEditor().openCategories(player);
+            return true;
+        }
         if (sender instanceof Player player && player.hasPermission(PermissionNodes.ADMIN)) {
             plugin.getGuiService().open(player, "admin");
             return true;

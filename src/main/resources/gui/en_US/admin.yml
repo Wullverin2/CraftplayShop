@@ -15,11 +15,13 @@ items:
     material: WRITABLE_BOOK
     name: "&aServerShop Editor"
     lore:
-      - "&7Base for the in-game editor."
-      - "&8Editing follows in a later phase."
+      - "&7Edit categories and items."
+      - "&7Prices, buy/sell and item from hand."
+      - ""
+      - "&eClick to open"
     permission: "craftplayshop.admin"
     leftClickActions:
-      - "MESSAGE:general.featureNotAvailable"
+      - "PLAYER_COMMAND:cshop servershop"
   close:
     enabled: true
     slot: 24

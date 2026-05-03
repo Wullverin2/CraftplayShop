@@ -41,6 +41,7 @@ import de.craftplay.shop.servershop.ServerShopGui;
 import de.craftplay.shop.servershop.ServerShopRegistry;
 import de.craftplay.shop.servershop.ServerShopService;
 import de.craftplay.shop.servershop.ServerShopTransactionService;
+import de.craftplay.shop.servershop.admin.ServerShopAdminEditor;
 import de.craftplay.shop.trade.DirectTradeService;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
@@ -69,6 +70,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
     private ServerShopGui serverShopGui;
     private ServerShopCategoryGui serverShopCategoryGui;
     private ServerShopTransactionService serverShopTransactionService;
+    private ServerShopAdminEditor serverShopAdminEditor;
     private SellCommandService sellCommandService;
     private TransactionService transactionService;
     private TransactionRollbackService transactionRollbackService;
@@ -112,6 +114,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         serverShopGui = new ServerShopGui(this);
         serverShopCategoryGui = new ServerShopCategoryGui(this);
         serverShopTransactionService = new ServerShopTransactionService(this);
+        serverShopAdminEditor = new ServerShopAdminEditor(this);
         sellCommandService = new SellCommandService(this);
         directTradeService = new DirectTradeService(this);
 
@@ -286,6 +289,10 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
 
     public ServerShopTransactionService getServerShopTransactionService() {
         return serverShopTransactionService;
+    }
+
+    public ServerShopAdminEditor getServerShopAdminEditor() {
+        return serverShopAdminEditor;
     }
 
     public SellCommandService getSellCommandService() {

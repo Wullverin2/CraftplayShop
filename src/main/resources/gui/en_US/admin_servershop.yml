@@ -1,0 +1,99 @@
+titles:
+  categories: "&8AdminShop Categories"
+  items: "&8AdminShop: %category%"
+  itemEditor: "&8Edit Item"
+
+items:
+  category:
+    lore:
+      - "&7ID: &f%category_id%"
+      - "&7Items: &f%item_count%"
+      - ""
+      - "&eClick to edit"
+  shopItem:
+    lore:
+      - "&7ID: &f%item_id%"
+      - "&7Material: &f%material%"
+      - "&7Buy price: &f%buy_price%"
+      - "&7Sell price: &f%sell_price%"
+      - "&7Buying: %buy_status%"
+      - "&7Selling: %sell_status%"
+      - ""
+      - "&eClick to edit"
+  backAdmin:
+    material: ARROW
+    name: "&cBack"
+    lore:
+      - "&7Back to admin overview."
+  backCategories:
+    material: ARROW
+    name: "&cBack"
+    lore:
+      - "&7Back to categories."
+  backItems:
+    material: ARROW
+    name: "&cBack"
+    lore:
+      - "&7Back to item list."
+  toggleBuy:
+    material: LIME_DYE
+    enabledName: "&aBuying enabled"
+    disabledName: "&cBuying disabled"
+    lore:
+      - "&7Click to toggle."
+  toggleSell:
+    material: ORANGE_DYE
+    enabledName: "&aSelling enabled"
+    disabledName: "&cSelling disabled"
+    lore:
+      - "&7Click to toggle."
+  buyMinus10:
+    material: EMERALD
+    name: "&aBuy price -10"
+    lore:
+      - "&7Current: &f%price%"
+  buyMinus1:
+    material: EMERALD
+    name: "&aBuy price -1"
+    lore:
+      - "&7Current: &f%price%"
+  buyPlus1:
+    material: EMERALD
+    name: "&aBuy price +1"
+    lore:
+      - "&7Current: &f%price%"
+  buyPlus10:
+    material: EMERALD
+    name: "&aBuy price +10"
+    lore:
+      - "&7Current: &f%price%"
+  sellMinus10:
+    material: GOLD_INGOT
+    name: "&6Sell price -10"
+    lore:
+      - "&7Current: &f%price%"
+  sellMinus1:
+    material: GOLD_INGOT
+    name: "&6Sell price -1"
+    lore:
+      - "&7Current: &f%price%"
+  sellPlus1:
+    material: GOLD_INGOT
+    name: "&6Sell price +1"
+    lore:
+      - "&7Current: &f%price%"
+  sellPlus10:
+    material: GOLD_INGOT
+    name: "&6Sell price +10"
+    lore:
+      - "&7Current: &f%price%"
+  setFromHand:
+    material: WRITABLE_BOOK
+    name: "&eUse item from hand"
+    lore:
+      - "&7Copies material and display name"
+      - "&7from your main-hand item."
+
+status:
+  enabled: "&aenabled"
+  disabled: "&cdisabled"

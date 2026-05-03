@@ -1,0 +1,99 @@
+titles:
+  categories: "&8AdminShop Kategorien"
+  items: "&8AdminShop: %category%"
+  itemEditor: "&8Item bearbeiten"
+
+items:
+  category:
+    lore:
+      - "&7ID: &f%category_id%"
+      - "&7Items: &f%item_count%"
+      - ""
+      - "&eKlicken zum Bearbeiten"
+  shopItem:
+    lore:
+      - "&7ID: &f%item_id%"
+      - "&7Material: &f%material%"
+      - "&7Kaufpreis: &f%buy_price%"
+      - "&7Verkaufspreis: &f%sell_price%"
+      - "&7Kaufen: %buy_status%"
+      - "&7Verkaufen: %sell_status%"
+      - ""
+      - "&eKlicken zum Bearbeiten"
+  backAdmin:
+    material: ARROW
+    name: "&cZurück"
+    lore:
+      - "&7Zur Admin-Übersicht."
+  backCategories:
+    material: ARROW
+    name: "&cZurück"
+    lore:
+      - "&7Zur Kategorieübersicht."
+  backItems:
+    material: ARROW
+    name: "&cZurück"
+    lore:
+      - "&7Zur Itemliste."
+  toggleBuy:
+    material: LIME_DYE
+    enabledName: "&aKaufen aktiviert"
+    disabledName: "&cKaufen deaktiviert"
+    lore:
+      - "&7Klicken zum Umschalten."
+  toggleSell:
+    material: ORANGE_DYE
+    enabledName: "&aVerkaufen aktiviert"
+    disabledName: "&cVerkaufen deaktiviert"
+    lore:
+      - "&7Klicken zum Umschalten."
+  buyMinus10:
+    material: EMERALD
+    name: "&aKaufpreis -10"
+    lore:
+      - "&7Aktuell: &f%price%"
+  buyMinus1:
+    material: EMERALD
+    name: "&aKaufpreis -1"
+    lore:
+      - "&7Aktuell: &f%price%"
+  buyPlus1:
+    material: EMERALD
+    name: "&aKaufpreis +1"
+    lore:
+      - "&7Aktuell: &f%price%"
+  buyPlus10:
+    material: EMERALD
+    name: "&aKaufpreis +10"
+    lore:
+      - "&7Aktuell: &f%price%"
+  sellMinus10:
+    material: GOLD_INGOT
+    name: "&6Verkaufspreis -10"
+    lore:
+      - "&7Aktuell: &f%price%"
+  sellMinus1:
+    material: GOLD_INGOT
+    name: "&6Verkaufspreis -1"
+    lore:
+      - "&7Aktuell: &f%price%"
+  sellPlus1:
+    material: GOLD_INGOT
+    name: "&6Verkaufspreis +1"
+    lore:
+      - "&7Aktuell: &f%price%"
+  sellPlus10:
+    material: GOLD_INGOT
+    name: "&6Verkaufspreis +10"
+    lore:
+      - "&7Aktuell: &f%price%"
+  setFromHand:
+    material: WRITABLE_BOOK
+    name: "&eItem aus Hand übernehmen"
+    lore:
+      - "&7Setzt Material und Anzeigename"
+      - "&7aus deinem Main-Hand-Item."
+
+status:
+  enabled: "&aaktiv"
+  disabled: "&cdeaktiviert"

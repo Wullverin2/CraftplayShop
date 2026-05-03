@@ -41,3 +41,7 @@ trade:
 gui:
   missingFile: "%prefix%&cGUI-Datei fehlt: %file%"
   missingItem: "%prefix%&cGUI-Item fehlt: %item%"
+
+adminShop:
+  saved: "%prefix%&aServerShop wurde gespeichert."
+  noHandItem: "%prefix%&cDu musst ein Item in der Hand halten."

@@ -3,6 +3,7 @@ package de.craftplay.shop.core.gui;
 import de.craftplay.shop.CraftplayShopPlugin;
 import de.craftplay.shop.servershop.ServerShopCategoryHolder;
 import de.craftplay.shop.servershop.ServerShopHolder;
+import de.craftplay.shop.servershop.admin.ServerShopAdminHolder;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -42,13 +43,20 @@ public class GuiListener implements Listener {
             if (event.getWhoClicked() instanceof org.bukkit.entity.Player player) {
                 plugin.getServerShopCategoryGui().handleClick(player, categoryHolder, event);
             }
+            return;
+        }
+        if (holder instanceof ServerShopAdminHolder adminHolder) {
+            event.setCancelled(true);
+            if (event.getWhoClicked() instanceof org.bukkit.entity.Player player) {
+                plugin.getServerShopAdminEditor().handleClick(player, adminHolder, event);
+            }
         }
     }
 
     @EventHandler
     public void onDrag(InventoryDragEvent event) {
         InventoryHolder holder = event.getInventory().getHolder();
-        if (holder instanceof GuiHolder || holder instanceof ServerShopHolder || holder instanceof ServerShopCategoryHolder) {
+        if (holder instanceof GuiHolder || holder instanceof ServerShopHolder || holder instanceof ServerShopCategoryHolder || holder instanceof ServerShopAdminHolder) {
             event.setCancelled(true);
         }
     }
