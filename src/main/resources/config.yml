@@ -14,6 +14,13 @@ settings:
   # Aktiviert zusätzliche Debug-Ausgaben.
   debug: false
 
+commands:
+  # Hauptbefehl, den du fuer CraftplayShop verwenden moechtest.
+  # In Phase 1 koennen die in plugin.yml registrierten Befehle genutzt werden:
+  # "cshop", "shop" oder "craftplayshop".
+  # Beispiel: "cshop" => /cshop admin editor
+  pluginCommand: "cshop"
+
 economy:
   # Wenn true, wird Vault benötigt. Fehlt Vault, deaktiviert sich das Plugin.
   requireVault: true

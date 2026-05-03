@@ -1,9 +1,40 @@
 titles:
   categories: "&8AdminShop Categories"
   items: "&8AdminShop: %category%"
+  categoryEditor: "&8Edit Category"
   itemEditor: "&8Edit Item"
   materialPickerCategory: "&8Choose Category Icon %page%/%pages%"
   materialPickerItem: "&8Choose Material %page%/%pages%"
+
+slots:
+  categories:
+    back: 49
+    createCategory: 53
+  items:
+    back: 49
+    createItem: 53
+  categoryEditor:
+    preview: 4
+    editName: 20
+    editLore: 22
+    openItems: 24
+    materialPicker: 42
+    back: 45
+  itemEditor:
+    preview: 4
+    toggleBuy: 10
+    buyPrice: 13
+    editName: 20
+    editLore: 22
+    toggleSell: 28
+    sellPrice: 31
+    setFromHand: 40
+    materialPicker: 42
+    back: 45
+  materialPicker:
+    back: 45
+    previousPage: 48
+    nextPage: 50
 
 items:
   category:
@@ -14,6 +45,14 @@ items:
       - "&eClick to edit"
       - "&eRight click: material picker"
       - "&eShift-click: select for moving"
+      - "&eDrag item onto slot: change icon"
+  categoryEditor:
+    lore:
+      - "&7ID: &f%category_id%"
+      - "&7Items: &f%item_count%"
+      - "&7Lore lines: &f%lore_lines%"
+      - ""
+      - "&eClick: icon picker"
       - "&eDrag item onto slot: change icon"
   shopItem:
     lore:
@@ -61,6 +100,26 @@ items:
     disabledName: "&cSelling disabled"
     lore:
       - "&7Click to toggle."
+  buyPrice:
+    material: EMERALD
+    name: "&aEdit Buy Price"
+    lore:
+      - "&7Current: &f%price%"
+      - ""
+      - "&aLeft click: +1"
+      - "&aShift-left click: +10"
+      - "&cRight click: -1"
+      - "&cShift-right click: -10"
+  sellPrice:
+    material: GOLD_INGOT
+    name: "&6Edit Sell Price"
+    lore:
+      - "&7Current: &f%price%"
+      - ""
+      - "&aLeft click: +1"
+      - "&aShift-left click: +10"
+      - "&cRight click: -1"
+      - "&cShift-right click: -10"
   buyMinus10:
     material: EMERALD
     name: "&aBuy price -10"
@@ -107,6 +166,22 @@ items:
     lore:
       - "&7Copies material and display name"
       - "&7from your main-hand item."
+  editName:
+    material: NAME_TAG
+    name: "&eEdit Display Name"
+    lore:
+      - "&7Edits the name through chat."
+  editLore:
+    material: BOOK
+    name: "&eEdit Lore"
+    lore:
+      - "&7Edits lore through chat."
+      - "&7Separate lines with |."
+  openItems:
+    material: CHEST
+    name: "&aOpen Items"
+    lore:
+      - "&7Opens this category's items."
   materialPicker:
     material: COMPASS
     name: "&bMaterial Picker"

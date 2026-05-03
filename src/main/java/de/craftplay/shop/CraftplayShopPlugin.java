@@ -2,7 +2,6 @@ package de.craftplay.shop;
 
 import de.craftplay.shop.auctionhouse.AuctionHouseService;
 import de.craftplay.shop.autosell.AutoSellChestService;
-import de.craftplay.shop.core.command.AdminCommand;
 import de.craftplay.shop.core.command.FeatureUnavailableCommand;
 import de.craftplay.shop.core.command.MainCommand;
 import de.craftplay.shop.core.command.ShopCommand;
@@ -214,7 +213,11 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         if (shopCommand != null) {
             shopCommand.setTabCompleter(mainCommand);
         }
-        register("cshop", new AdminCommand(this));
+        register("cshop", mainCommand);
+        PluginCommand cshopCommand = getCommand("cshop");
+        if (cshopCommand != null) {
+            cshopCommand.setTabCompleter(mainCommand);
+        }
         register("servershop", new ShopCommand(this));
         register("trade", new TradeCommand(this));
         register("asc", new FeatureUnavailableCommand(this));

@@ -51,3 +51,6 @@ adminShop:
   itemUpdated: "%prefix%&aShop item has been updated."
   moveSelected: "%prefix%&7Entry &e%entry% &7selected. Now click the target slot."
   moveDone: "%prefix%&aLayout has been saved."
+  inputName: "%prefix%&7Write the new display name in chat. &e& &7color codes are allowed. Write &ccancel &7to cancel."
+  inputLore: "%prefix%&7Write lore in chat. Separate lines with &e|&7. Write &e-&7 or &eclear&7 to clear it, &ccancel &7to cancel."
+  inputCancelled: "%prefix%&cInput cancelled."

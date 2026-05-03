@@ -70,6 +70,14 @@ public class ConfigService {
         return config().getBoolean("settings.debug", false);
     }
 
+    public String pluginCommand() {
+        String command = config().getString("commands.pluginCommand", "cshop");
+        if (command == null || command.isBlank()) {
+            return "cshop";
+        }
+        return command.toLowerCase(Locale.ROOT).replace("/", "");
+    }
+
     public boolean requireVault() {
         return config().getBoolean("economy.requireVault", true);
     }

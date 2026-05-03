@@ -36,6 +36,7 @@ public class ServerShopRegistry {
             ServerShopCategory category = new ServerShopCategory(
                     categoryId,
                     categorySection.getString("displayName", categoryId),
+                    categorySection.getStringList("lore"),
                     icon,
                     categorySection.getInt("slot", 0)
             );

@@ -4,10 +4,12 @@ import de.craftplay.shop.CraftplayShopPlugin;
 import de.craftplay.shop.servershop.ServerShopCategoryHolder;
 import de.craftplay.shop.servershop.ServerShopHolder;
 import de.craftplay.shop.servershop.admin.ServerShopAdminHolder;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.InventoryHolder;
 
 public class GuiListener implements Listener {
@@ -62,5 +64,14 @@ public class GuiListener implements Listener {
                 plugin.getServerShopAdminEditor().handleDrag(player, adminHolder, event);
             }
         }
+    }
+
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent event) {
+        if (!plugin.getServerShopAdminEditor().hasTextInput(event.getPlayer())) {
+            return;
+        }
+        event.setCancelled(true);
+        Bukkit.getScheduler().runTask(plugin, () -> plugin.getServerShopAdminEditor().handleTextInput(event.getPlayer(), event.getMessage()));
     }
 }

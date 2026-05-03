@@ -51,3 +51,6 @@ adminShop:
   itemUpdated: "%prefix%&aShop-Item wurde aktualisiert."
   moveSelected: "%prefix%&7Eintrag &e%entry% &7ausgewählt. Klicke jetzt auf den Zielslot."
   moveDone: "%prefix%&aAnordnung wurde gespeichert."
+  inputName: "%prefix%&7Schreibe den neuen Anzeigenamen in den Chat. &e& &7Farbcodes sind erlaubt. Schreibe &ccancel &7zum Abbrechen."
+  inputLore: "%prefix%&7Schreibe die Lore in den Chat. Trenne Zeilen mit &e|&7. Schreibe &e-&7 oder &eclear&7 zum Leeren, &ccancel &7zum Abbrechen."
+  inputCancelled: "%prefix%&cEingabe abgebrochen."

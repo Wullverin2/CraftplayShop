@@ -35,6 +35,14 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         }
 
         String sub = args[0].toLowerCase();
+        if ("admin".equals(sub)) {
+            if (!matchesConfiguredCommand(label)) {
+                plugin.getLanguageService().send(sender, "general.unknownCommand");
+                return true;
+            }
+            admin(sender, args);
+            return true;
+        }
         if ("reload".equals(sub)) {
             reload(sender);
             return true;
@@ -53,6 +61,39 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         }
         plugin.getLanguageService().send(sender, "general.unknownCommand");
         return true;
+    }
+
+    private void admin(CommandSender sender, String[] args) {
+        if (args.length == 1) {
+            if (!(sender instanceof Player player)) {
+                plugin.getLanguageService().send(sender, "general.playerOnly");
+                return;
+            }
+            if (!player.hasPermission(PermissionNodes.ADMIN)) {
+                plugin.getLanguageService().send(player, "general.noPermission");
+                return;
+            }
+            plugin.getGuiService().open(player, "admin");
+            return;
+        }
+        String sub = args[1].toLowerCase();
+        if ("reload".equals(sub)) {
+            reload(sender);
+            return;
+        }
+        if ("editor".equals(sub) || "servershop".equals(sub) || "adminshop".equals(sub)) {
+            if (!(sender instanceof Player player)) {
+                plugin.getLanguageService().send(sender, "general.playerOnly");
+                return;
+            }
+            if (!player.hasPermission(PermissionNodes.ADMIN)) {
+                plugin.getLanguageService().send(player, "general.noPermission");
+                return;
+            }
+            plugin.getServerShopAdminEditor().openCategories(player);
+            return;
+        }
+        plugin.getLanguageService().send(sender, "general.unknownCommand");
     }
 
     private void reload(CommandSender sender) {
@@ -118,7 +159,10 @@ public class MainCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(List.of("reload", "language", "lang", "sellhand", "sellall"), args[0]);
+            return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall"), args[0]);
+        }
+        if (args.length == 2 && "admin".equalsIgnoreCase(args[0])) {
+            return filter(List.of("editor", "reload", "servershop", "adminshop"), args[1]);
         }
         if (args.length == 2 && ("language".equalsIgnoreCase(args[0]) || "lang".equalsIgnoreCase(args[0]))) {
             return filter(new ArrayList<>(plugin.getLanguageService().availableLanguages()), args[1]);
@@ -128,5 +172,14 @@ public class MainCommand implements CommandExecutor, TabCompleter {
 
     private List<String> filter(List<String> values, String token) {
         return values.stream().filter(value -> value.toLowerCase().startsWith(token.toLowerCase())).toList();
+    }
+
+    private boolean matchesConfiguredCommand(String label) {
+        String configured = plugin.getConfigService().pluginCommand();
+        String used = label.toLowerCase();
+        if (configured.equals(used)) {
+            return true;
+        }
+        return "shop".equals(configured) && "craftplayshop".equals(used);
     }
 }
