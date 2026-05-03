@@ -30,10 +30,14 @@ public class GuiItemBuilder {
     public ItemStack build(ConfigurationSection section, Player player, Map<String, String> placeholders) {
         Material material = material(section.getString("material", "STONE"));
         ConfigurationSection head = section.getConfigurationSection("head");
+        ItemStack headDatabaseItem = headDatabaseItem(head);
         if (head != null && "HEAD_DATABASE".equalsIgnoreCase(head.getString("type", "")) && !plugin.getHeadDatabaseHook().isAvailable()) {
             material = material(plugin.getConfig().getString("integrations.headDatabase.fallbackMaterial", "PLAYER_HEAD"));
         }
-        ItemStack itemStack = new ItemStack(material, Math.max(1, Math.min(64, section.getInt("amount", 1))));
+        ItemStack itemStack = headDatabaseItem == null
+                ? new ItemStack(material, Math.max(1, Math.min(64, section.getInt("amount", 1))))
+                : headDatabaseItem;
+        itemStack.setAmount(Math.max(1, Math.min(64, section.getInt("amount", itemStack.getAmount()))));
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null) {
             return itemStack;
@@ -41,11 +45,11 @@ public class GuiItemBuilder {
         if (section.contains("customModelData") && section.getInt("customModelData", 0) > 0) {
             meta.setCustomModelData(section.getInt("customModelData"));
         }
-        String name = PlaceholderUtil.apply(section.getString("name", ""), placeholders);
+        String name = applyPlaceholders(player, PlaceholderUtil.apply(section.getString("name", ""), placeholders));
         meta.setDisplayName(TextUtil.color(name));
         List<String> lore = new ArrayList<>();
         for (String line : section.getStringList("lore")) {
-            lore.add(TextUtil.color(PlaceholderUtil.apply(line, placeholders)));
+            lore.add(TextUtil.color(applyPlaceholders(player, PlaceholderUtil.apply(line, placeholders))));
         }
         if (!lore.isEmpty()) {
             meta.setLore(lore);
@@ -68,6 +72,13 @@ public class GuiItemBuilder {
         }
         itemStack.setItemMeta(meta);
         return itemStack;
+    }
+
+    private ItemStack headDatabaseItem(ConfigurationSection head) {
+        if (head == null || !"HEAD_DATABASE".equalsIgnoreCase(head.getString("type", ""))) {
+            return null;
+        }
+        return plugin.getHeadDatabaseHook().head(head.getString("id", head.getString("value", "")));
     }
 
     private void applyHead(SkullMeta skullMeta, ConfigurationSection head, Player player, Map<String, String> placeholders) {
@@ -93,5 +104,9 @@ public class GuiItemBuilder {
     private Material material(String name) {
         Material material = Material.matchMaterial(name == null ? "STONE" : name);
         return material == null ? Material.STONE : material;
+    }
+
+    private String applyPlaceholders(Player player, String value) {
+        return plugin.getPlaceholderApiHook().apply(player, value);
     }
 }

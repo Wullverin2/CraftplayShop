@@ -1,0 +1,26 @@
+title: "&8Items verkaufen"
+size: 54
+
+itemSlots: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
+
+filler:
+  enabled: true
+  material: BLACK_STAINED_GLASS_PANE
+  name: " "
+
+buttons:
+  confirm:
+    slot: 49
+    material: EMERALD_BLOCK
+    name: "&aVerkaufen"
+    lore:
+      - "&7Verkauft alle ankaufbaren Items"
+      - "&7in den freien Slots."
+      - ""
+      - "&eKlicken zum Verkaufen"
+  back:
+    slot: 45
+    material: ARROW
+    name: "&cZurück"
+    lore:
+      - "&7Items werden zurückgegeben."

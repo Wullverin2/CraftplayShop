@@ -40,7 +40,7 @@ items:
 
   settings:
     enabled: true
-    slot: 22
+    slot: 21
     material: COMPARATOR
     name: "&eEinstellungen"
     lore:
@@ -49,6 +49,20 @@ items:
       - "&eKlicken zum Öffnen"
     leftClickActions:
       - "OPEN_GUI:settings"
+
+  sellGui:
+    enabled: true
+    slot: 23
+    material: CHEST
+    name: "&6Verkauf-GUI"
+    lore:
+      - "&7Lege Items hinein und verkaufe"
+      - "&7alle ankaufbaren Items."
+      - ""
+      - "&eKlicken zum Öffnen"
+    permission: "craftplayshop.servershop.sellgui"
+    leftClickActions:
+      - "SELL_GUI"
 
   referral:
     enabled: true

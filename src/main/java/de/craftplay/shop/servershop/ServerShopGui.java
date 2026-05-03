@@ -80,8 +80,11 @@ public class ServerShopGui {
             ItemStack stack = new ItemStack(material == null ? Material.STONE : material);
             ItemMeta meta = stack.getItemMeta();
             if (meta != null) {
-                meta.setDisplayName(TextUtil.color(item.getString("name", "")));
-                meta.setLore(item.getStringList("lore").stream().map(TextUtil::color).toList());
+                Map<String, String> placeholders = plugin.getGuiPlaceholderService().placeholders(player);
+                meta.setDisplayName(TextUtil.color(plugin.getPlaceholderApiHook().apply(player, PlaceholderUtil.apply(item.getString("name", ""), placeholders))));
+                meta.setLore(item.getStringList("lore").stream()
+                        .map(line -> TextUtil.color(plugin.getPlaceholderApiHook().apply(player, PlaceholderUtil.apply(line, placeholders))))
+                        .toList());
                 stack.setItemMeta(meta);
             }
             inventory.setItem(slot, stack);

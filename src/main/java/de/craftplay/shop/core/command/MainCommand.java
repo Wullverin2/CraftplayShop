@@ -21,6 +21,19 @@ public class MainCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        String commandName = command.getName().toLowerCase();
+        if ("sellhand".equals(commandName)) {
+            sellHand(sender);
+            return true;
+        }
+        if ("sellall".equals(commandName)) {
+            sellAll(sender);
+            return true;
+        }
+        if ("sellgui".equals(commandName)) {
+            sellGui(sender);
+            return true;
+        }
         if (args.length == 0) {
             if (!(sender instanceof Player player)) {
                 plugin.getLanguageService().send(sender, "general.playerOnly");
@@ -57,6 +70,10 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         }
         if ("sellall".equals(sub)) {
             sellAll(sender);
+            return true;
+        }
+        if ("sellgui".equals(sub) || "sellinv".equals(sub) || "sellinventory".equals(sub)) {
+            sellGui(sender);
             return true;
         }
         plugin.getLanguageService().send(sender, "general.unknownCommand");
@@ -156,10 +173,22 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         plugin.getSellCommandService().sellAll(player);
     }
 
+    private void sellGui(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            plugin.getLanguageService().send(sender, "general.playerOnly");
+            return;
+        }
+        if (!player.hasPermission(PermissionNodes.SERVER_SHOP_SELL_GUI)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        plugin.getSellCommandService().openSellGui(player);
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall"), args[0]);
+            return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall", "sellgui"), args[0]);
         }
         if (args.length == 2 && "admin".equalsIgnoreCase(args[0])) {
             return filter(List.of("editor", "reload", "servershop", "adminshop"), args[1]);

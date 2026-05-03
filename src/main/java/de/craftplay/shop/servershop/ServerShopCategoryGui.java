@@ -39,7 +39,7 @@ public class ServerShopCategoryGui {
         Inventory inventory = Bukkit.createInventory(holder, sanitizeSize(gui.getInt("size", 54)), TextUtil.color(title));
         holder.setInventory(inventory);
         fill(inventory, gui);
-        addConfiguredButtons(inventory, gui);
+        addConfiguredButtons(player, inventory, gui);
         for (ServerShopItem item : category.items()) {
             inventory.setItem(item.slot(), buildShopItem(item, gui));
             itemsBySlot.put(item.slot(), item.id());
@@ -102,7 +102,7 @@ public class ServerShopCategoryGui {
         ));
     }
 
-    private void addConfiguredButtons(Inventory inventory, YamlConfiguration gui) {
+    private void addConfiguredButtons(Player player, Inventory inventory, YamlConfiguration gui) {
         var section = gui.getConfigurationSection("items");
         if (section == null) {
             return;
@@ -120,8 +120,11 @@ public class ServerShopCategoryGui {
             ItemStack stack = new ItemStack(material == null ? Material.STONE : material);
             ItemMeta meta = stack.getItemMeta();
             if (meta != null) {
-                meta.setDisplayName(TextUtil.color(item.getString("name", "")));
-                meta.setLore(item.getStringList("lore").stream().map(TextUtil::color).toList());
+                Map<String, String> placeholders = plugin.getGuiPlaceholderService().placeholders(player);
+                meta.setDisplayName(TextUtil.color(plugin.getPlaceholderApiHook().apply(player, PlaceholderUtil.apply(item.getString("name", ""), placeholders))));
+                meta.setLore(item.getStringList("lore").stream()
+                        .map(line -> TextUtil.color(plugin.getPlaceholderApiHook().apply(player, PlaceholderUtil.apply(line, placeholders))))
+                        .toList());
                 stack.setItemMeta(meta);
             }
             inventory.setItem(slot, stack);

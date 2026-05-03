@@ -29,6 +29,8 @@ serverShop:
   sellHandNoItem: "%prefix%&cYou need to hold a sellable item."
   sellAllNothing: "%prefix%&cYou do not have any sellable items."
   sellAllDone: "%prefix%&aYou sold items for &e%price%&a."
+  sellGuiNothing: "%prefix%&cThere are no sellable items in the sell GUI."
+  sellGuiDone: "%prefix%&aYou sold the sell GUI items for &e%price%&a."
 
 trade:
   disabledSelf: "%prefix%&cYou disabled direct trade requests."

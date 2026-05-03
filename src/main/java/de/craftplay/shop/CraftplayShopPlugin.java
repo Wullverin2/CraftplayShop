@@ -219,6 +219,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
             cshopCommand.setTabCompleter(mainCommand);
         }
         register("servershop", new ShopCommand(this));
+        register("sellhand", mainCommand);
+        register("sellall", mainCommand);
+        register("sellgui", mainCommand);
         register("trade", new TradeCommand(this));
         register("asc", new FeatureUnavailableCommand(this));
     }
@@ -324,5 +327,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
 
     public HeadDatabaseHook getHeadDatabaseHook() {
         return headDatabaseHook;
+    }
+
+    public PlaceholderApiHook getPlaceholderApiHook() {
+        return placeholderApiHook;
     }
 }

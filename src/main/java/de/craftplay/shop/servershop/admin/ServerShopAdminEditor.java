@@ -69,8 +69,8 @@ public class ServerShopAdminEditor {
             ))));
             keys.put(slot, category.id());
         }
-        putConfigured(inventory, keys, gui, "slots.categories.createCategory", 53, "createCategory", "create_category", Map.of());
-        putConfigured(inventory, keys, gui, "slots.categories.back", 49, "backAdmin", "back", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.categories.createCategory", 53, "createCategory", "create_category", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.categories.back", 49, "backAdmin", "back", Map.of());
         player.openInventory(inventory);
     }
 
@@ -92,8 +92,8 @@ public class ServerShopAdminEditor {
             inventory.setItem(slot, editorItem(gui, shopItem));
             keys.put(slot, shopItem.id());
         }
-        putConfigured(inventory, keys, gui, "slots.items.createItem", 53, "createItem", "create_item", Map.of());
-        putConfigured(inventory, keys, gui, "slots.items.back", 49, "backCategories", "back", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.items.createItem", 53, "createItem", "create_item", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.items.back", 49, "backCategories", "back", Map.of());
         player.openInventory(inventory);
     }
 
@@ -113,11 +113,11 @@ public class ServerShopAdminEditor {
         int previewSlot = slot(gui, "slots.categoryEditor.preview", 4);
         inventory.setItem(previewSlot, categoryEditorItem(gui, category));
         keys.put(previewSlot, "category_preview");
-        putConfigured(inventory, keys, gui, "slots.categoryEditor.editName", 20, "editName", "edit_name", Map.of());
-        putConfigured(inventory, keys, gui, "slots.categoryEditor.editLore", 22, "editLore", "edit_lore", Map.of());
-        putConfigured(inventory, keys, gui, "slots.categoryEditor.openItems", 24, "openItems", "open_items", Map.of());
-        putConfigured(inventory, keys, gui, "slots.categoryEditor.materialPicker", 42, "materialPicker", "material_picker", Map.of());
-        putConfigured(inventory, keys, gui, "slots.categoryEditor.back", 45, "backCategories", "back", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.categoryEditor.editName", 20, "editName", "edit_name", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.categoryEditor.editLore", 22, "editLore", "edit_lore", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.categoryEditor.openItems", 24, "openItems", "open_items", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.categoryEditor.materialPicker", 42, "materialPicker", "material_picker", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.categoryEditor.back", 45, "backCategories", "back", Map.of());
         player.openInventory(inventory);
     }
 
@@ -146,18 +146,18 @@ public class ServerShopAdminEditor {
         int toggleBuySlot = slot(gui, "slots.itemEditor.toggleBuy", 10);
         inventory.setItem(toggleBuySlot, toggleItem(gui, "toggleBuy", shopItem.buyEnabled()));
         keys.put(toggleBuySlot, "toggle_buy");
-        priceButton(inventory, keys, gui, "slots.itemEditor.buyPrice", 13, "buyPrice", "buy_price", shopItem.buyPrice());
+        priceButton(player, inventory, keys, gui, "slots.itemEditor.buyPrice", 13, "buyPrice", "buy_price", shopItem.buyPrice());
 
         int toggleSellSlot = slot(gui, "slots.itemEditor.toggleSell", 28);
         inventory.setItem(toggleSellSlot, toggleItem(gui, "toggleSell", shopItem.sellEnabled()));
         keys.put(toggleSellSlot, "toggle_sell");
-        priceButton(inventory, keys, gui, "slots.itemEditor.sellPrice", 31, "sellPrice", "sell_price", shopItem.sellPrice());
+        priceButton(player, inventory, keys, gui, "slots.itemEditor.sellPrice", 31, "sellPrice", "sell_price", shopItem.sellPrice());
 
-        putConfigured(inventory, keys, gui, "slots.itemEditor.editName", 20, "editName", "edit_name", Map.of());
-        putConfigured(inventory, keys, gui, "slots.itemEditor.editLore", 22, "editLore", "edit_lore", Map.of());
-        putConfigured(inventory, keys, gui, "slots.itemEditor.setFromHand", 40, "setFromHand", "set_from_hand", Map.of());
-        putConfigured(inventory, keys, gui, "slots.itemEditor.materialPicker", 42, "materialPicker", "material_picker", Map.of());
-        putConfigured(inventory, keys, gui, "slots.itemEditor.back", 45, "backItems", "back", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.itemEditor.editName", 20, "editName", "edit_name", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.itemEditor.editLore", 22, "editLore", "edit_lore", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.itemEditor.setFromHand", 40, "setFromHand", "set_from_hand", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.itemEditor.materialPicker", 42, "materialPicker", "material_picker", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.itemEditor.back", 45, "backItems", "back", Map.of());
         player.openInventory(inventory);
     }
 
@@ -719,12 +719,12 @@ public class ServerShopAdminEditor {
             inventory.setItem(slot, item(material, "&f" + formatMaterialName(material), lore(gui, "items.material.lore", Map.of("material", material.name()))));
             keys.put(slot, "material:" + material.name());
         }
-        putConfigured(inventory, keys, gui, "slots.materialPicker.back", 45, "backItems", "back", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.materialPicker.back", 45, "backItems", "back", Map.of());
         if (safePage > 0) {
-            putConfigured(inventory, keys, gui, "slots.materialPicker.previousPage", 48, "previousPage", "previous", Map.of());
+            putConfigured(player, inventory, keys, gui, "slots.materialPicker.previousPage", 48, "previousPage", "previous", Map.of());
         }
         if (safePage < maxPage) {
-            putConfigured(inventory, keys, gui, "slots.materialPicker.nextPage", 50, "nextPage", "next", Map.of());
+            putConfigured(player, inventory, keys, gui, "slots.materialPicker.nextPage", 50, "nextPage", "next", Map.of());
         }
         player.openInventory(inventory);
     }
@@ -838,16 +838,16 @@ public class ServerShopAdminEditor {
         )));
     }
 
-    private void priceButton(Inventory inventory, Map<Integer, String> keys, YamlConfiguration gui, String slotPath, int fallbackSlot, String itemKey, String actionKey, double price) {
+    private void priceButton(Player player, Inventory inventory, Map<Integer, String> keys, YamlConfiguration gui, String slotPath, int fallbackSlot, String itemKey, String actionKey, double price) {
         int buttonSlot = slot(gui, slotPath, fallbackSlot);
-        inventory.setItem(buttonSlot, configuredItem(gui, itemKey, Map.of("price", money(price))));
+        inventory.setItem(buttonSlot, configuredItem(player, gui, itemKey, Map.of("price", money(price))));
         keys.put(buttonSlot, actionKey);
     }
 
-    private void putConfigured(Inventory inventory, Map<Integer, String> keys, YamlConfiguration gui, String slotPath,
+    private void putConfigured(Player player, Inventory inventory, Map<Integer, String> keys, YamlConfiguration gui, String slotPath,
                                int fallbackSlot, String itemKey, String actionKey, Map<String, String> placeholders) {
         int buttonSlot = slot(gui, slotPath, fallbackSlot);
-        inventory.setItem(buttonSlot, configuredItem(gui, itemKey, placeholders));
+        inventory.setItem(buttonSlot, configuredItem(player, gui, itemKey, placeholders));
         keys.put(buttonSlot, actionKey);
     }
 
@@ -864,15 +864,15 @@ public class ServerShopAdminEditor {
         return item(material, name, lore);
     }
 
-    private ItemStack configuredItem(YamlConfiguration gui, String key, Map<String, String> placeholders) {
+    private ItemStack configuredItem(Player player, YamlConfiguration gui, String key, Map<String, String> placeholders) {
         ConfigurationSection section = gui.getConfigurationSection("items." + key);
         if (section == null) {
             return item(Material.STONE, key, List.of());
         }
         return item(
                 material(section.getString("material"), Material.STONE),
-                PlaceholderUtil.apply(section.getString("name", key), placeholders),
-                lore(section, "lore", placeholders)
+                plugin.getPlaceholderApiHook().apply(player, PlaceholderUtil.apply(section.getString("name", key), placeholders)),
+                lore(section, "lore", placeholders).stream().map(line -> plugin.getPlaceholderApiHook().apply(player, line)).toList()
         );
     }
 

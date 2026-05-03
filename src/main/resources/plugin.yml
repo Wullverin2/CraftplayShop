@@ -23,6 +23,13 @@ commands:
     description: Admin-Befehl für CraftplayShop.
   servershop:
     description: Öffnet den ServerShop.
+  sellhand:
+    description: Verkauft das Item in deiner Hand.
+  sellall:
+    description: Verkauft alle ankaufbaren Items aus deinem Inventar.
+  sellgui:
+    description: Öffnet das Verkauf-GUI.
+    aliases: [sellinventory, sellinv]
   trade:
     description: DirectTrade Einstellungen und später Handel.
   asc:
@@ -44,6 +51,8 @@ permissions:
   craftplayshop.servershop.sellhand:
     default: true
   craftplayshop.servershop.sellall:
+    default: true
+  craftplayshop.servershop.sellgui:
     default: true
   craftplayshop.language:
     default: true

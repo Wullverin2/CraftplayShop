@@ -8,6 +8,7 @@ public final class ConfigDefaults {
             "main.yml",
             "servershop.yml",
             "servershop_category.yml",
+            "sell_gui.yml",
             "settings.yml",
             "directtrade.yml",
             "autosellchest.yml",

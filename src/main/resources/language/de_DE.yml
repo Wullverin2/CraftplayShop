@@ -29,6 +29,8 @@ serverShop:
   sellHandNoItem: "%prefix%&cDu musst ein verkaufbares Item in der Hand halten."
   sellAllNothing: "%prefix%&cDu hast keine verkaufbaren Items im Inventar."
   sellAllDone: "%prefix%&aDu hast Items für insgesamt &e%price% &averkauft."
+  sellGuiNothing: "%prefix%&cIm Verkauf-GUI liegen keine verkaufbaren Items."
+  sellGuiDone: "%prefix%&aDu hast die Items im Verkauf-GUI für &e%price% &averkauft."
 
 trade:
   disabledSelf: "%prefix%&cDu hast direkte Handelsanfragen deaktiviert."

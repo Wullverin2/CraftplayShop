@@ -1,6 +1,8 @@
 package de.craftplay.shop.core.gui;
 
 import de.craftplay.shop.CraftplayShopPlugin;
+import de.craftplay.shop.core.permission.PermissionNodes;
+import de.craftplay.shop.core.util.PlaceholderUtil;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
@@ -46,10 +48,26 @@ public class GuiActionExecutor {
             case "SERVER_SHOP_CATEGORY" -> plugin.getServerShopCategoryGui().open(player, value);
             case "PLAYER_COMMAND" -> runPlayerCommand(player, value);
             case "CONSOLE_COMMAND" -> runConsoleCommand(player, value);
+            case "CUSTOM_COMMAND", "COMMAND" -> runPlayerCommand(player, value);
             case "MESSAGE" -> plugin.getLanguageService().send(player, value);
             case "SOUND" -> playSound(player, value, 1.0F, 1.0F);
             case "DIRECT_TRADE_TOGGLE" -> plugin.getDirectTradeService().toggle(player);
             case "LANGUAGE_SET" -> setLanguage(player, value);
+            case "SELL_HAND" -> {
+                if (has(player, PermissionNodes.SERVER_SHOP_SELL_HAND)) {
+                    plugin.getSellCommandService().sellHand(player);
+                }
+            }
+            case "SELL_ALL" -> {
+                if (has(player, PermissionNodes.SERVER_SHOP_SELL_ALL)) {
+                    plugin.getSellCommandService().sellAll(player);
+                }
+            }
+            case "SELL_GUI" -> {
+                if (has(player, PermissionNodes.SERVER_SHOP_SELL_GUI)) {
+                    plugin.getSellCommandService().openSellGui(player);
+                }
+            }
             default -> plugin.getPluginLogService().debug("Unknown GUI action: " + action);
         }
     }
@@ -62,19 +80,33 @@ public class GuiActionExecutor {
         plugin.getLanguageService().send(player, "language.changed", Map.of("language", language));
     }
 
+    private boolean has(Player player, String permission) {
+        if (player.hasPermission(permission)) {
+            return true;
+        }
+        plugin.getLanguageService().send(player, "general.noPermission");
+        return false;
+    }
+
     private void runPlayerCommand(Player player, String command) {
         if (!plugin.getConfig().getBoolean("gui.allowPlayerCommands", true) || isBlocked(command)) {
             return;
         }
-        player.performCommand(command.startsWith("/") ? command.substring(1) : command);
+        String parsed = parse(player, command);
+        player.performCommand(parsed.startsWith("/") ? parsed.substring(1) : parsed);
     }
 
     private void runConsoleCommand(Player player, String command) {
         if (!plugin.getConfig().getBoolean("gui.allowConsoleCommands", true) || isBlocked(command)) {
             return;
         }
-        String parsed = command.replace("%player%", player.getName()).replace("%player_uuid%", player.getUniqueId().toString());
+        String parsed = parse(player, command);
         plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), parsed.startsWith("/") ? parsed.substring(1) : parsed);
+    }
+
+    private String parse(Player player, String command) {
+        String parsed = PlaceholderUtil.apply(command, plugin.getGuiPlaceholderService().placeholders(player));
+        return plugin.getPlaceholderApiHook().apply(player, parsed);
     }
 
     private boolean isBlocked(String command) {
