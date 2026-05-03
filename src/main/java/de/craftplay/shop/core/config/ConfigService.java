@@ -101,4 +101,12 @@ public class ConfigService {
             return ItemMatchMode.MATERIAL_ONLY;
         }
     }
+
+    public String panelServerId() {
+        return config().getString("panel.serverId", "Testserver-1");
+    }
+
+    public String panelToken() {
+        return config().getString("panel.token", "");
+    }
 }
