@@ -3,6 +3,8 @@ titles:
   items: "&8AdminShop: %category%"
   categoryEditor: "&8Edit Category"
   itemEditor: "&8Edit Item"
+  confirmCategoryDelete: "&4Delete Category?"
+  confirmItemDelete: "&4Delete Item?"
   materialPickerCategory: "&8Choose Category Icon %page%/%pages%"
   materialPickerItem: "&8Choose Material %page%/%pages%"
 
@@ -18,6 +20,7 @@ slots:
     editName: 20
     editLore: 22
     openItems: 24
+    delete: 38
     materialPicker: 42
     back: 45
   itemEditor:
@@ -28,9 +31,14 @@ slots:
     editLore: 22
     toggleSell: 28
     sellPrice: 31
+    delete: 38
     setFromHand: 40
     materialPicker: 42
     back: 45
+  confirmDelete:
+    preview: 13
+    confirm: 30
+    cancel: 32
   materialPicker:
     back: 45
     previousPage: 48
@@ -182,6 +190,32 @@ items:
     name: "&aOpen Items"
     lore:
       - "&7Opens this category's items."
+  deleteCategory:
+    material: BARRIER
+    name: "&cDelete Category"
+    lore:
+      - "&7Opens a confirmation screen."
+      - ""
+      - "&cCareful: also deletes every item"
+      - "&cinside this category."
+  deleteItem:
+    material: BARRIER
+    name: "&cDelete Item"
+    lore:
+      - "&7Opens a confirmation screen."
+  confirmDelete:
+    material: REDSTONE_BLOCK
+    name: "&cConfirm Delete"
+    lore:
+      - "&7This action cannot be"
+      - "&7undone automatically."
+      - ""
+      - "&cClick to delete"
+  cancelDelete:
+    material: EMERALD_BLOCK
+    name: "&aCancel"
+    lore:
+      - "&7Nothing will be deleted."
   materialPicker:
     material: COMPASS
     name: "&bMaterial Picker"

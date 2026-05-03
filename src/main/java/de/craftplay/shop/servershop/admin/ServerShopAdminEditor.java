@@ -116,6 +116,7 @@ public class ServerShopAdminEditor {
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.editName", 20, "editName", "edit_name", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.editLore", 22, "editLore", "edit_lore", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.openItems", 24, "openItems", "open_items", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.categoryEditor.delete", 38, "deleteCategory", "delete_category", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.materialPicker", 42, "materialPicker", "material_picker", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.back", 45, "backCategories", "back", Map.of());
         player.openInventory(inventory);
@@ -156,8 +157,36 @@ public class ServerShopAdminEditor {
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.editName", 20, "editName", "edit_name", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.editLore", 22, "editLore", "edit_lore", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.setFromHand", 40, "setFromHand", "set_from_hand", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.itemEditor.delete", 38, "deleteItem", "delete_item", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.materialPicker", 42, "materialPicker", "material_picker", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.back", 45, "backItems", "back", Map.of());
+        player.openInventory(inventory);
+    }
+
+    public void openDeleteConfirm(Player player, String categoryId, String itemId) {
+        ServerShopCategory category = plugin.getServerShopRegistry().category(categoryId);
+        if (category == null) {
+            plugin.getLanguageService().send(player, "serverShop.categoryNotFound");
+            return;
+        }
+        ServerShopItem shopItem = itemId == null || itemId.isBlank() ? null : category.item(itemId);
+        if (itemId != null && !itemId.isBlank() && shopItem == null) {
+            plugin.getLanguageService().send(player, "gui.missingItem", Map.of("item", itemId));
+            return;
+        }
+        YamlConfiguration gui = gui(player);
+        Map<Integer, String> keys = new HashMap<>();
+        ServerShopAdminHolder holder = new ServerShopAdminHolder(ServerShopAdminView.CONFIRM_DELETE, categoryId, itemId == null ? "" : itemId, keys);
+        String titleKey = shopItem == null ? "confirmCategoryDelete" : "confirmItemDelete";
+        Inventory inventory = Bukkit.createInventory(holder, 54, title(gui, titleKey, Map.of()));
+        holder.setInventory(inventory);
+        fill(inventory);
+
+        int previewSlot = slot(gui, "slots.confirmDelete.preview", 13);
+        inventory.setItem(previewSlot, shopItem == null ? categoryEditorItem(gui, category) : editorItem(gui, shopItem));
+        keys.put(previewSlot, "preview");
+        putConfigured(player, inventory, keys, gui, "slots.confirmDelete.confirm", 30, "confirmDelete", "confirm_delete", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.confirmDelete.cancel", 32, "cancelDelete", "cancel_delete", Map.of());
         player.openInventory(inventory);
     }
 
@@ -187,6 +216,7 @@ public class ServerShopAdminEditor {
             case ITEMS -> handleItemListClick(player, holder.categoryId(), key, event.isRightClick());
             case CATEGORY_EDITOR -> handleCategoryEditorClick(player, holder.categoryId(), key);
             case ITEM_EDITOR -> handleItemEditorClick(player, holder.categoryId(), holder.itemId(), key, event);
+            case CONFIRM_DELETE -> handleDeleteConfirmClick(player, holder, key);
             case MATERIAL_PICKER -> handleMaterialPickerClick(player, holder, key);
         }
     }
@@ -255,6 +285,10 @@ public class ServerShopAdminEditor {
         }
         if ("open_items".equals(key)) {
             openItems(player, categoryId);
+            return;
+        }
+        if ("delete_category".equals(key)) {
+            openDeleteConfirm(player, categoryId, "");
         }
     }
 
@@ -290,6 +324,10 @@ public class ServerShopAdminEditor {
             openMaterialPicker(player, categoryId, itemId, 0);
             return;
         }
+        if ("delete_item".equals(key)) {
+            openDeleteConfirm(player, categoryId, itemId);
+            return;
+        }
         if ("buy_price".equals(key)) {
             adjustPrice(categoryId, itemId, "buyPrice", priceDelta(event));
             saved(player, categoryId, itemId);
@@ -299,6 +337,30 @@ public class ServerShopAdminEditor {
             adjustPrice(categoryId, itemId, "sellPrice", priceDelta(event));
             saved(player, categoryId, itemId);
         }
+    }
+
+    private void handleDeleteConfirmClick(Player player, ServerShopAdminHolder holder, String key) {
+        boolean itemDelete = holder.itemId() != null && !holder.itemId().isBlank();
+        if ("cancel_delete".equals(key)) {
+            if (itemDelete) {
+                openItemEditor(player, holder.categoryId(), holder.itemId());
+            } else {
+                openCategoryEditor(player, holder.categoryId());
+            }
+            return;
+        }
+        if (!"confirm_delete".equals(key)) {
+            return;
+        }
+        if (itemDelete) {
+            deleteItem(holder.categoryId(), holder.itemId());
+            plugin.getLanguageService().send(player, "adminShop.itemDeleted");
+            openItems(player, holder.categoryId());
+            return;
+        }
+        deleteCategory(holder.categoryId());
+        plugin.getLanguageService().send(player, "adminShop.categoryDeleted");
+        openCategories(player);
     }
 
     private void handleMaterialPickerClick(Player player, ServerShopAdminHolder holder, String key) {
@@ -567,6 +629,18 @@ public class ServerShopAdminEditor {
         save(configuration);
     }
 
+    private void deleteCategory(String categoryId) {
+        YamlConfiguration configuration = loadShopFile();
+        configuration.set("categories." + categoryId, null);
+        save(configuration);
+    }
+
+    private void deleteItem(String categoryId, String itemId) {
+        YamlConfiguration configuration = loadShopFile();
+        configuration.set(itemPath(categoryId, itemId), null);
+        save(configuration);
+    }
+
     private ServerShopCategory categoryAtSlot(int slot) {
         for (ServerShopCategory category : plugin.getServerShopRegistry().categories()) {
             if (category.slot() == slot) {
@@ -734,7 +808,11 @@ public class ServerShopAdminEditor {
                 || "previous".equals(key)
                 || "next".equals(key)
                 || "create_category".equals(key)
-                || "create_item".equals(key);
+                || "create_item".equals(key)
+                || "delete_category".equals(key)
+                || "delete_item".equals(key)
+                || "confirm_delete".equals(key)
+                || "cancel_delete".equals(key);
     }
 
     private boolean isMovableKey(ServerShopAdminHolder holder, String key) {
