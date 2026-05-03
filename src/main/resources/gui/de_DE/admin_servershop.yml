@@ -2,6 +2,8 @@ titles:
   categories: "&8AdminShop Kategorien"
   items: "&8AdminShop: %category%"
   itemEditor: "&8Item bearbeiten"
+  materialPickerCategory: "&8Kategorie-Icon wählen %page%/%pages%"
+  materialPickerItem: "&8Material wählen %page%/%pages%"
 
 items:
   category:
@@ -10,6 +12,8 @@ items:
       - "&7Items: &f%item_count%"
       - ""
       - "&eKlicken zum Bearbeiten"
+      - "&eRechtsklick: Blockauswahl"
+      - "&eItem auf Slot ziehen: Icon ändern"
   shopItem:
     lore:
       - "&7ID: &f%item_id%"
@@ -20,6 +24,13 @@ items:
       - "&7Verkaufen: %sell_status%"
       - ""
       - "&eKlicken zum Bearbeiten"
+      - "&eRechtsklick: Materialauswahl"
+      - "&eItem auf Slot ziehen: Item ändern"
+  material:
+    lore:
+      - "&7Material: &f%material%"
+      - ""
+      - "&eKlicken zum Auswählen"
   backAdmin:
     material: ARROW
     name: "&cZurück"
@@ -93,6 +104,21 @@ items:
     lore:
       - "&7Setzt Material und Anzeigename"
       - "&7aus deinem Main-Hand-Item."
+  materialPicker:
+    material: COMPASS
+    name: "&bMaterialauswahl"
+    lore:
+      - "&7Wähle ein Material aus einer Liste."
+  previousPage:
+    material: ARROW
+    name: "&eVorherige Seite"
+    lore:
+      - "&7Zurückblättern."
+  nextPage:
+    material: ARROW
+    name: "&eNächste Seite"
+    lore:
+      - "&7Weiterblättern."
 
 status:
   enabled: "&aaktiv"

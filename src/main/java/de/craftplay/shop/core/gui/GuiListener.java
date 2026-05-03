@@ -58,6 +58,9 @@ public class GuiListener implements Listener {
         InventoryHolder holder = event.getInventory().getHolder();
         if (holder instanceof GuiHolder || holder instanceof ServerShopHolder || holder instanceof ServerShopCategoryHolder || holder instanceof ServerShopAdminHolder) {
             event.setCancelled(true);
+            if (holder instanceof ServerShopAdminHolder adminHolder && event.getWhoClicked() instanceof org.bukkit.entity.Player player) {
+                plugin.getServerShopAdminEditor().handleDrag(player, adminHolder, event);
+            }
         }
     }
 }

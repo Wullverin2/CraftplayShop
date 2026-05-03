@@ -45,3 +45,7 @@ gui:
 adminShop:
   saved: "%prefix%&aServerShop wurde gespeichert."
   noHandItem: "%prefix%&cDu musst ein Item in der Hand halten."
+  categoryCreated: "%prefix%&aKategorie wurde erstellt."
+  categoryUpdated: "%prefix%&aKategorie wurde aktualisiert."
+  itemCreated: "%prefix%&aShop-Item wurde erstellt."
+  itemUpdated: "%prefix%&aShop-Item wurde aktualisiert."

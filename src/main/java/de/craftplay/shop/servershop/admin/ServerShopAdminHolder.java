@@ -10,13 +10,19 @@ public class ServerShopAdminHolder implements InventoryHolder {
     private final String categoryId;
     private final String itemId;
     private final Map<Integer, String> keysBySlot;
+    private final int page;
     private Inventory inventory;
 
     public ServerShopAdminHolder(ServerShopAdminView view, String categoryId, String itemId, Map<Integer, String> keysBySlot) {
+        this(view, categoryId, itemId, keysBySlot, 0);
+    }
+
+    public ServerShopAdminHolder(ServerShopAdminView view, String categoryId, String itemId, Map<Integer, String> keysBySlot, int page) {
         this.view = view;
         this.categoryId = categoryId;
         this.itemId = itemId;
         this.keysBySlot = keysBySlot;
+        this.page = page;
     }
 
     public ServerShopAdminView view() {
@@ -33,6 +39,10 @@ public class ServerShopAdminHolder implements InventoryHolder {
 
     public String keyAt(int slot) {
         return keysBySlot.get(slot);
+    }
+
+    public int page() {
+        return page;
     }
 
     public void setInventory(Inventory inventory) {

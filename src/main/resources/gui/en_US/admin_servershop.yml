@@ -2,6 +2,8 @@ titles:
   categories: "&8AdminShop Categories"
   items: "&8AdminShop: %category%"
   itemEditor: "&8Edit Item"
+  materialPickerCategory: "&8Choose Category Icon %page%/%pages%"
+  materialPickerItem: "&8Choose Material %page%/%pages%"
 
 items:
   category:
@@ -10,6 +12,8 @@ items:
       - "&7Items: &f%item_count%"
       - ""
       - "&eClick to edit"
+      - "&eRight click: material picker"
+      - "&eDrag item onto slot: change icon"
   shopItem:
     lore:
       - "&7ID: &f%item_id%"
@@ -20,6 +24,13 @@ items:
       - "&7Selling: %sell_status%"
       - ""
       - "&eClick to edit"
+      - "&eRight click: material picker"
+      - "&eDrag item onto slot: change item"
+  material:
+    lore:
+      - "&7Material: &f%material%"
+      - ""
+      - "&eClick to select"
   backAdmin:
     material: ARROW
     name: "&cBack"
@@ -93,6 +104,21 @@ items:
     lore:
       - "&7Copies material and display name"
       - "&7from your main-hand item."
+  materialPicker:
+    material: COMPASS
+    name: "&bMaterial Picker"
+    lore:
+      - "&7Choose a material from a list."
+  previousPage:
+    material: ARROW
+    name: "&ePrevious Page"
+    lore:
+      - "&7Go back one page."
+  nextPage:
+    material: ARROW
+    name: "&eNext Page"
+    lore:
+      - "&7Go forward one page."
 
 status:
   enabled: "&aenabled"
