@@ -57,4 +57,6 @@ adminShop:
   moveDone: "%prefix%&aLayout has been saved."
   inputName: "%prefix%&7Write the new display name in chat. &e& &7color codes are allowed. Write &ccancel &7to cancel."
   inputLore: "%prefix%&7Write lore in chat. Separate lines with &e|&7. Write &e-&7 or &eclear&7 to clear it, &ccancel &7to cancel."
+  inputPrice: "%prefix%&7Write the new price as a number in chat. Example: &e12.5&7. Write &ccancel &7to cancel."
+  invalidPrice: "%prefix%&cThat is not a valid price."
   inputCancelled: "%prefix%&cInput cancelled."

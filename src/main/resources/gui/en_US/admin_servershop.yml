@@ -27,10 +27,12 @@ slots:
     preview: 4
     toggleBuy: 10
     buyPrice: 13
+    setBuyPrice: 14
     editName: 20
     editLore: 22
     toggleSell: 28
     sellPrice: 31
+    setSellPrice: 32
     delete: 38
     setFromHand: 40
     materialPicker: 42
@@ -118,6 +120,13 @@ items:
       - "&aShift-left click: +10"
       - "&cRight click: -1"
       - "&cShift-right click: -10"
+  setBuyPrice:
+    material: EMERALD
+    name: "&aSet Buy Price Directly"
+    lore:
+      - "&7Current: &f%price%"
+      - ""
+      - "&eClick to enter"
   sellPrice:
     material: GOLD_INGOT
     name: "&6Edit Sell Price"
@@ -128,6 +137,13 @@ items:
       - "&aShift-left click: +10"
       - "&cRight click: -1"
       - "&cShift-right click: -10"
+  setSellPrice:
+    material: GOLD_INGOT
+    name: "&6Set Sell Price Directly"
+    lore:
+      - "&7Current: &f%price%"
+      - ""
+      - "&eClick to enter"
   buyMinus10:
     material: EMERALD
     name: "&aBuy price -10"

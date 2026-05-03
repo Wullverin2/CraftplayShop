@@ -148,11 +148,13 @@ public class ServerShopAdminEditor {
         inventory.setItem(toggleBuySlot, toggleItem(gui, "toggleBuy", shopItem.buyEnabled()));
         keys.put(toggleBuySlot, "toggle_buy");
         priceButton(player, inventory, keys, gui, "slots.itemEditor.buyPrice", 13, "buyPrice", "buy_price", shopItem.buyPrice());
+        putConfigured(player, inventory, keys, gui, "slots.itemEditor.setBuyPrice", 14, "setBuyPrice", "set_buy_price", Map.of("price", money(shopItem.buyPrice())));
 
         int toggleSellSlot = slot(gui, "slots.itemEditor.toggleSell", 28);
         inventory.setItem(toggleSellSlot, toggleItem(gui, "toggleSell", shopItem.sellEnabled()));
         keys.put(toggleSellSlot, "toggle_sell");
         priceButton(player, inventory, keys, gui, "slots.itemEditor.sellPrice", 31, "sellPrice", "sell_price", shopItem.sellPrice());
+        putConfigured(player, inventory, keys, gui, "slots.itemEditor.setSellPrice", 32, "setSellPrice", "set_sell_price", Map.of("price", money(shopItem.sellPrice())));
 
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.editName", 20, "editName", "edit_name", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.editLore", 22, "editLore", "edit_lore", Map.of());
@@ -318,6 +320,14 @@ public class ServerShopAdminEditor {
         }
         if ("edit_lore".equals(key)) {
             startTextEdit(player, TextEditType.ITEM_LORE, categoryId, itemId);
+            return;
+        }
+        if ("set_buy_price".equals(key)) {
+            startTextEdit(player, TextEditType.ITEM_BUY_PRICE, categoryId, itemId);
+            return;
+        }
+        if ("set_sell_price".equals(key)) {
+            startTextEdit(player, TextEditType.ITEM_SELL_PRICE, categoryId, itemId);
             return;
         }
         if ("material_picker".equals(key) || "item_preview".equals(key)) {
@@ -576,6 +586,8 @@ public class ServerShopAdminEditor {
                 setItemLore(session.categoryId(), session.itemId(), parseLore(message));
                 plugin.getLanguageService().send(player, "adminShop.itemUpdated");
             }
+            case ITEM_BUY_PRICE -> handlePriceInput(player, session, "buyPrice", message);
+            case ITEM_SELL_PRICE -> handlePriceInput(player, session, "sellPrice", message);
         }
         reopenAfterTextEdit(player, session);
     }
@@ -583,7 +595,11 @@ public class ServerShopAdminEditor {
     private void startTextEdit(Player player, TextEditType type, String categoryId, String itemId) {
         textEditSessions.put(player.getUniqueId(), new TextEditSession(type, categoryId, itemId));
         player.closeInventory();
-        String key = type == TextEditType.CATEGORY_LORE || type == TextEditType.ITEM_LORE ? "adminShop.inputLore" : "adminShop.inputName";
+        String key = switch (type) {
+            case CATEGORY_LORE, ITEM_LORE -> "adminShop.inputLore";
+            case ITEM_BUY_PRICE, ITEM_SELL_PRICE -> "adminShop.inputPrice";
+            default -> "adminShop.inputName";
+        };
         plugin.getLanguageService().send(player, key);
     }
 
@@ -626,6 +642,22 @@ public class ServerShopAdminEditor {
     private void setItemLore(String categoryId, String itemId, List<String> lore) {
         YamlConfiguration configuration = loadShopFile();
         configuration.set(itemPath(categoryId, itemId) + ".lore", lore);
+        save(configuration);
+    }
+
+    private void handlePriceInput(Player player, TextEditSession session, String priceKey, String message) {
+        try {
+            double price = Double.parseDouble(message.replace(',', '.'));
+            setItemPrice(session.categoryId(), session.itemId(), priceKey, Math.max(0.0D, price));
+            plugin.getLanguageService().send(player, "adminShop.itemUpdated");
+        } catch (NumberFormatException exception) {
+            plugin.getLanguageService().send(player, "adminShop.invalidPrice");
+        }
+    }
+
+    private void setItemPrice(String categoryId, String itemId, String priceKey, double price) {
+        YamlConfiguration configuration = loadShopFile();
+        configuration.set(itemPath(categoryId, itemId) + "." + priceKey, price);
         save(configuration);
     }
 
@@ -1052,6 +1084,8 @@ public class ServerShopAdminEditor {
         CATEGORY_NAME,
         CATEGORY_LORE,
         ITEM_NAME,
-        ITEM_LORE
+        ITEM_LORE,
+        ITEM_BUY_PRICE,
+        ITEM_SELL_PRICE
     }
 }
