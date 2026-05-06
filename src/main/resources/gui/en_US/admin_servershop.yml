@@ -17,9 +17,11 @@ slots:
     createItem: 53
   categoryEditor:
     preview: 4
+    toggleCategory: 10
     editName: 20
     editLore: 22
     openItems: 24
+    duplicate: 36
     delete: 38
     materialPicker: 42
     back: 45
@@ -33,6 +35,7 @@ slots:
     toggleSell: 28
     sellPrice: 31
     setSellPrice: 32
+    duplicate: 36
     delete: 38
     setFromHand: 40
     materialPicker: 42
@@ -51,6 +54,7 @@ items:
     lore:
       - "&7ID: &f%category_id%"
       - "&7Items: &f%item_count%"
+      - "&7Status: %category_status%"
       - ""
       - "&eClick to edit"
       - "&eRight click: material picker"
@@ -60,6 +64,7 @@ items:
     lore:
       - "&7ID: &f%category_id%"
       - "&7Items: &f%item_count%"
+      - "&7Status: %category_status%"
       - "&7Lore lines: &f%lore_lines%"
       - ""
       - "&eClick: icon picker"
@@ -110,6 +115,15 @@ items:
     disabledName: "&cSelling disabled"
     lore:
       - "&7Click to toggle."
+  toggleCategory:
+    material: LEVER
+    enabledName: "&aCategory enabled"
+    disabledName: "&cCategory disabled"
+    lore:
+      - "&7Disabled categories are hidden"
+      - "&7from the regular ServerShop."
+      - ""
+      - "&eClick to toggle"
   buyPrice:
     material: EMERALD
     name: "&aEdit Buy Price"
@@ -206,6 +220,18 @@ items:
     name: "&aOpen Items"
     lore:
       - "&7Opens this category's items."
+  duplicateCategory:
+    material: MAP
+    name: "&bDuplicate Category"
+    lore:
+      - "&7Copies category and items"
+      - "&7to the next free slot."
+  duplicateItem:
+    material: MAP
+    name: "&bDuplicate Item"
+    lore:
+      - "&7Copies this shop item"
+      - "&7to the next free slot."
   deleteCategory:
     material: BARRIER
     name: "&cDelete Category"

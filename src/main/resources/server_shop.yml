@@ -1,5 +1,6 @@
 categories:
   blocks:
+    enabled: true
     displayName: "&6Blöcke"
     icon: STONE
     slot: 20
@@ -22,6 +23,7 @@ categories:
         slot: 11
 
   farming:
+    enabled: true
     displayName: "&aFarmitems"
     icon: WHEAT
     slot: 22

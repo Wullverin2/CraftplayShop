@@ -12,14 +12,16 @@ public class ServerShopCategory {
     private final String displayName;
     private final List<String> lore;
     private final Material icon;
+    private final boolean enabled;
     private final int slot;
     private final Map<String, ServerShopItem> items = new LinkedHashMap<>();
 
-    public ServerShopCategory(String id, String displayName, List<String> lore, Material icon, int slot) {
+    public ServerShopCategory(String id, String displayName, List<String> lore, Material icon, boolean enabled, int slot) {
         this.id = id;
         this.displayName = displayName;
         this.lore = lore;
         this.icon = icon;
+        this.enabled = enabled;
         this.slot = slot;
     }
 
@@ -37,6 +39,10 @@ public class ServerShopCategory {
 
     public Material icon() {
         return icon;
+    }
+
+    public boolean enabled() {
+        return enabled;
     }
 
     public int slot() {

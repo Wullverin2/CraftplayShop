@@ -31,6 +31,10 @@ public class ServerShopCategoryGui {
             plugin.getLanguageService().send(player, "serverShop.categoryNotFound");
             return;
         }
+        if (!category.enabled()) {
+            plugin.getLanguageService().send(player, "general.featureNotAvailable");
+            return;
+        }
         String language = plugin.getPlayerLanguageService().getLanguage(player);
         YamlConfiguration gui = loadGui(language, "servershop_category.yml");
         Map<Integer, String> itemsBySlot = new HashMap<>();

@@ -38,6 +38,7 @@ public class ServerShopRegistry {
                     categorySection.getString("displayName", categoryId),
                     categorySection.getStringList("lore"),
                     icon,
+                    categorySection.getBoolean("enabled", true),
                     categorySection.getInt("slot", 0)
             );
             ConfigurationSection items = categorySection.getConfigurationSection("items");
@@ -82,6 +83,9 @@ public class ServerShopRegistry {
             return null;
         }
         for (ServerShopCategory category : categories.values()) {
+            if (!category.enabled()) {
+                continue;
+            }
             for (ServerShopItem item : category.items()) {
                 if (item.sellEnabled() && plugin.getItemMatcher().matches(itemStack, item.createStack(1), plugin.getConfigService().itemMatchMode())) {
                     return item;

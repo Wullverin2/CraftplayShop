@@ -65,7 +65,8 @@ public class ServerShopAdminEditor {
             int slot = clampSlot(category.slot(), inventory.getSize());
             inventory.setItem(slot, item(category.icon(), category.displayName(), lore(gui, "items.category.lore", Map.of(
                     "category_id", category.id(),
-                    "item_count", Integer.toString(category.items().size())
+                    "item_count", Integer.toString(category.items().size()),
+                    "category_status", status(gui, category.enabled())
             ))));
             keys.put(slot, category.id());
         }
@@ -113,9 +114,13 @@ public class ServerShopAdminEditor {
         int previewSlot = slot(gui, "slots.categoryEditor.preview", 4);
         inventory.setItem(previewSlot, categoryEditorItem(gui, category));
         keys.put(previewSlot, "category_preview");
+        int toggleCategorySlot = slot(gui, "slots.categoryEditor.toggleCategory", 10);
+        inventory.setItem(toggleCategorySlot, toggleItem(gui, "toggleCategory", category.enabled()));
+        keys.put(toggleCategorySlot, "toggle_category");
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.editName", 20, "editName", "edit_name", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.editLore", 22, "editLore", "edit_lore", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.openItems", 24, "openItems", "open_items", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.categoryEditor.duplicate", 36, "duplicateCategory", "duplicate_category", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.delete", 38, "deleteCategory", "delete_category", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.materialPicker", 42, "materialPicker", "material_picker", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.back", 45, "backCategories", "back", Map.of());
@@ -158,6 +163,7 @@ public class ServerShopAdminEditor {
 
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.editName", 20, "editName", "edit_name", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.editLore", 22, "editLore", "edit_lore", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.itemEditor.duplicate", 36, "duplicateItem", "duplicate_item", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.setFromHand", 40, "setFromHand", "set_from_hand", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.delete", 38, "deleteItem", "delete_item", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.materialPicker", 42, "materialPicker", "material_picker", Map.of());
@@ -277,6 +283,12 @@ public class ServerShopAdminEditor {
             openMaterialPicker(player, categoryId, CATEGORY_EDITOR_TARGET, 0);
             return;
         }
+        if ("toggle_category".equals(key)) {
+            toggleCategory(categoryId);
+            plugin.getLanguageService().send(player, "adminShop.categoryUpdated");
+            openCategoryEditor(player, categoryId);
+            return;
+        }
         if ("edit_name".equals(key)) {
             startTextEdit(player, TextEditType.CATEGORY_NAME, categoryId, "");
             return;
@@ -287,6 +299,12 @@ public class ServerShopAdminEditor {
         }
         if ("open_items".equals(key)) {
             openItems(player, categoryId);
+            return;
+        }
+        if ("duplicate_category".equals(key)) {
+            duplicateCategory(categoryId);
+            plugin.getLanguageService().send(player, "adminShop.categoryDuplicated");
+            openCategories(player);
             return;
         }
         if ("delete_category".equals(key)) {
@@ -328,6 +346,12 @@ public class ServerShopAdminEditor {
         }
         if ("set_sell_price".equals(key)) {
             startTextEdit(player, TextEditType.ITEM_SELL_PRICE, categoryId, itemId);
+            return;
+        }
+        if ("duplicate_item".equals(key)) {
+            duplicateItem(categoryId, itemId);
+            plugin.getLanguageService().send(player, "adminShop.itemDuplicated");
+            openItems(player, categoryId);
             return;
         }
         if ("material_picker".equals(key) || "item_preview".equals(key)) {
@@ -555,6 +579,42 @@ public class ServerShopAdminEditor {
         save(configuration);
     }
 
+    private void duplicateCategory(String categoryId) {
+        YamlConfiguration configuration = loadShopFile();
+        ConfigurationSection source = configuration.getConfigurationSection("categories." + categoryId);
+        if (source == null) {
+            return;
+        }
+        String newId = uniqueId(configuration, "categories", categoryId + "_copy");
+        String targetPath = "categories." + newId;
+        copyValues(source, targetPath, configuration);
+        configuration.set(targetPath + ".slot", nextFreeCategorySlot());
+        save(configuration);
+    }
+
+    private void duplicateItem(String categoryId, String itemId) {
+        YamlConfiguration configuration = loadShopFile();
+        ConfigurationSection source = configuration.getConfigurationSection(itemPath(categoryId, itemId));
+        ServerShopCategory category = plugin.getServerShopRegistry().category(categoryId);
+        if (source == null || category == null) {
+            return;
+        }
+        String newId = uniqueId(configuration, "categories." + categoryId + ".items", itemId + "_copy");
+        String targetPath = itemPath(categoryId, newId);
+        copyValues(source, targetPath, configuration);
+        configuration.set(targetPath + ".slot", nextFreeItemSlot(category));
+        save(configuration);
+    }
+
+    private void copyValues(ConfigurationSection source, String targetPath, YamlConfiguration configuration) {
+        for (Map.Entry<String, Object> entry : source.getValues(true).entrySet()) {
+            if (entry.getValue() instanceof ConfigurationSection) {
+                continue;
+            }
+            configuration.set(targetPath + "." + entry.getKey(), entry.getValue());
+        }
+    }
+
     public boolean hasTextInput(Player player) {
         return textEditSessions.containsKey(player.getUniqueId());
     }
@@ -633,6 +693,13 @@ public class ServerShopAdminEditor {
         save(configuration);
     }
 
+    private void toggleCategory(String categoryId) {
+        YamlConfiguration configuration = loadShopFile();
+        String path = "categories." + categoryId + ".enabled";
+        configuration.set(path, !configuration.getBoolean(path, true));
+        save(configuration);
+    }
+
     private void setItemDisplayName(String categoryId, String itemId, String displayName) {
         YamlConfiguration configuration = loadShopFile();
         configuration.set(itemPath(categoryId, itemId) + ".displayName", displayName);
@@ -697,6 +764,7 @@ public class ServerShopAdminEditor {
         String path = "categories." + id;
         configuration.set(path + ".displayName", displayName(source));
         configuration.set(path + ".lore", List.of());
+        configuration.set(path + ".enabled", true);
         configuration.set(path + ".icon", source.getType().name());
         configuration.set(path + ".slot", slot);
         configuration.createSection(path + ".items");
@@ -709,6 +777,7 @@ public class ServerShopAdminEditor {
         String path = "categories." + id;
         configuration.set(path + ".displayName", "&f" + formatMaterialName(material));
         configuration.set(path + ".lore", List.of());
+        configuration.set(path + ".enabled", true);
         configuration.set(path + ".icon", material.name());
         configuration.set(path + ".slot", slot);
         configuration.createSection(path + ".items");
@@ -925,6 +994,16 @@ public class ServerShopAdminEditor {
         return id;
     }
 
+    private String uniqueId(YamlConfiguration configuration, String parentPath, String baseValue) {
+        String base = normalizeId(baseValue);
+        String id = base;
+        int counter = 2;
+        while (configuration.contains(parentPath + "." + id)) {
+            id = base + "_" + counter++;
+        }
+        return id;
+    }
+
     private String normalizeId(String value) {
         return value.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_]", "_");
     }
@@ -933,7 +1012,8 @@ public class ServerShopAdminEditor {
         return item(category.icon(), category.displayName(), lore(gui, "items.categoryEditor.lore", Map.of(
                 "category_id", category.id(),
                 "item_count", Integer.toString(category.items().size()),
-                "lore_lines", Integer.toString(category.lore().size())
+                "lore_lines", Integer.toString(category.lore().size()),
+                "category_status", status(gui, category.enabled())
         )));
     }
 

@@ -37,6 +37,9 @@ public class ServerShopGui {
         holder.setInventory(inventory);
         fill(inventory, gui);
         for (ServerShopCategory category : plugin.getServerShopRegistry().categories()) {
+            if (!category.enabled()) {
+                continue;
+            }
             ItemStack itemStack = new ItemStack(category.icon());
             ItemMeta meta = itemStack.getItemMeta();
             if (meta != null) {
