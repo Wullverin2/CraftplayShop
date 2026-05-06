@@ -1031,7 +1031,7 @@ public class ServerShopAdminEditor {
         createBackup(false);
     }
 
-    private void createManualBackup(Player player) {
+    public void createManualBackup(Player player) {
         if (!plugin.getConfig().getBoolean("adminShop.backups.enabled", true)) {
             plugin.getLanguageService().send(player, "adminShop.backupDisabled");
             return;

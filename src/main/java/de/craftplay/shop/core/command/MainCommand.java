@@ -110,6 +110,18 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             plugin.getServerShopAdminEditor().openCategories(player);
             return;
         }
+        if ("backup".equals(sub)) {
+            if (!(sender instanceof Player player)) {
+                plugin.getLanguageService().send(sender, "general.playerOnly");
+                return;
+            }
+            if (!player.hasPermission(PermissionNodes.ADMIN)) {
+                plugin.getLanguageService().send(player, "general.noPermission");
+                return;
+            }
+            plugin.getServerShopAdminEditor().createManualBackup(player);
+            return;
+        }
         plugin.getLanguageService().send(sender, "general.unknownCommand");
     }
 
@@ -191,7 +203,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall", "sellgui"), args[0]);
         }
         if (args.length == 2 && "admin".equalsIgnoreCase(args[0])) {
-            return filter(List.of("editor", "reload", "servershop", "adminshop"), args[1]);
+            return filter(List.of("editor", "reload", "servershop", "adminshop", "backup"), args[1]);
         }
         if (args.length == 2 && ("language".equalsIgnoreCase(args[0]) || "lang".equalsIgnoreCase(args[0]))) {
             return filter(new ArrayList<>(plugin.getLanguageService().availableLanguages()), args[1]);
