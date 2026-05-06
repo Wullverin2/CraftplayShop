@@ -22,7 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -34,6 +36,7 @@ import java.util.UUID;
 public class ServerShopAdminEditor {
     private static final int MATERIALS_PER_PAGE = 45;
     private static final DateTimeFormatter BACKUP_TIMESTAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
+    private static final DateTimeFormatter BACKUP_LIST_TIMESTAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final String CREATE_CATEGORY_TARGET = "__create_category__";
     private static final String CREATE_ITEM_TARGET = "__create_item__";
     private static final String CATEGORY_EDITOR_TARGET = "__category_editor__";
@@ -1049,6 +1052,33 @@ public class ServerShopAdminEditor {
         }
     }
 
+    public void listBackups(Player player) {
+        try {
+            File folder = backupFolder();
+            File[] files = folder.listFiles((dir, name) -> name.startsWith("server_shop-") && name.endsWith(".yml"));
+            if (files == null || files.length == 0) {
+                plugin.getLanguageService().send(player, "adminShop.backupListEmpty");
+                return;
+            }
+            int limit = Math.max(1, plugin.getConfig().getInt("adminShop.backups.listLimit", 8));
+            List<File> backups = java.util.Arrays.stream(files)
+                    .sorted(Comparator.comparingLong(File::lastModified).reversed())
+                    .limit(limit)
+                    .toList();
+            plugin.getLanguageService().send(player, "adminShop.backupListHeader", Map.of("count", Integer.toString(backups.size())));
+            for (File backup : backups) {
+                plugin.getLanguageService().send(player, "adminShop.backupListEntry", Map.of(
+                        "file", backup.getName(),
+                        "date", formatBackupDate(backup.lastModified()),
+                        "size", formatFileSize(backup.length())
+                ));
+            }
+        } catch (IOException exception) {
+            plugin.getPluginLogService().error("Could not list server shop backups.", exception);
+            plugin.getLanguageService().send(player, "adminShop.backupFailed");
+        }
+    }
+
     private File createBackup(boolean force) throws IOException {
         File source = shopFile();
         if (!source.exists()) {
@@ -1102,6 +1132,20 @@ public class ServerShopAdminEditor {
                 plugin.getPluginLogService().warn("Could not delete old server shop backup: " + file.getName());
             }
         }
+    }
+
+    private String formatBackupDate(long millis) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault()).format(BACKUP_LIST_TIMESTAMP);
+    }
+
+    private String formatFileSize(long bytes) {
+        if (bytes < 1024L) {
+            return bytes + " B";
+        }
+        if (bytes < 1024L * 1024L) {
+            return String.format(Locale.US, "%.1f KB", bytes / 1024.0D);
+        }
+        return String.format(Locale.US, "%.1f MB", bytes / 1024.0D / 1024.0D);
     }
 
     private File shopFile() {

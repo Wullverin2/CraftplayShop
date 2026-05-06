@@ -93,6 +93,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Manueller Backup-Button in der AdminShop-Kategorieuebersicht.
 - Backups mit konfigurierbarem Ordner, Cooldown und Maximalanzahl.
 - Manuelles ServerShop-Backup per GUI-Button und Admin-Befehl.
+- Auflisten der letzten ServerShop-Backups per Admin-Befehl.
 
 ### Commands
 
@@ -112,6 +113,8 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `/cshop admin editor`
 - `/cshop admin servershop`
 - `/cshop admin backup`
+- `/cshop admin backup list`
+- `/cshop admin backups`
 - `/trade toggle`
 - `/trade on`
 - `/trade off`
@@ -159,6 +162,7 @@ adminShop:
     folder: "backups/server_shop"
     cooldownSeconds: 30
     maxFiles: 25
+    listLimit: 8
 ```
 
 ## Build

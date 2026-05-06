@@ -113,6 +113,9 @@ adminShop:
     # Maximale Anzahl gespeicherter ServerShop-Backups.
     maxFiles: 25
 
+    # Anzahl der Backups, die /cshop admin backup list maximal im Chat anzeigt.
+    listLimit: 8
+
 sellCommands:
   sellHand: true
   sellAll: true

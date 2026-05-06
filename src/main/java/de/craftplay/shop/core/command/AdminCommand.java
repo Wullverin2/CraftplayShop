@@ -54,7 +54,23 @@ public class AdminCommand implements CommandExecutor {
                 plugin.getLanguageService().send(player, "general.noPermission");
                 return true;
             }
+            if (args.length > 1 && "list".equalsIgnoreCase(args[1])) {
+                plugin.getServerShopAdminEditor().listBackups(player);
+                return true;
+            }
             plugin.getServerShopAdminEditor().createManualBackup(player);
+            return true;
+        }
+        if (args.length > 0 && "backups".equalsIgnoreCase(args[0])) {
+            if (!(sender instanceof Player player)) {
+                plugin.getLanguageService().send(sender, "general.playerOnly");
+                return true;
+            }
+            if (!player.hasPermission(PermissionNodes.ADMIN)) {
+                plugin.getLanguageService().send(player, "general.noPermission");
+                return true;
+            }
+            plugin.getServerShopAdminEditor().listBackups(player);
             return true;
         }
         if (sender instanceof Player player && player.hasPermission(PermissionNodes.ADMIN)) {

@@ -119,7 +119,23 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 plugin.getLanguageService().send(player, "general.noPermission");
                 return;
             }
+            if (args.length > 2 && "list".equalsIgnoreCase(args[2])) {
+                plugin.getServerShopAdminEditor().listBackups(player);
+                return;
+            }
             plugin.getServerShopAdminEditor().createManualBackup(player);
+            return;
+        }
+        if ("backups".equals(sub)) {
+            if (!(sender instanceof Player player)) {
+                plugin.getLanguageService().send(sender, "general.playerOnly");
+                return;
+            }
+            if (!player.hasPermission(PermissionNodes.ADMIN)) {
+                plugin.getLanguageService().send(player, "general.noPermission");
+                return;
+            }
+            plugin.getServerShopAdminEditor().listBackups(player);
             return;
         }
         plugin.getLanguageService().send(sender, "general.unknownCommand");
@@ -203,7 +219,10 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall", "sellgui"), args[0]);
         }
         if (args.length == 2 && "admin".equalsIgnoreCase(args[0])) {
-            return filter(List.of("editor", "reload", "servershop", "adminshop", "backup"), args[1]);
+            return filter(List.of("editor", "reload", "servershop", "adminshop", "backup", "backups"), args[1]);
+        }
+        if (args.length == 3 && "admin".equalsIgnoreCase(args[0]) && "backup".equalsIgnoreCase(args[1])) {
+            return filter(List.of("list"), args[2]);
         }
         if (args.length == 2 && ("language".equalsIgnoreCase(args[0]) || "lang".equalsIgnoreCase(args[0]))) {
             return filter(new ArrayList<>(plugin.getLanguageService().availableLanguages()), args[1]);
