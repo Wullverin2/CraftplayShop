@@ -20,8 +20,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -29,6 +33,7 @@ import java.util.UUID;
 
 public class ServerShopAdminEditor {
     private static final int MATERIALS_PER_PAGE = 45;
+    private static final DateTimeFormatter BACKUP_TIMESTAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
     private static final String CREATE_CATEGORY_TARGET = "__create_category__";
     private static final String CREATE_ITEM_TARGET = "__create_item__";
     private static final String CATEGORY_EDITOR_TARGET = "__category_editor__";
@@ -44,6 +49,7 @@ public class ServerShopAdminEditor {
     private final Map<UUID, MoveSelection> moveSelections = new HashMap<>();
     private final Map<UUID, TextEditSession> textEditSessions = new HashMap<>();
     private final Map<UUID, String> materialSearches = new HashMap<>();
+    private long lastBackupCreatedAt;
 
     public ServerShopAdminEditor(CraftplayShopPlugin plugin) {
         this.plugin = plugin;
@@ -1003,10 +1009,68 @@ public class ServerShopAdminEditor {
 
     private void save(YamlConfiguration configuration) {
         try {
+            createBackupIfNeeded();
             configuration.save(shopFile());
             plugin.getServerShopRegistry().load();
         } catch (IOException exception) {
             plugin.getPluginLogService().error("Could not save server_shop.yml.", exception);
+        }
+    }
+
+    private void createBackupIfNeeded() throws IOException {
+        if (!plugin.getConfig().getBoolean("adminShop.backups.enabled", true)) {
+            return;
+        }
+        File source = shopFile();
+        if (!source.exists()) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        long cooldownMillis = Math.max(0, plugin.getConfig().getLong("adminShop.backups.cooldownSeconds", 30L)) * 1000L;
+        if (lastBackupCreatedAt > 0 && now - lastBackupCreatedAt < cooldownMillis) {
+            return;
+        }
+        File folder = backupFolder();
+        if (!folder.exists() && !folder.mkdirs()) {
+            throw new IOException("Could not create backup folder: " + folder);
+        }
+        String timestamp = LocalDateTime.now().format(BACKUP_TIMESTAMP);
+        File target = new File(folder, "server_shop-" + timestamp + ".yml");
+        Files.copy(source.toPath(), target.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+        lastBackupCreatedAt = now;
+        cleanupBackups(folder);
+    }
+
+    private File backupFolder() throws IOException {
+        String configured = plugin.getConfig().getString("adminShop.backups.folder", "backups/server_shop");
+        File dataFolder = plugin.getDataFolder().getCanonicalFile();
+        File folder = new File(dataFolder, configured == null || configured.isBlank() ? "backups/server_shop" : configured).getCanonicalFile();
+        if (!folder.toPath().startsWith(dataFolder.toPath())) {
+            plugin.getPluginLogService().warn("Configured adminShop backup folder is outside the plugin folder. Falling back to backups/server_shop.");
+            return new File(dataFolder, "backups/server_shop").getCanonicalFile();
+        }
+        return folder;
+    }
+
+    private void cleanupBackups(File folder) {
+        int maxFiles = plugin.getConfig().getInt("adminShop.backups.maxFiles", 25);
+        if (maxFiles <= 0) {
+            return;
+        }
+        File[] files = folder.listFiles((dir, name) -> name.startsWith("server_shop-") && name.endsWith(".yml"));
+        if (files == null || files.length <= maxFiles) {
+            return;
+        }
+        List<File> sorted = java.util.Arrays.stream(files)
+                .sorted(Comparator.comparingLong(File::lastModified).reversed())
+                .toList();
+        for (int index = maxFiles; index < sorted.size(); index++) {
+            File file = sorted.get(index);
+            try {
+                Files.deleteIfExists(file.toPath());
+            } catch (IOException exception) {
+                plugin.getPluginLogService().warn("Could not delete old server shop backup: " + file.getName());
+            }
         }
     }
 

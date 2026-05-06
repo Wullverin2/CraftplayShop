@@ -98,6 +98,21 @@ serverShop:
   # Standard-Itemvergleich für einfache ServerShop-Items.
   itemMatchMode: "MATERIAL_ONLY"
 
+adminShop:
+  backups:
+    # Erstellt vor Aenderungen ueber den Ingame-Editor ein Backup der server_shop.yml.
+    enabled: true
+
+    # Unterordner im Plugin-Ordner fuer ServerShop-Backups.
+    folder: "backups/server_shop"
+
+    # Mindestabstand zwischen zwei automatischen Backups.
+    # Verhindert Backup-Spam bei mehreren schnellen Preis- oder Sortierklicks.
+    cooldownSeconds: 30
+
+    # Maximale Anzahl gespeicherter ServerShop-Backups.
+    maxFiles: 25
+
 sellCommands:
   sellHand: true
   sellAll: true
