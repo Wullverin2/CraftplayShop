@@ -79,6 +79,10 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Kategorie-Icon ueber Materialauswahl oder Item-Drop setzen.
 - Shop-Item-Material ueber Materialauswahl, Item-Drop oder Item aus Hand setzen.
 - Anzeigename von Kategorien und Items per Chat bearbeiten.
+- ID von Kategorien und Items per Chat bearbeiten.
+- Wunsch-ID direkt nach dem Erstellen einer Kategorie oder eines Items per Chat setzen.
+- Automatische ID bleibt erhalten, wenn `-`, `keep` oder `cancel` genutzt wird.
+- Kollisionspruefung beim Umbenennen von Kategorie- und Item-IDs.
 - Lore von Kategorien und Items per Chat bearbeiten.
 - Kaufpreis und Verkaufspreis per Klick erhoehen oder verringern.
 - Kaufpreis und Verkaufspreis direkt per Chat setzen.

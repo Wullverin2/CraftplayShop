@@ -208,6 +208,7 @@ public class ServerShopAdminEditor {
         int toggleCategorySlot = slot(gui, "slots.categoryEditor.toggleCategory", 10);
         inventory.setItem(toggleCategorySlot, toggleItem(gui, "toggleCategory", category.enabled()));
         keys.put(toggleCategorySlot, "toggle_category");
+        putConfigured(player, inventory, keys, gui, "slots.categoryEditor.editId", 18, "editId", "edit_id", Map.of("id", category.id()));
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.editName", 20, "editName", "edit_name", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.editLore", 22, "editLore", "edit_lore", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categoryEditor.openItems", 24, "openItems", "open_items", Map.of());
@@ -252,6 +253,7 @@ public class ServerShopAdminEditor {
         priceButton(player, inventory, keys, gui, "slots.itemEditor.sellPrice", 31, "sellPrice", "sell_price", shopItem.sellPrice());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.setSellPrice", 32, "setSellPrice", "set_sell_price", Map.of("price", money(shopItem.sellPrice())));
 
+        putConfigured(player, inventory, keys, gui, "slots.itemEditor.editId", 18, "editId", "edit_id", Map.of("id", shopItem.id()));
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.editName", 20, "editName", "edit_name", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.editLore", 22, "editLore", "edit_lore", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.duplicate", 36, "duplicateItem", "duplicate_item", Map.of());
@@ -396,6 +398,10 @@ public class ServerShopAdminEditor {
             startTextEdit(player, TextEditType.CATEGORY_NAME, categoryId, "");
             return;
         }
+        if ("edit_id".equals(key)) {
+            startTextEdit(player, TextEditType.CATEGORY_ID, categoryId, "");
+            return;
+        }
         if ("edit_lore".equals(key)) {
             startTextEdit(player, TextEditType.CATEGORY_LORE, categoryId, "");
             return;
@@ -437,6 +443,10 @@ public class ServerShopAdminEditor {
         }
         if ("edit_name".equals(key)) {
             startTextEdit(player, TextEditType.ITEM_NAME, categoryId, itemId);
+            return;
+        }
+        if ("edit_id".equals(key)) {
+            startTextEdit(player, TextEditType.ITEM_ID, categoryId, itemId);
             return;
         }
         if ("edit_lore".equals(key)) {
@@ -584,9 +594,9 @@ public class ServerShopAdminEditor {
             return;
         }
         if (isCreateCategoryTarget(holder)) {
-            createCategoryFromMaterial(nextFreeCategorySlot(), material);
+            String categoryId = createCategoryFromMaterial(nextFreeCategorySlot(), material);
             plugin.getLanguageService().send(player, "adminShop.categoryCreated");
-            openCategories(player);
+            startTextEdit(player, TextEditType.CATEGORY_ID, categoryId, "");
             return;
         }
         if (isCreateItemTarget(holder)) {
@@ -595,9 +605,9 @@ public class ServerShopAdminEditor {
                 plugin.getLanguageService().send(player, "serverShop.categoryNotFound");
                 return;
             }
-            createItemFromMaterial(holder.categoryId(), nextFreeItemSlot(category), material);
+            String itemId = createItemFromMaterial(holder.categoryId(), nextFreeItemSlot(category), material);
             plugin.getLanguageService().send(player, "adminShop.itemCreated");
-            openItems(player, holder.categoryId());
+            startTextEdit(player, TextEditType.ITEM_ID, holder.categoryId(), itemId);
             return;
         }
         if (isCategoryEditorTarget(holder)) {
@@ -646,9 +656,9 @@ public class ServerShopAdminEditor {
     private void placeCategorySource(Player player, int slot, ItemStack source) {
         ServerShopCategory existing = categoryAtSlot(slot);
         if (existing == null) {
-            createCategoryFromStack(slot, source);
+            String categoryId = createCategoryFromStack(slot, source);
             plugin.getLanguageService().send(player, "adminShop.categoryCreated");
-            openCategories(player);
+            startTextEdit(player, TextEditType.CATEGORY_ID, categoryId, "");
             return;
         }
         setCategoryIcon(existing.id(), source.getType());
@@ -664,9 +674,9 @@ public class ServerShopAdminEditor {
         }
         ServerShopItem existing = itemAtSlot(category, slot);
         if (existing == null) {
-            createItemFromStack(categoryId, slot, source);
+            String itemId = createItemFromStack(categoryId, slot, source);
             plugin.getLanguageService().send(player, "adminShop.itemCreated");
-            openItems(player, categoryId);
+            startTextEdit(player, TextEditType.ITEM_ID, categoryId, itemId);
             return;
         }
         setItemFromStack(categoryId, existing.id(), source);
@@ -771,6 +781,15 @@ public class ServerShopAdminEditor {
         }
     }
 
+    private void renameSection(YamlConfiguration configuration, String oldPath, String newPath) {
+        ConfigurationSection source = configuration.getConfigurationSection(oldPath);
+        if (source == null) {
+            return;
+        }
+        copyValues(source, newPath, configuration);
+        configuration.set(oldPath, null);
+    }
+
     public boolean hasTextInput(Player player) {
         return textEditSessions.containsKey(player.getUniqueId());
     }
@@ -790,6 +809,10 @@ public class ServerShopAdminEditor {
                 setCategoryDisplayName(session.categoryId(), message);
                 plugin.getLanguageService().send(player, "adminShop.categoryUpdated");
             }
+            case CATEGORY_ID -> {
+                handleCategoryIdInput(player, session.categoryId(), message);
+                return;
+            }
             case CATEGORY_LORE -> {
                 setCategoryLore(session.categoryId(), parseLore(message));
                 plugin.getLanguageService().send(player, "adminShop.categoryUpdated");
@@ -797,6 +820,10 @@ public class ServerShopAdminEditor {
             case ITEM_NAME -> {
                 setItemDisplayName(session.categoryId(), session.itemId(), message);
                 plugin.getLanguageService().send(player, "adminShop.itemUpdated");
+            }
+            case ITEM_ID -> {
+                handleItemIdInput(player, session.categoryId(), session.itemId(), message);
+                return;
             }
             case ITEM_LORE -> {
                 setItemLore(session.categoryId(), session.itemId(), parseLore(message));
@@ -819,6 +846,7 @@ public class ServerShopAdminEditor {
             case CATEGORY_LORE, ITEM_LORE -> "adminShop.inputLore";
             case ITEM_BUY_PRICE, ITEM_SELL_PRICE -> "adminShop.inputPrice";
             case MATERIAL_SEARCH -> "adminShop.inputMaterialSearch";
+            case CATEGORY_ID, ITEM_ID -> "adminShop.inputId";
             default -> "adminShop.inputName";
         };
         plugin.getLanguageService().send(player, key);
@@ -829,7 +857,7 @@ public class ServerShopAdminEditor {
             openMaterialPicker(player, session.categoryId(), session.itemId(), 0);
             return;
         }
-        if (session.type() == TextEditType.CATEGORY_NAME || session.type() == TextEditType.CATEGORY_LORE) {
+        if (session.type() == TextEditType.CATEGORY_NAME || session.type() == TextEditType.CATEGORY_LORE || session.type() == TextEditType.CATEGORY_ID) {
             openCategoryEditor(player, session.categoryId());
             return;
         }
@@ -852,6 +880,40 @@ public class ServerShopAdminEditor {
         save(configuration);
     }
 
+    private void handleCategoryIdInput(Player player, String categoryId, String message) {
+        String newId = normalizedInputId(message);
+        if (newId == null) {
+            plugin.getLanguageService().send(player, "adminShop.idKept", Map.of("id", categoryId));
+            openCategoryEditor(player, categoryId);
+            return;
+        }
+        if (newId.isBlank()) {
+            plugin.getLanguageService().send(player, "adminShop.invalidId");
+            openCategoryEditor(player, categoryId);
+            return;
+        }
+        if (newId.equals(categoryId)) {
+            plugin.getLanguageService().send(player, "adminShop.idKept", Map.of("id", categoryId));
+            openCategoryEditor(player, categoryId);
+            return;
+        }
+        YamlConfiguration configuration = loadShopFile();
+        if (!configuration.contains("categories." + categoryId)) {
+            plugin.getLanguageService().send(player, "serverShop.categoryNotFound");
+            openCategories(player);
+            return;
+        }
+        if (configuration.contains("categories." + newId)) {
+            plugin.getLanguageService().send(player, "adminShop.idAlreadyExists", Map.of("id", newId));
+            openCategoryEditor(player, categoryId);
+            return;
+        }
+        renameSection(configuration, "categories." + categoryId, "categories." + newId);
+        save(configuration);
+        plugin.getLanguageService().send(player, "adminShop.idChanged", Map.of("old_id", categoryId, "new_id", newId));
+        openCategoryEditor(player, newId);
+    }
+
     private void setCategoryLore(String categoryId, List<String> lore) {
         YamlConfiguration configuration = loadShopFile();
         configuration.set("categories." + categoryId + ".lore", lore);
@@ -869,6 +931,42 @@ public class ServerShopAdminEditor {
         YamlConfiguration configuration = loadShopFile();
         configuration.set(itemPath(categoryId, itemId) + ".displayName", displayName);
         save(configuration);
+    }
+
+    private void handleItemIdInput(Player player, String categoryId, String itemId, String message) {
+        String newId = normalizedInputId(message);
+        if (newId == null) {
+            plugin.getLanguageService().send(player, "adminShop.idKept", Map.of("id", itemId));
+            openItemEditor(player, categoryId, itemId);
+            return;
+        }
+        if (newId.isBlank()) {
+            plugin.getLanguageService().send(player, "adminShop.invalidId");
+            openItemEditor(player, categoryId, itemId);
+            return;
+        }
+        if (newId.equals(itemId)) {
+            plugin.getLanguageService().send(player, "adminShop.idKept", Map.of("id", itemId));
+            openItemEditor(player, categoryId, itemId);
+            return;
+        }
+        YamlConfiguration configuration = loadShopFile();
+        String oldPath = itemPath(categoryId, itemId);
+        String newPath = itemPath(categoryId, newId);
+        if (!configuration.contains(oldPath)) {
+            plugin.getLanguageService().send(player, "gui.missingItem", Map.of("item", itemId));
+            openItems(player, categoryId);
+            return;
+        }
+        if (configuration.contains(newPath)) {
+            plugin.getLanguageService().send(player, "adminShop.idAlreadyExists", Map.of("id", newId));
+            openItemEditor(player, categoryId, itemId);
+            return;
+        }
+        renameSection(configuration, oldPath, newPath);
+        save(configuration);
+        plugin.getLanguageService().send(player, "adminShop.idChanged", Map.of("old_id", itemId, "new_id", newId));
+        openItemEditor(player, categoryId, newId);
     }
 
     private void setItemLore(String categoryId, String itemId, List<String> lore) {
@@ -935,7 +1033,7 @@ public class ServerShopAdminEditor {
         return null;
     }
 
-    private void createCategoryFromStack(int slot, ItemStack source) {
+    private String createCategoryFromStack(int slot, ItemStack source) {
         YamlConfiguration configuration = loadShopFile();
         String id = uniqueCategoryId(configuration, source.getType());
         String path = "categories." + id;
@@ -946,9 +1044,10 @@ public class ServerShopAdminEditor {
         configuration.set(path + ".slot", slot);
         configuration.createSection(path + ".items");
         save(configuration);
+        return id;
     }
 
-    private void createCategoryFromMaterial(int slot, Material material) {
+    private String createCategoryFromMaterial(int slot, Material material) {
         YamlConfiguration configuration = loadShopFile();
         String id = uniqueCategoryId(configuration, material);
         String path = "categories." + id;
@@ -959,9 +1058,10 @@ public class ServerShopAdminEditor {
         configuration.set(path + ".slot", slot);
         configuration.createSection(path + ".items");
         save(configuration);
+        return id;
     }
 
-    private void createItemFromStack(String categoryId, int slot, ItemStack source) {
+    private String createItemFromStack(String categoryId, int slot, ItemStack source) {
         YamlConfiguration configuration = loadShopFile();
         String id = uniqueItemId(configuration, categoryId, source.getType());
         String path = itemPath(categoryId, id);
@@ -974,9 +1074,10 @@ public class ServerShopAdminEditor {
         configuration.set(path + ".sellEnabled", false);
         configuration.set(path + ".slot", slot);
         save(configuration);
+        return id;
     }
 
-    private void createItemFromMaterial(String categoryId, int slot, Material material) {
+    private String createItemFromMaterial(String categoryId, int slot, Material material) {
         YamlConfiguration configuration = loadShopFile();
         String id = uniqueItemId(configuration, categoryId, material);
         String path = itemPath(categoryId, id);
@@ -989,6 +1090,7 @@ public class ServerShopAdminEditor {
         configuration.set(path + ".sellEnabled", false);
         configuration.set(path + ".slot", slot);
         save(configuration);
+        return id;
     }
 
     private void setCategoryIcon(String categoryId, Material material) {
@@ -1434,8 +1536,22 @@ public class ServerShopAdminEditor {
         return id;
     }
 
+    private String normalizedInputId(String value) {
+        if (value == null) {
+            return "";
+        }
+        String trimmed = value.trim();
+        if (trimmed.isBlank() || "-".equals(trimmed) || "keep".equalsIgnoreCase(trimmed)) {
+            return null;
+        }
+        return normalizeId(trimmed);
+    }
+
     private String normalizeId(String value) {
-        return value.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_]", "_");
+        return value.toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9_]", "_")
+                .replaceAll("_+", "_")
+                .replaceAll("^_+|_+$", "");
     }
 
     private ItemStack categoryEditorItem(YamlConfiguration gui, ServerShopCategory category) {
@@ -1598,6 +1714,8 @@ public class ServerShopAdminEditor {
         CATEGORY_LORE,
         ITEM_NAME,
         ITEM_LORE,
+        CATEGORY_ID,
+        ITEM_ID,
         ITEM_BUY_PRICE,
         ITEM_SELL_PRICE,
         MATERIAL_SEARCH

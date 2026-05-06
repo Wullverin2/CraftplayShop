@@ -23,6 +23,7 @@ slots:
   categoryEditor:
     preview: 4
     toggleCategory: 10
+    editId: 18
     editName: 20
     editLore: 22
     openItems: 24
@@ -40,6 +41,7 @@ slots:
     toggleSell: 28
     sellPrice: 31
     setSellPrice: 32
+    editId: 18
     duplicate: 36
     delete: 38
     setFromHand: 40
@@ -233,6 +235,17 @@ items:
     name: "&eAnzeigename bearbeiten"
     lore:
       - "&7Bearbeitet den Namen per Chat."
+  editId:
+    material: PAPER
+    name: "&eID bearbeiten"
+    lore:
+      - "&7Aktuelle ID: &f%id%"
+      - ""
+      - "&7A-Z, 0-9 und _ sind erlaubt."
+      - "&7Andere Zeichen werden automatisch"
+      - "&7zu _ normalisiert."
+      - ""
+      - "&eKlicken zum Bearbeiten"
   editLore:
     material: BOOK
     name: "&eLore bearbeiten"
