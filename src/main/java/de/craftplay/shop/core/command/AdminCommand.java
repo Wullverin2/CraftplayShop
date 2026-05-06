@@ -58,6 +58,22 @@ public class AdminCommand implements CommandExecutor {
                 plugin.getServerShopAdminEditor().listBackups(player);
                 return true;
             }
+            if (args.length > 1 && "restore".equalsIgnoreCase(args[1])) {
+                if (args.length < 3) {
+                    plugin.getLanguageService().send(player, "adminShop.backupRestoreUsage");
+                    return true;
+                }
+                plugin.getServerShopAdminEditor().requestBackupRestore(player, args[2]);
+                return true;
+            }
+            if (args.length > 1 && "confirm".equalsIgnoreCase(args[1])) {
+                plugin.getServerShopAdminEditor().confirmBackupRestore(player);
+                return true;
+            }
+            if (args.length > 1 && "cancel".equalsIgnoreCase(args[1])) {
+                plugin.getServerShopAdminEditor().cancelBackupRestore(player);
+                return true;
+            }
             plugin.getServerShopAdminEditor().createManualBackup(player);
             return true;
         }

@@ -123,6 +123,22 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 plugin.getServerShopAdminEditor().listBackups(player);
                 return;
             }
+            if (args.length > 2 && "restore".equalsIgnoreCase(args[2])) {
+                if (args.length < 4) {
+                    plugin.getLanguageService().send(player, "adminShop.backupRestoreUsage");
+                    return;
+                }
+                plugin.getServerShopAdminEditor().requestBackupRestore(player, args[3]);
+                return;
+            }
+            if (args.length > 2 && "confirm".equalsIgnoreCase(args[2])) {
+                plugin.getServerShopAdminEditor().confirmBackupRestore(player);
+                return;
+            }
+            if (args.length > 2 && "cancel".equalsIgnoreCase(args[2])) {
+                plugin.getServerShopAdminEditor().cancelBackupRestore(player);
+                return;
+            }
             plugin.getServerShopAdminEditor().createManualBackup(player);
             return;
         }
@@ -222,7 +238,13 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             return filter(List.of("editor", "reload", "servershop", "adminshop", "backup", "backups"), args[1]);
         }
         if (args.length == 3 && "admin".equalsIgnoreCase(args[0]) && "backup".equalsIgnoreCase(args[1])) {
-            return filter(List.of("list"), args[2]);
+            return filter(List.of("list", "restore", "confirm", "cancel"), args[2]);
+        }
+        if (args.length == 4
+                && "admin".equalsIgnoreCase(args[0])
+                && "backup".equalsIgnoreCase(args[1])
+                && "restore".equalsIgnoreCase(args[2])) {
+            return filter(plugin.getServerShopAdminEditor().backupFileNames(), args[3]);
         }
         if (args.length == 2 && ("language".equalsIgnoreCase(args[0]) || "lang".equalsIgnoreCase(args[0]))) {
             return filter(new ArrayList<>(plugin.getLanguageService().availableLanguages()), args[1]);

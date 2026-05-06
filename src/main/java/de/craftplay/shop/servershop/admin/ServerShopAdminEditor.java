@@ -52,6 +52,7 @@ public class ServerShopAdminEditor {
     private final Map<UUID, MoveSelection> moveSelections = new HashMap<>();
     private final Map<UUID, TextEditSession> textEditSessions = new HashMap<>();
     private final Map<UUID, String> materialSearches = new HashMap<>();
+    private final Map<UUID, PendingRestore> pendingRestores = new HashMap<>();
     private long lastBackupCreatedAt;
 
     public ServerShopAdminEditor(CraftplayShopPlugin plugin) {
@@ -1054,8 +1055,7 @@ public class ServerShopAdminEditor {
 
     public void listBackups(Player player) {
         try {
-            File folder = backupFolder();
-            File[] files = folder.listFiles((dir, name) -> name.startsWith("server_shop-") && name.endsWith(".yml"));
+            File[] files = backupFiles();
             if (files == null || files.length == 0) {
                 plugin.getLanguageService().send(player, "adminShop.backupListEmpty");
                 return;
@@ -1076,6 +1076,64 @@ public class ServerShopAdminEditor {
         } catch (IOException exception) {
             plugin.getPluginLogService().error("Could not list server shop backups.", exception);
             plugin.getLanguageService().send(player, "adminShop.backupFailed");
+        }
+    }
+
+    public void requestBackupRestore(Player player, String fileName) {
+        try {
+            File backup = backupFile(fileName);
+            if (backup == null || !backup.exists()) {
+                plugin.getLanguageService().send(player, "adminShop.backupNotFound", Map.of("file", fileName));
+                return;
+            }
+            long expiresAt = System.currentTimeMillis() + 60_000L;
+            pendingRestores.put(player.getUniqueId(), new PendingRestore(backup.getName(), expiresAt));
+            plugin.getLanguageService().send(player, "adminShop.backupRestoreConfirm", Map.of("file", backup.getName()));
+        } catch (IOException exception) {
+            plugin.getPluginLogService().error("Could not prepare server shop backup restore.", exception);
+            plugin.getLanguageService().send(player, "adminShop.backupRestoreFailed");
+        }
+    }
+
+    public void confirmBackupRestore(Player player) {
+        PendingRestore pending = pendingRestores.remove(player.getUniqueId());
+        if (pending == null || pending.expiresAt() < System.currentTimeMillis()) {
+            plugin.getLanguageService().send(player, "adminShop.backupRestoreExpired");
+            return;
+        }
+        try {
+            File backup = backupFile(pending.fileName());
+            if (backup == null || !backup.exists()) {
+                plugin.getLanguageService().send(player, "adminShop.backupNotFound", Map.of("file", pending.fileName()));
+                return;
+            }
+            createBackup(true);
+            Files.copy(backup.toPath(), shopFile().toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+            plugin.getServerShopRegistry().load();
+            plugin.getLanguageService().send(player, "adminShop.backupRestored", Map.of("file", backup.getName()));
+        } catch (IOException exception) {
+            plugin.getPluginLogService().error("Could not restore server shop backup.", exception);
+            plugin.getLanguageService().send(player, "adminShop.backupRestoreFailed");
+        }
+    }
+
+    public void cancelBackupRestore(Player player) {
+        pendingRestores.remove(player.getUniqueId());
+        plugin.getLanguageService().send(player, "adminShop.backupRestoreCancelled");
+    }
+
+    public List<String> backupFileNames() {
+        try {
+            File[] files = backupFiles();
+            if (files == null) {
+                return List.of();
+            }
+            return java.util.Arrays.stream(files)
+                    .sorted(Comparator.comparingLong(File::lastModified).reversed())
+                    .map(File::getName)
+                    .toList();
+        } catch (IOException exception) {
+            return List.of();
         }
     }
 
@@ -1110,6 +1168,31 @@ public class ServerShopAdminEditor {
             return new File(dataFolder, "backups/server_shop").getCanonicalFile();
         }
         return folder;
+    }
+
+    private File[] backupFiles() throws IOException {
+        File folder = backupFolder();
+        return folder.listFiles((dir, name) -> isBackupFileName(name));
+    }
+
+    private File backupFile(String fileName) throws IOException {
+        if (!isBackupFileName(fileName)) {
+            return null;
+        }
+        File folder = backupFolder();
+        File file = new File(folder, fileName).getCanonicalFile();
+        if (!file.toPath().startsWith(folder.toPath())) {
+            return null;
+        }
+        return file;
+    }
+
+    private boolean isBackupFileName(String fileName) {
+        return fileName != null
+                && fileName.startsWith("server_shop-")
+                && fileName.endsWith(".yml")
+                && !fileName.contains("/")
+                && !fileName.contains("\\");
     }
 
     private void cleanupBackups(File folder) {
@@ -1340,6 +1423,9 @@ public class ServerShopAdminEditor {
     }
 
     private record TextEditSession(TextEditType type, String categoryId, String itemId) {
+    }
+
+    private record PendingRestore(String fileName, long expiresAt) {
     }
 
     private enum TextEditType {
