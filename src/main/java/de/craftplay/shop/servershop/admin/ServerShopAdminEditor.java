@@ -78,6 +78,7 @@ public class ServerShopAdminEditor {
             keys.put(slot, category.id());
         }
         putConfigured(player, inventory, keys, gui, "slots.categories.createCategory", 53, "createCategory", "create_category", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.categories.createBackup", 47, "createBackup", "create_backup", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categories.back", 49, "backAdmin", "back", Map.of());
         player.openInventory(inventory);
     }
@@ -256,6 +257,11 @@ public class ServerShopAdminEditor {
         }
         if ("create_category".equals(key)) {
             openMaterialPicker(player, CREATE_CATEGORY_TARGET, "", 0);
+            return;
+        }
+        if ("create_backup".equals(key)) {
+            createManualBackup(player);
+            openCategories(player);
             return;
         }
         if (rightClick) {
@@ -957,6 +963,7 @@ public class ServerShopAdminEditor {
         return "back".equals(key)
                 || "previous".equals(key)
                 || "next".equals(key)
+                || "create_backup".equals(key)
                 || "material_search".equals(key)
                 || "create_category".equals(key)
                 || "create_item".equals(key)
@@ -1021,14 +1028,36 @@ public class ServerShopAdminEditor {
         if (!plugin.getConfig().getBoolean("adminShop.backups.enabled", true)) {
             return;
         }
+        createBackup(false);
+    }
+
+    private void createManualBackup(Player player) {
+        if (!plugin.getConfig().getBoolean("adminShop.backups.enabled", true)) {
+            plugin.getLanguageService().send(player, "adminShop.backupDisabled");
+            return;
+        }
+        try {
+            File backup = createBackup(true);
+            if (backup == null) {
+                plugin.getLanguageService().send(player, "adminShop.backupFailed");
+                return;
+            }
+            plugin.getLanguageService().send(player, "adminShop.backupCreated", Map.of("file", backup.getName()));
+        } catch (IOException exception) {
+            plugin.getPluginLogService().error("Could not create manual server shop backup.", exception);
+            plugin.getLanguageService().send(player, "adminShop.backupFailed");
+        }
+    }
+
+    private File createBackup(boolean force) throws IOException {
         File source = shopFile();
         if (!source.exists()) {
-            return;
+            return null;
         }
         long now = System.currentTimeMillis();
         long cooldownMillis = Math.max(0, plugin.getConfig().getLong("adminShop.backups.cooldownSeconds", 30L)) * 1000L;
-        if (lastBackupCreatedAt > 0 && now - lastBackupCreatedAt < cooldownMillis) {
-            return;
+        if (!force && lastBackupCreatedAt > 0 && now - lastBackupCreatedAt < cooldownMillis) {
+            return null;
         }
         File folder = backupFolder();
         if (!folder.exists() && !folder.mkdirs()) {
@@ -1039,6 +1068,7 @@ public class ServerShopAdminEditor {
         Files.copy(source.toPath(), target.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
         lastBackupCreatedAt = now;
         cleanupBackups(folder);
+        return target;
     }
 
     private File backupFolder() throws IOException {

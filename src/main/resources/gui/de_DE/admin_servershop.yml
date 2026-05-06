@@ -11,6 +11,7 @@ titles:
 slots:
   categories:
     back: 49
+    createBackup: 47
     createCategory: 53
   items:
     back: 49
@@ -272,6 +273,14 @@ items:
       - ""
       - "&eKlicken zum Suchen"
       - "&7Schreibe &eclear &7zum Zuruecksetzen."
+  createBackup:
+    material: CHEST_MINECART
+    name: "&eBackup erstellen"
+    lore:
+      - "&7Erstellt sofort ein Backup"
+      - "&7der aktuellen server_shop.yml."
+      - ""
+      - "&eKlicken zum Sichern"
   createCategory:
     material: NETHER_STAR
     name: "&aNeue Kategorie"

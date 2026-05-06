@@ -11,6 +11,7 @@ titles:
 slots:
   categories:
     back: 49
+    createBackup: 47
     createCategory: 53
   items:
     back: 49
@@ -272,6 +273,14 @@ items:
       - ""
       - "&eClick to search"
       - "&7Write &eclear &7to reset."
+  createBackup:
+    material: CHEST_MINECART
+    name: "&eCreate Backup"
+    lore:
+      - "&7Creates an immediate backup"
+      - "&7of the current server_shop.yml."
+      - ""
+      - "&eClick to save"
   createCategory:
     material: NETHER_STAR
     name: "&aNew Category"
