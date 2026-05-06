@@ -3,9 +3,15 @@ package de.craftplay.shop.core.config;
 import de.craftplay.shop.CraftplayShopPlugin;
 import de.craftplay.shop.core.database.DatabaseType;
 import de.craftplay.shop.core.item.ItemMatchMode;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 public class ConfigService {
@@ -34,24 +40,91 @@ public class ConfigService {
     }
 
     private void saveMissingDefaults() {
-        if (!new File(plugin.getDataFolder(), "config.yml").exists()) {
-            plugin.saveResource("config.yml", false);
-        }
-        if (!new File(plugin.getDataFolder(), "server_shop.yml").exists()) {
-            plugin.saveResource("server_shop.yml", false);
-        }
+        saveMissingResource("config.yml");
+        saveMissingResource("server_shop.yml");
         for (String language : ConfigDefaults.LANGUAGES) {
             String languagePath = "language/" + language + ".yml";
-            if (!new File(plugin.getDataFolder(), languagePath).exists()) {
-                plugin.saveResource(languagePath, false);
-            }
+            saveMissingResource(languagePath);
             for (String guiFile : ConfigDefaults.GUI_FILES) {
                 String guiPath = "gui/" + language + "/" + guiFile;
-                if (!new File(plugin.getDataFolder(), guiPath).exists()) {
-                    plugin.saveResource(guiPath, false);
+                saveMissingResource(guiPath);
+            }
+        }
+        if (autoUpdateExistingFiles()) {
+            mergeMissingResourceKeys("config.yml");
+            for (String language : ConfigDefaults.LANGUAGES) {
+                mergeMissingResourceKeys("language/" + language + ".yml");
+                for (String guiFile : ConfigDefaults.GUI_FILES) {
+                    mergeMissingResourceKeys("gui/" + language + "/" + guiFile);
                 }
             }
         }
+    }
+
+    private void saveMissingResource(String resourcePath) {
+        if (!new File(plugin.getDataFolder(), resourcePath).exists()) {
+            plugin.saveResource(resourcePath, false);
+        }
+    }
+
+    private boolean autoUpdateExistingFiles() {
+        File configFile = new File(plugin.getDataFolder(), "config.yml");
+        if (!configFile.exists()) {
+            return true;
+        }
+        return YamlConfiguration.loadConfiguration(configFile).getBoolean("files.autoUpdateExisting", true);
+    }
+
+    private void mergeMissingResourceKeys(String resourcePath) {
+        File targetFile = new File(plugin.getDataFolder(), resourcePath);
+        if (!targetFile.exists()) {
+            return;
+        }
+        YamlConfiguration target = YamlConfiguration.loadConfiguration(targetFile);
+        YamlConfiguration defaults = loadResourceConfiguration(resourcePath);
+        if (defaults == null || !mergeMissing(target, defaults)) {
+            return;
+        }
+        try {
+            target.save(targetFile);
+            plugin.getPluginLogService().info("Updated missing keys in " + resourcePath + ".");
+        } catch (IOException exception) {
+            plugin.getPluginLogService().error("Could not update missing keys in " + resourcePath + ".", exception);
+        }
+    }
+
+    private YamlConfiguration loadResourceConfiguration(String resourcePath) {
+        InputStream stream = plugin.getResource(resourcePath);
+        if (stream == null) {
+            return null;
+        }
+        try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+            return YamlConfiguration.loadConfiguration(reader);
+        } catch (IOException exception) {
+            plugin.getPluginLogService().error("Could not read default resource " + resourcePath + ".", exception);
+            return null;
+        }
+    }
+
+    private boolean mergeMissing(ConfigurationSection target, ConfigurationSection defaults) {
+        boolean changed = false;
+        for (String key : defaults.getKeys(false)) {
+            ConfigurationSection defaultSection = defaults.getConfigurationSection(key);
+            if (defaultSection != null) {
+                ConfigurationSection targetSection = target.getConfigurationSection(key);
+                if (targetSection == null) {
+                    targetSection = target.createSection(key);
+                    changed = true;
+                }
+                changed |= mergeMissing(targetSection, defaultSection);
+                continue;
+            }
+            if (!target.contains(key)) {
+                target.set(key, defaults.get(key));
+                changed = true;
+            }
+        }
+        return changed;
     }
 
     public FileConfiguration config() {

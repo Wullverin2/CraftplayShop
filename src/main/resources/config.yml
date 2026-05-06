@@ -21,6 +21,12 @@ commands:
   # Beispiel: "cshop" => /cshop admin editor
   pluginCommand: "cshop"
 
+files:
+  # Wenn true, ergaenzt CraftplayShop beim Start und Reload vorhandene
+  # config-, language- und gui-Dateien automatisch um fehlende neue Keys.
+  # Bestehende Werte werden dabei nicht ueberschrieben.
+  autoUpdateExisting: true
+
 economy:
   # Wenn true, wird Vault benötigt. Fehlt Vault, deaktiviert sich das Plugin.
   requireVault: true
