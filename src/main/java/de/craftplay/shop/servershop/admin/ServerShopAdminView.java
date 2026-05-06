@@ -6,5 +6,8 @@ public enum ServerShopAdminView {
     CATEGORY_EDITOR,
     ITEM_EDITOR,
     CONFIRM_DELETE,
-    MATERIAL_PICKER
+    MATERIAL_PICKER,
+    BACKUPS,
+    BACKUP_DETAIL,
+    CONFIRM_RESTORE
 }

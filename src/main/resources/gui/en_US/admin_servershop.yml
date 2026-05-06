@@ -7,11 +7,15 @@ titles:
   confirmItemDelete: "&4Delete Item?"
   materialPickerCategory: "&8Choose Category Icon %page%/%pages%"
   materialPickerItem: "&8Choose Material %page%/%pages%"
+  backups: "&8ServerShop Backups %page%/%pages%"
+  backupDetail: "&8Backup: %file%"
+  confirmBackupRestore: "&4Restore Backup?"
 
 slots:
   categories:
     back: 49
     createBackup: 47
+    openBackups: 51
     createCategory: 53
   items:
     back: 49
@@ -50,6 +54,19 @@ slots:
     search: 46
     previousPage: 48
     nextPage: 50
+  backups:
+    back: 45
+    createBackup: 46
+    previousPage: 48
+    nextPage: 50
+  backupDetail:
+    preview: 13
+    restore: 30
+    back: 32
+  confirmRestore:
+    preview: 13
+    confirm: 30
+    cancel: 32
 
 items:
   category:
@@ -105,6 +122,11 @@ items:
     name: "&cBack"
     lore:
       - "&7Back to item list."
+  backBackups:
+    material: ARROW
+    name: "&cBack"
+    lore:
+      - "&7Back to backups."
   toggleBuy:
     material: LIME_DYE
     enabledName: "&aBuying enabled"
@@ -273,6 +295,15 @@ items:
       - ""
       - "&eClick to search"
       - "&7Write &eclear &7to reset."
+  backup:
+    material: PAPER
+    name: "&e%file%"
+    lore:
+      - "&7Date: &f%date%"
+      - "&7Size: &f%size%"
+      - ""
+      - "&eLeft click: details"
+      - "&cRight click: restore"
   createBackup:
     material: CHEST_MINECART
     name: "&eCreate Backup"
@@ -281,6 +312,34 @@ items:
       - "&7of the current server_shop.yml."
       - ""
       - "&eClick to save"
+  openBackups:
+    material: BOOKSHELF
+    name: "&bShow Backups"
+    lore:
+      - "&7Shows stored backups"
+      - "&7and allows restoring them."
+      - ""
+      - "&eClick to open"
+  restoreBackup:
+    material: REDSTONE_TORCH
+    name: "&cRestore Backup"
+    lore:
+      - "&7Backup: &f%file%"
+      - ""
+      - "&eOpens the confirmation screen."
+  confirmRestore:
+    material: REDSTONE_BLOCK
+    name: "&cConfirm Restore"
+    lore:
+      - "&7The current server_shop.yml"
+      - "&7will be backed up first."
+      - ""
+      - "&cClick to restore"
+  cancelRestore:
+    material: EMERALD_BLOCK
+    name: "&aCancel"
+    lore:
+      - "&7No backup will be restored."
   createCategory:
     material: NETHER_STAR
     name: "&aNew Category"

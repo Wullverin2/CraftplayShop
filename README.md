@@ -95,6 +95,9 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Manuelles ServerShop-Backup per GUI-Button und Admin-Befehl.
 - Auflisten der letzten ServerShop-Backups per Admin-Befehl.
 - Sicheres Wiederherstellen eines ServerShop-Backups per Admin-Befehl mit 60-Sekunden-Bestaetigung.
+- Backup-Uebersicht im AdminShop mit Backup-Items.
+- Backup-Detail-GUI mit Dateiname, Datum und Groesse.
+- Restore-Bestaetigungs-GUI vor dem Wiederherstellen eines Backups.
 
 ### Commands
 

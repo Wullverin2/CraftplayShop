@@ -35,6 +35,7 @@ import java.util.UUID;
 
 public class ServerShopAdminEditor {
     private static final int MATERIALS_PER_PAGE = 45;
+    private static final int BACKUPS_PER_PAGE = 45;
     private static final DateTimeFormatter BACKUP_TIMESTAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
     private static final DateTimeFormatter BACKUP_LIST_TIMESTAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final String CREATE_CATEGORY_TARGET = "__create_category__";
@@ -83,6 +84,7 @@ public class ServerShopAdminEditor {
         }
         putConfigured(player, inventory, keys, gui, "slots.categories.createCategory", 53, "createCategory", "create_category", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categories.createBackup", 47, "createBackup", "create_backup", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.categories.openBackups", 51, "openBackups", "open_backups", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categories.back", 49, "backAdmin", "back", Map.of());
         player.openInventory(inventory);
     }
@@ -107,6 +109,83 @@ public class ServerShopAdminEditor {
         }
         putConfigured(player, inventory, keys, gui, "slots.items.createItem", 53, "createItem", "create_item", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.items.back", 49, "backCategories", "back", Map.of());
+        player.openInventory(inventory);
+    }
+
+    public void openBackups(Player player, int page) {
+        YamlConfiguration gui = gui(player);
+        Map<Integer, String> keys = new HashMap<>();
+        List<File> backups = backupFilesSorted();
+        int maxPage = Math.max(0, (backups.size() - 1) / BACKUPS_PER_PAGE);
+        int safePage = Math.max(0, Math.min(maxPage, page));
+        ServerShopAdminHolder holder = new ServerShopAdminHolder(ServerShopAdminView.BACKUPS, "", "", keys, safePage);
+        Inventory inventory = Bukkit.createInventory(holder, 54, title(gui, "backups", Map.of(
+                "page", Integer.toString(safePage + 1),
+                "pages", Integer.toString(maxPage + 1)
+        )));
+        holder.setInventory(inventory);
+        fill(inventory);
+
+        int start = safePage * BACKUPS_PER_PAGE;
+        int end = Math.min(start + BACKUPS_PER_PAGE, backups.size());
+        for (int index = start; index < end; index++) {
+            File backup = backups.get(index);
+            int slot = index - start;
+            inventory.setItem(slot, backupItem(gui, backup));
+            keys.put(slot, "backup:" + backup.getName());
+        }
+        putConfigured(player, inventory, keys, gui, "slots.backups.back", 45, "backCategories", "back", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.backups.createBackup", 46, "createBackup", "create_backup", Map.of());
+        if (safePage > 0) {
+            putConfigured(player, inventory, keys, gui, "slots.backups.previousPage", 48, "previousPage", "previous", Map.of());
+        }
+        if (safePage < maxPage) {
+            putConfigured(player, inventory, keys, gui, "slots.backups.nextPage", 50, "nextPage", "next", Map.of());
+        }
+        player.openInventory(inventory);
+    }
+
+    public void openBackupDetail(Player player, String fileName) {
+        File backup = backupFileSafe(fileName);
+        if (backup == null || !backup.exists()) {
+            plugin.getLanguageService().send(player, "adminShop.backupNotFound", Map.of("file", fileName));
+            openBackups(player, 0);
+            return;
+        }
+        YamlConfiguration gui = gui(player);
+        Map<Integer, String> keys = new HashMap<>();
+        ServerShopAdminHolder holder = new ServerShopAdminHolder(ServerShopAdminView.BACKUP_DETAIL, backup.getName(), "", keys);
+        Inventory inventory = Bukkit.createInventory(holder, 54, title(gui, "backupDetail", Map.of("file", backup.getName())));
+        holder.setInventory(inventory);
+        fill(inventory);
+
+        int previewSlot = slot(gui, "slots.backupDetail.preview", 13);
+        inventory.setItem(previewSlot, backupItem(gui, backup));
+        keys.put(previewSlot, "preview");
+        putConfigured(player, inventory, keys, gui, "slots.backupDetail.restore", 30, "restoreBackup", "restore_backup", Map.of("file", backup.getName()));
+        putConfigured(player, inventory, keys, gui, "slots.backupDetail.back", 32, "backBackups", "back", Map.of());
+        player.openInventory(inventory);
+    }
+
+    public void openRestoreConfirm(Player player, String fileName) {
+        File backup = backupFileSafe(fileName);
+        if (backup == null || !backup.exists()) {
+            plugin.getLanguageService().send(player, "adminShop.backupNotFound", Map.of("file", fileName));
+            openBackups(player, 0);
+            return;
+        }
+        YamlConfiguration gui = gui(player);
+        Map<Integer, String> keys = new HashMap<>();
+        ServerShopAdminHolder holder = new ServerShopAdminHolder(ServerShopAdminView.CONFIRM_RESTORE, backup.getName(), "", keys);
+        Inventory inventory = Bukkit.createInventory(holder, 54, title(gui, "confirmBackupRestore", Map.of("file", backup.getName())));
+        holder.setInventory(inventory);
+        fill(inventory);
+
+        int previewSlot = slot(gui, "slots.confirmRestore.preview", 13);
+        inventory.setItem(previewSlot, backupItem(gui, backup));
+        keys.put(previewSlot, "preview");
+        putConfigured(player, inventory, keys, gui, "slots.confirmRestore.confirm", 30, "confirmRestore", "confirm_restore", Map.of("file", backup.getName()));
+        putConfigured(player, inventory, keys, gui, "slots.confirmRestore.cancel", 32, "cancelRestore", "cancel_restore", Map.of());
         player.openInventory(inventory);
     }
 
@@ -238,6 +317,9 @@ public class ServerShopAdminEditor {
             case ITEM_EDITOR -> handleItemEditorClick(player, holder.categoryId(), holder.itemId(), key, event);
             case CONFIRM_DELETE -> handleDeleteConfirmClick(player, holder, key);
             case MATERIAL_PICKER -> handleMaterialPickerClick(player, holder, key);
+            case BACKUPS -> handleBackupOverviewClick(player, holder, key, event.isRightClick());
+            case BACKUP_DETAIL -> handleBackupDetailClick(player, holder, key);
+            case CONFIRM_RESTORE -> handleRestoreConfirmClick(player, holder, key);
         }
     }
 
@@ -266,6 +348,10 @@ public class ServerShopAdminEditor {
         if ("create_backup".equals(key)) {
             createManualBackup(player);
             openCategories(player);
+            return;
+        }
+        if ("open_backups".equals(key)) {
+            openBackups(player, 0);
             return;
         }
         if (rightClick) {
@@ -412,6 +498,55 @@ public class ServerShopAdminEditor {
         deleteCategory(holder.categoryId());
         plugin.getLanguageService().send(player, "adminShop.categoryDeleted");
         openCategories(player);
+    }
+
+    private void handleBackupOverviewClick(Player player, ServerShopAdminHolder holder, String key, boolean rightClick) {
+        if ("back".equals(key)) {
+            openCategories(player);
+            return;
+        }
+        if ("create_backup".equals(key)) {
+            createManualBackup(player);
+            openBackups(player, holder.page());
+            return;
+        }
+        if ("previous".equals(key)) {
+            openBackups(player, Math.max(0, holder.page() - 1));
+            return;
+        }
+        if ("next".equals(key)) {
+            openBackups(player, holder.page() + 1);
+            return;
+        }
+        if (key.startsWith("backup:")) {
+            String fileName = key.substring("backup:".length());
+            if (rightClick) {
+                openRestoreConfirm(player, fileName);
+                return;
+            }
+            openBackupDetail(player, fileName);
+        }
+    }
+
+    private void handleBackupDetailClick(Player player, ServerShopAdminHolder holder, String key) {
+        if ("back".equals(key)) {
+            openBackups(player, 0);
+            return;
+        }
+        if ("restore_backup".equals(key)) {
+            openRestoreConfirm(player, holder.categoryId());
+        }
+    }
+
+    private void handleRestoreConfirmClick(Player player, ServerShopAdminHolder holder, String key) {
+        if ("cancel_restore".equals(key)) {
+            openBackupDetail(player, holder.categoryId());
+            return;
+        }
+        if ("confirm_restore".equals(key)) {
+            restoreBackup(player, holder.categoryId());
+            openBackups(player, 0);
+        }
     }
 
     private void handleMaterialPickerClick(Player player, ServerShopAdminHolder holder, String key) {
@@ -968,6 +1103,10 @@ public class ServerShopAdminEditor {
                 || "previous".equals(key)
                 || "next".equals(key)
                 || "create_backup".equals(key)
+                || "open_backups".equals(key)
+                || "restore_backup".equals(key)
+                || "confirm_restore".equals(key)
+                || "cancel_restore".equals(key)
                 || "material_search".equals(key)
                 || "create_category".equals(key)
                 || "create_item".equals(key)
@@ -1101,10 +1240,14 @@ public class ServerShopAdminEditor {
             plugin.getLanguageService().send(player, "adminShop.backupRestoreExpired");
             return;
         }
+        restoreBackup(player, pending.fileName());
+    }
+
+    private void restoreBackup(Player player, String fileName) {
         try {
-            File backup = backupFile(pending.fileName());
+            File backup = backupFile(fileName);
             if (backup == null || !backup.exists()) {
-                plugin.getLanguageService().send(player, "adminShop.backupNotFound", Map.of("file", pending.fileName()));
+                plugin.getLanguageService().send(player, "adminShop.backupNotFound", Map.of("file", fileName));
                 return;
             }
             createBackup(true);
@@ -1123,18 +1266,7 @@ public class ServerShopAdminEditor {
     }
 
     public List<String> backupFileNames() {
-        try {
-            File[] files = backupFiles();
-            if (files == null) {
-                return List.of();
-            }
-            return java.util.Arrays.stream(files)
-                    .sorted(Comparator.comparingLong(File::lastModified).reversed())
-                    .map(File::getName)
-                    .toList();
-        } catch (IOException exception) {
-            return List.of();
-        }
+        return backupFilesSorted().stream().map(File::getName).toList();
     }
 
     private File createBackup(boolean force) throws IOException {
@@ -1173,6 +1305,29 @@ public class ServerShopAdminEditor {
     private File[] backupFiles() throws IOException {
         File folder = backupFolder();
         return folder.listFiles((dir, name) -> isBackupFileName(name));
+    }
+
+    private List<File> backupFilesSorted() {
+        try {
+            File[] files = backupFiles();
+            if (files == null) {
+                return List.of();
+            }
+            return java.util.Arrays.stream(files)
+                    .sorted(Comparator.comparingLong(File::lastModified).reversed())
+                    .toList();
+        } catch (IOException exception) {
+            return List.of();
+        }
+    }
+
+    private File backupFileSafe(String fileName) {
+        try {
+            return backupFile(fileName);
+        } catch (IOException exception) {
+            plugin.getPluginLogService().error("Could not read server shop backup file.", exception);
+            return null;
+        }
     }
 
     private File backupFile(String fileName) throws IOException {
@@ -1229,6 +1384,16 @@ public class ServerShopAdminEditor {
             return String.format(Locale.US, "%.1f KB", bytes / 1024.0D);
         }
         return String.format(Locale.US, "%.1f MB", bytes / 1024.0D / 1024.0D);
+    }
+
+    private ItemStack backupItem(YamlConfiguration gui, File backup) {
+        Map<String, String> placeholders = Map.of(
+                "file", backup.getName(),
+                "date", formatBackupDate(backup.lastModified()),
+                "size", formatFileSize(backup.length())
+        );
+        Material material = material(gui.getString("items.backup.material", "PAPER"), Material.PAPER);
+        return item(material, PlaceholderUtil.apply(gui.getString("items.backup.name", "&e%file%"), placeholders), lore(gui, "items.backup.lore", placeholders));
     }
 
     private File shopFile() {

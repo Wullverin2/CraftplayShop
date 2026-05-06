@@ -7,11 +7,15 @@ titles:
   confirmItemDelete: "&4Item löschen?"
   materialPickerCategory: "&8Kategorie-Icon wählen %page%/%pages%"
   materialPickerItem: "&8Material wählen %page%/%pages%"
+  backups: "&8ServerShop Backups %page%/%pages%"
+  backupDetail: "&8Backup: %file%"
+  confirmBackupRestore: "&4Backup wiederherstellen?"
 
 slots:
   categories:
     back: 49
     createBackup: 47
+    openBackups: 51
     createCategory: 53
   items:
     back: 49
@@ -50,6 +54,19 @@ slots:
     search: 46
     previousPage: 48
     nextPage: 50
+  backups:
+    back: 45
+    createBackup: 46
+    previousPage: 48
+    nextPage: 50
+  backupDetail:
+    preview: 13
+    restore: 30
+    back: 32
+  confirmRestore:
+    preview: 13
+    confirm: 30
+    cancel: 32
 
 items:
   category:
@@ -105,6 +122,11 @@ items:
     name: "&cZurück"
     lore:
       - "&7Zur Itemliste."
+  backBackups:
+    material: ARROW
+    name: "&cZurück"
+    lore:
+      - "&7Zur Backup-Übersicht."
   toggleBuy:
     material: LIME_DYE
     enabledName: "&aKaufen aktiviert"
@@ -273,6 +295,15 @@ items:
       - ""
       - "&eKlicken zum Suchen"
       - "&7Schreibe &eclear &7zum Zuruecksetzen."
+  backup:
+    material: PAPER
+    name: "&e%file%"
+    lore:
+      - "&7Datum: &f%date%"
+      - "&7Groesse: &f%size%"
+      - ""
+      - "&eLinksklick: Details"
+      - "&cRechtsklick: Wiederherstellen"
   createBackup:
     material: CHEST_MINECART
     name: "&eBackup erstellen"
@@ -281,6 +312,34 @@ items:
       - "&7der aktuellen server_shop.yml."
       - ""
       - "&eKlicken zum Sichern"
+  openBackups:
+    material: BOOKSHELF
+    name: "&bBackups anzeigen"
+    lore:
+      - "&7Zeigt gespeicherte Backups"
+      - "&7und erlaubt Wiederherstellung."
+      - ""
+      - "&eKlicken zum Oeffnen"
+  restoreBackup:
+    material: REDSTONE_TORCH
+    name: "&cBackup wiederherstellen"
+    lore:
+      - "&7Backup: &f%file%"
+      - ""
+      - "&eOeffnet die Sicherheitsabfrage."
+  confirmRestore:
+    material: REDSTONE_BLOCK
+    name: "&cWiederherstellen bestaetigen"
+    lore:
+      - "&7Die aktuelle server_shop.yml"
+      - "&7wird vorher automatisch gesichert."
+      - ""
+      - "&cKlicken zum Wiederherstellen"
+  cancelRestore:
+    material: EMERALD_BLOCK
+    name: "&aAbbrechen"
+    lore:
+      - "&7Kein Backup wird wiederhergestellt."
   createCategory:
     material: NETHER_STAR
     name: "&aNeue Kategorie"
