@@ -43,6 +43,7 @@ public class ServerShopAdminEditor {
     private final List<Material> selectableMaterials;
     private final Map<UUID, MoveSelection> moveSelections = new HashMap<>();
     private final Map<UUID, TextEditSession> textEditSessions = new HashMap<>();
+    private final Map<UUID, String> materialSearches = new HashMap<>();
 
     public ServerShopAdminEditor(CraftplayShopPlugin plugin) {
         this.plugin = plugin;
@@ -420,6 +421,10 @@ public class ServerShopAdminEditor {
             openMaterialPicker(player, holder.categoryId(), holder.itemId(), holder.page() + 1);
             return;
         }
+        if ("material_search".equals(key)) {
+            startTextEdit(player, TextEditType.MATERIAL_SEARCH, holder.categoryId(), holder.itemId());
+            return;
+        }
         if (!key.startsWith("material:")) {
             return;
         }
@@ -648,6 +653,10 @@ public class ServerShopAdminEditor {
             }
             case ITEM_BUY_PRICE -> handlePriceInput(player, session, "buyPrice", message);
             case ITEM_SELL_PRICE -> handlePriceInput(player, session, "sellPrice", message);
+            case MATERIAL_SEARCH -> {
+                handleMaterialSearchInput(player, session, message);
+                return;
+            }
         }
         reopenAfterTextEdit(player, session);
     }
@@ -658,12 +667,17 @@ public class ServerShopAdminEditor {
         String key = switch (type) {
             case CATEGORY_LORE, ITEM_LORE -> "adminShop.inputLore";
             case ITEM_BUY_PRICE, ITEM_SELL_PRICE -> "adminShop.inputPrice";
+            case MATERIAL_SEARCH -> "adminShop.inputMaterialSearch";
             default -> "adminShop.inputName";
         };
         plugin.getLanguageService().send(player, key);
     }
 
     private void reopenAfterTextEdit(Player player, TextEditSession session) {
+        if (session.type() == TextEditType.MATERIAL_SEARCH) {
+            openMaterialPicker(player, session.categoryId(), session.itemId(), 0);
+            return;
+        }
         if (session.type() == TextEditType.CATEGORY_NAME || session.type() == TextEditType.CATEGORY_LORE) {
             openCategoryEditor(player, session.categoryId());
             return;
@@ -720,6 +734,18 @@ public class ServerShopAdminEditor {
         } catch (NumberFormatException exception) {
             plugin.getLanguageService().send(player, "adminShop.invalidPrice");
         }
+    }
+
+    private void handleMaterialSearchInput(Player player, TextEditSession session, String message) {
+        String trimmed = message.trim();
+        if (trimmed.isBlank() || "clear".equalsIgnoreCase(trimmed) || "-".equals(trimmed)) {
+            materialSearches.remove(player.getUniqueId());
+            plugin.getLanguageService().send(player, "adminShop.materialSearchCleared");
+        } else {
+            materialSearches.put(player.getUniqueId(), trimmed.toLowerCase(Locale.ROOT));
+            plugin.getLanguageService().send(player, "adminShop.materialSearchSet", Map.of("search", trimmed));
+        }
+        openMaterialPicker(player, session.categoryId(), session.itemId(), 0);
     }
 
     private void setItemPrice(String categoryId, String itemId, String priceKey, double price) {
@@ -874,27 +900,32 @@ public class ServerShopAdminEditor {
 
     private void openMaterialPicker(Player player, String categoryId, String itemId, int page) {
         YamlConfiguration gui = gui(player);
-        int maxPage = Math.max(0, (selectableMaterials.size() - 1) / MATERIALS_PER_PAGE);
+        List<Material> materials = filteredMaterials(player);
+        int maxPage = Math.max(0, (materials.size() - 1) / MATERIALS_PER_PAGE);
         int safePage = Math.max(0, Math.min(maxPage, page));
         Map<Integer, String> keys = new HashMap<>();
         ServerShopAdminHolder holder = new ServerShopAdminHolder(ServerShopAdminView.MATERIAL_PICKER, categoryId, itemId, keys, safePage);
         String titleKey = itemId == null || itemId.isBlank() ? "materialPickerCategory" : "materialPickerItem";
         Inventory inventory = Bukkit.createInventory(holder, 54, title(gui, titleKey, Map.of(
                 "page", Integer.toString(safePage + 1),
-                "pages", Integer.toString(maxPage + 1)
+                "pages", Integer.toString(maxPage + 1),
+                "search", materialSearches.getOrDefault(player.getUniqueId(), "")
         )));
         holder.setInventory(inventory);
         fill(inventory);
 
         int start = safePage * MATERIALS_PER_PAGE;
-        int end = Math.min(start + MATERIALS_PER_PAGE, selectableMaterials.size());
+        int end = Math.min(start + MATERIALS_PER_PAGE, materials.size());
         for (int index = start; index < end; index++) {
-            Material material = selectableMaterials.get(index);
+            Material material = materials.get(index);
             int slot = index - start;
             inventory.setItem(slot, item(material, "&f" + formatMaterialName(material), lore(gui, "items.material.lore", Map.of("material", material.name()))));
             keys.put(slot, "material:" + material.name());
         }
         putConfigured(player, inventory, keys, gui, "slots.materialPicker.back", 45, "backItems", "back", Map.of());
+        putConfigured(player, inventory, keys, gui, "slots.materialPicker.search", 46, "materialSearch", "material_search", Map.of(
+                "search", materialSearches.getOrDefault(player.getUniqueId(), "")
+        ));
         if (safePage > 0) {
             putConfigured(player, inventory, keys, gui, "slots.materialPicker.previousPage", 48, "previousPage", "previous", Map.of());
         }
@@ -904,10 +935,23 @@ public class ServerShopAdminEditor {
         player.openInventory(inventory);
     }
 
+    private List<Material> filteredMaterials(Player player) {
+        String search = materialSearches.get(player.getUniqueId());
+        if (search == null || search.isBlank()) {
+            return selectableMaterials;
+        }
+        String normalizedSearch = search.toLowerCase(Locale.ROOT);
+        return selectableMaterials.stream()
+                .filter(material -> material.name().toLowerCase(Locale.ROOT).contains(normalizedSearch)
+                        || formatMaterialName(material).toLowerCase(Locale.ROOT).contains(normalizedSearch))
+                .toList();
+    }
+
     private boolean isControlKey(String key) {
         return "back".equals(key)
                 || "previous".equals(key)
                 || "next".equals(key)
+                || "material_search".equals(key)
                 || "create_category".equals(key)
                 || "create_item".equals(key)
                 || "delete_category".equals(key)
@@ -1166,6 +1210,7 @@ public class ServerShopAdminEditor {
         ITEM_NAME,
         ITEM_LORE,
         ITEM_BUY_PRICE,
-        ITEM_SELL_PRICE
+        ITEM_SELL_PRICE,
+        MATERIAL_SEARCH
     }
 }

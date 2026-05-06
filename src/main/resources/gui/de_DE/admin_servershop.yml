@@ -46,6 +46,7 @@ slots:
     cancel: 32
   materialPicker:
     back: 45
+    search: 46
     previousPage: 48
     nextPage: 50
 
@@ -263,6 +264,14 @@ items:
     name: "&bMaterialauswahl"
     lore:
       - "&7Wähle ein Material aus einer Liste."
+  materialSearch:
+    material: OAK_SIGN
+    name: "&eMaterial suchen"
+    lore:
+      - "&7Aktuelle Suche: &f%search%"
+      - ""
+      - "&eKlicken zum Suchen"
+      - "&7Schreibe &eclear &7zum Zuruecksetzen."
   createCategory:
     material: NETHER_STAR
     name: "&aNeue Kategorie"

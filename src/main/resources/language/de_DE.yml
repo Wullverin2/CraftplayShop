@@ -60,5 +60,8 @@ adminShop:
   inputName: "%prefix%&7Schreibe den neuen Anzeigenamen in den Chat. &e& &7Farbcodes sind erlaubt. Schreibe &ccancel &7zum Abbrechen."
   inputLore: "%prefix%&7Schreibe die Lore in den Chat. Trenne Zeilen mit &e|&7. Schreibe &e-&7 oder &eclear&7 zum Leeren, &ccancel &7zum Abbrechen."
   inputPrice: "%prefix%&7Schreibe den neuen Preis als Zahl in den Chat. Beispiel: &e12.5&7. Schreibe &ccancel &7zum Abbrechen."
+  inputMaterialSearch: "%prefix%&7Schreibe einen Suchbegriff fuer Materialien in den Chat. Schreibe &e-&7 oder &eclear&7 zum Zuruecksetzen, &ccancel &7zum Abbrechen."
+  materialSearchSet: "%prefix%&7Materialsuche: &e%search%"
+  materialSearchCleared: "%prefix%&aMaterialsuche wurde zurueckgesetzt."
   invalidPrice: "%prefix%&cDas ist kein gültiger Preis."
   inputCancelled: "%prefix%&cEingabe abgebrochen."
