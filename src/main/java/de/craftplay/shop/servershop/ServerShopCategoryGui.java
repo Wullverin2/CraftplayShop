@@ -15,7 +15,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ServerShopCategoryGui {
@@ -45,7 +47,7 @@ public class ServerShopCategoryGui {
         fill(inventory, gui);
         addConfiguredButtons(player, inventory, gui);
         for (ServerShopItem item : category.items()) {
-            inventory.setItem(item.slot(), buildShopItem(item, gui));
+            inventory.setItem(item.slot(), buildShopItem(player, item, gui));
             itemsBySlot.put(item.slot(), item.id());
         }
         player.openInventory(inventory);
@@ -76,19 +78,13 @@ public class ServerShopCategoryGui {
         open(player, holder.categoryId());
     }
 
-    private ItemStack buildShopItem(ServerShopItem item, YamlConfiguration gui) {
+    private ItemStack buildShopItem(Player player, ServerShopItem item, YamlConfiguration gui) {
         ItemStack itemStack = new ItemStack(item.material());
         ItemMeta meta = itemStack.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(TextUtil.color(item.displayName()));
-            Map<String, String> placeholders = Map.of(
-                    "buy_price", plugin.getEconomyService().format(item.buyPrice()),
-                    "sell_price", plugin.getEconomyService().format(item.sellPrice()),
-                    "item", TextUtil.color(item.displayName())
-            );
-            meta.setLore(gui.getStringList("shopItemLore").stream()
-                    .map(line -> TextUtil.color(PlaceholderUtil.apply(line, placeholders)))
-                    .toList());
+            Map<String, String> placeholders = itemPlaceholders(player, item);
+            meta.setDisplayName(TextUtil.color(parse(player, item.displayName(), placeholders)));
+            meta.setLore(shopItemLore(player, gui, item, placeholders));
             itemStack.setItemMeta(meta);
         }
         return itemStack;
@@ -172,6 +168,36 @@ public class ServerShopCategoryGui {
                 inventory.setItem(slot, stack);
             }
         }
+    }
+
+    private List<String> shopItemLore(Player player, YamlConfiguration gui, ServerShopItem item, Map<String, String> placeholders) {
+        List<String> lore = new ArrayList<>();
+        if (!item.lore().isEmpty()) {
+            lore.addAll(item.lore());
+            if (!gui.getStringList("shopItemLore").isEmpty()) {
+                lore.add("");
+            }
+        }
+        lore.addAll(gui.getStringList("shopItemLore"));
+        return lore.stream()
+                .map(line -> TextUtil.color(parse(player, line, placeholders)))
+                .toList();
+    }
+
+    private Map<String, String> itemPlaceholders(Player player, ServerShopItem item) {
+        Map<String, String> placeholders = new HashMap<>(plugin.getGuiPlaceholderService().placeholders(player));
+        placeholders.put("item", TextUtil.color(item.displayName()));
+        placeholders.put("item_id", item.id());
+        placeholders.put("material", item.material().name());
+        placeholders.put("buy_price", plugin.getEconomyService().format(item.buyPrice()));
+        placeholders.put("sell_price", plugin.getEconomyService().format(item.sellPrice()));
+        placeholders.put("buy_status", Boolean.toString(item.buyEnabled()));
+        placeholders.put("sell_status", Boolean.toString(item.sellEnabled()));
+        return placeholders;
+    }
+
+    private String parse(Player player, String value, Map<String, String> placeholders) {
+        return plugin.getPlaceholderApiHook().apply(player, PlaceholderUtil.apply(value, placeholders));
     }
 
     private YamlConfiguration loadGui(String language, String fileName) {

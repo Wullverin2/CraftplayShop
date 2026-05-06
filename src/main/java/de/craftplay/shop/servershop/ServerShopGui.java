@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +44,9 @@ public class ServerShopGui {
             ItemStack itemStack = new ItemStack(category.icon());
             ItemMeta meta = itemStack.getItemMeta();
             if (meta != null) {
-                meta.setDisplayName(TextUtil.color(category.displayName()));
-                meta.setLore(gui.getStringList("categoryLore").stream().map(TextUtil::color).toList());
+                Map<String, String> placeholders = categoryPlaceholders(player, category);
+                meta.setDisplayName(TextUtil.color(parse(player, category.displayName(), placeholders)));
+                meta.setLore(categoryLore(player, gui, category, placeholders));
                 itemStack.setItemMeta(meta);
             }
             inventory.setItem(category.slot(), itemStack);
@@ -131,6 +133,33 @@ public class ServerShopGui {
                 inventory.setItem(slot, stack);
             }
         }
+    }
+
+    private List<String> categoryLore(Player player, YamlConfiguration gui, ServerShopCategory category, Map<String, String> placeholders) {
+        List<String> lore = new ArrayList<>();
+        if (!category.lore().isEmpty()) {
+            lore.addAll(category.lore());
+            if (!gui.getStringList("categoryLore").isEmpty()) {
+                lore.add("");
+            }
+        }
+        lore.addAll(gui.getStringList("categoryLore"));
+        return lore.stream()
+                .map(line -> TextUtil.color(parse(player, line, placeholders)))
+                .toList();
+    }
+
+    private Map<String, String> categoryPlaceholders(Player player, ServerShopCategory category) {
+        Map<String, String> placeholders = new HashMap<>(plugin.getGuiPlaceholderService().placeholders(player));
+        placeholders.put("category", TextUtil.color(category.displayName()));
+        placeholders.put("category_id", category.id());
+        placeholders.put("item_count", Integer.toString(category.items().size()));
+        placeholders.put("category_status", category.enabled() ? "enabled" : "disabled");
+        return placeholders;
+    }
+
+    private String parse(Player player, String value, Map<String, String> placeholders) {
+        return plugin.getPlaceholderApiHook().apply(player, PlaceholderUtil.apply(value, placeholders));
     }
 
     private YamlConfiguration loadGui(String language, String fileName) {
