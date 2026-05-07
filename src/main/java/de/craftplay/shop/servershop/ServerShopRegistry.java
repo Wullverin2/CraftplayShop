@@ -58,7 +58,11 @@ public class ServerShopRegistry {
                             itemSection.getDouble("sellPrice", 0.0D),
                             itemSection.getBoolean("buyEnabled", false),
                             itemSection.getBoolean("sellEnabled", false),
-                            itemSection.getInt("slot", 0)
+                            itemSection.getInt("slot", 0),
+                            Math.max(1, itemSection.getInt("minBuyAmount", 1)),
+                            itemSection.getInt("maxBuyAmount", 0),
+                            Math.max(1, itemSection.getInt("minSellAmount", 1)),
+                            itemSection.getInt("maxSellAmount", 0)
                     ));
                 }
             }

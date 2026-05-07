@@ -26,6 +26,10 @@ public class ServerShopTransactionService {
         if (!item.buyEnabled() || item.buyPrice() < 0.0D) {
             return TransactionResult.failure("serverShop.itemNotBuyable");
         }
+        TransactionResult limitResult = validateBuyAmount(item, amount);
+        if (!limitResult.success()) {
+            return limitResult;
+        }
         double total = item.buyPrice() * amount;
         ItemStack stack = item.createStack(amount);
         if (!plugin.getEconomyService().has(player, total)) {
@@ -59,6 +63,10 @@ public class ServerShopTransactionService {
         if (!item.sellEnabled() || item.sellPrice() < 0.0D) {
             return TransactionResult.failure("serverShop.itemNotSellable");
         }
+        TransactionResult limitResult = validateSellAmount(item, amount);
+        if (!limitResult.success()) {
+            return limitResult;
+        }
         if (plugin.getServerShopService().countMatchingItems(player, item) < amount) {
             return TransactionResult.failure("serverShop.notEnoughItems");
         }
@@ -76,11 +84,18 @@ public class ServerShopTransactionService {
         if (!canSellInCurrentGameMode(player)) {
             return TransactionResult.failure("serverShop.creativeSellBlocked");
         }
-        List<SellBatch> batches = new ArrayList<>();
+        Map<ServerShopItem, Integer> amounts = new java.util.LinkedHashMap<>();
         for (ItemStack content : player.getInventory().getStorageContents()) {
             ServerShopItem sellable = plugin.getServerShopRegistry().findSellable(content);
             if (sellable != null) {
-                batches.add(new SellBatch(sellable, content.getAmount()));
+                amounts.merge(sellable, content.getAmount(), Integer::sum);
+            }
+        }
+        List<SellBatch> batches = new ArrayList<>();
+        for (Map.Entry<ServerShopItem, Integer> entry : amounts.entrySet()) {
+            int amount = limitSellAllAmount(entry.getKey(), entry.getValue());
+            if (amount >= entry.getKey().minSellAmount()) {
+                batches.add(new SellBatch(entry.getKey(), amount));
             }
         }
         if (batches.isEmpty()) {
@@ -108,6 +123,33 @@ public class ServerShopTransactionService {
             return false;
         }
         return gameMode != GameMode.SPECTATOR || !plugin.getConfig().getBoolean("serverShop.sellProtection.blockSpectator", true);
+    }
+
+    private TransactionResult validateBuyAmount(ServerShopItem item, int amount) {
+        if (amount < item.minBuyAmount()) {
+            return TransactionResult.failure("serverShop.buyAmountTooLow", Map.of("limit", Integer.toString(item.minBuyAmount())));
+        }
+        if (item.hasBuyMaximum() && amount > item.maxBuyAmount()) {
+            return TransactionResult.failure("serverShop.buyAmountTooHigh", Map.of("limit", Integer.toString(item.maxBuyAmount())));
+        }
+        return TransactionResult.success("", 0.0D);
+    }
+
+    public TransactionResult validateSellAmount(ServerShopItem item, int amount) {
+        if (amount < item.minSellAmount()) {
+            return TransactionResult.failure("serverShop.sellAmountTooLow", Map.of("limit", Integer.toString(item.minSellAmount())));
+        }
+        if (item.hasSellMaximum() && amount > item.maxSellAmount()) {
+            return TransactionResult.failure("serverShop.sellAmountTooHigh", Map.of("limit", Integer.toString(item.maxSellAmount())));
+        }
+        return TransactionResult.success("", 0.0D);
+    }
+
+    private int limitSellAllAmount(ServerShopItem item, int amount) {
+        if (!item.hasSellMaximum()) {
+            return amount;
+        }
+        return Math.min(amount, item.maxSellAmount());
     }
 
     private record SellBatch(ServerShopItem item, int amount) {

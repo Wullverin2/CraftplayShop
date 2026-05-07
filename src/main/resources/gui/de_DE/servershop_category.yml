@@ -50,6 +50,8 @@ items:
       - "&7Item: &f%item%"
       - "&7Aktion: &f%action%"
       - "&7Gesamtpreis: &e%price%"
+      - "&7Kauflimit: &f%min_buy_amount% &7- &f%max_buy_amount%"
+      - "&7Verkaufslimit: &f%min_sell_amount% &7- &f%max_sell_amount%"
       - ""
       - "&eKlicken zum Ausfuehren"
 
@@ -92,6 +94,8 @@ items:
 shopItemLore:
   - "&7Kaufen: &e%buy_price%"
   - "&7Verkaufen: &e%sell_price%"
+  - "&7Kauflimit: &f%min_buy_amount% &7- &f%max_buy_amount%"
+  - "&7Verkaufslimit: &f%min_sell_amount% &7- &f%max_sell_amount%"
   - ""
   - "&eLinksklick: Kaufmenge waehlen"
   - "&eRechtsklick: Verkaufsmenge waehlen"

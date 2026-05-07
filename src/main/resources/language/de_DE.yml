@@ -36,6 +36,11 @@ serverShop:
   amountInputCancelled: "%prefix%&cMengeneingabe abgebrochen."
   invalidAmount: "%prefix%&cDas ist keine gueltige Menge."
   amountTooHigh: "%prefix%&cDie Menge darf maximal &e%max% &csein."
+  buyAmountTooLow: "%prefix%&cDiese Kaufmenge ist zu niedrig. Mindestmenge: &e%limit%&c."
+  buyAmountTooHigh: "%prefix%&cDiese Kaufmenge ist zu hoch. Maximalmenge: &e%limit%&c."
+  sellAmountTooLow: "%prefix%&cDiese Verkaufsmenge ist zu niedrig. Mindestmenge: &e%limit%&c."
+  sellAmountTooHigh: "%prefix%&cDiese Verkaufsmenge ist zu hoch. Maximalmenge: &e%limit%&c."
+  limitUnlimited: "unbegrenzt"
   actionBuy: "Kaufen"
   actionSell: "Verkaufen"
 

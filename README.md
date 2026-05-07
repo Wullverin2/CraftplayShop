@@ -60,6 +60,8 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Verkaufen per Rechtsklick mit Mengenauswahl.
 - Konfigurierbare Mengenbuttons fuer 1, 8, 16, 32 und 64 Items.
 - Eigene Kauf- oder Verkaufsmenge per Chat-Eingabe.
+- Mindest- und Maximalmengen pro Shop-Item fuer Kaufen und Verkaufen.
+- Sell-All respektiert Verkaufs-Mindestmengen und deckelt konfigurierte Maximalmengen.
 - Konfigurierbare Bestaetigungs-GUI fuer teure Kaeufe.
 - Creative- und Spectator-Verkaufsschutz gegen ServerShop-, Sell-Hand-, Sell-All- und Sell-GUI-Verkaeufe.
 - Permission-Pruefungen fuer Kaufen und Verkaufen.

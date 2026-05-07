@@ -131,6 +131,14 @@ public class ServerShopCategoryGui {
         }
         int amount = parseAmount(message, -1);
         int max = Math.max(1, plugin.getConfig().getInt("serverShop.amountSelection.maxCustomAmount", 64));
+        ServerShopCategory category = plugin.getServerShopRegistry().category(pending.categoryId());
+        ServerShopItem item = category == null ? null : category.item(pending.itemId());
+        if (item != null) {
+            int itemMax = maxAllowed(item, pending.action());
+            if (itemMax > 0) {
+                max = Math.min(max, itemMax);
+            }
+        }
         if (amount <= 0) {
             plugin.getLanguageService().send(player, "serverShop.invalidAmount");
             openAmountSelection(player, pending.categoryId(), pending.itemId(), pending.action());
@@ -167,6 +175,9 @@ public class ServerShopCategoryGui {
         for (int index = 0; index < amounts.size() && index < slots.size(); index++) {
             int slot = slots.get(index);
             int amount = amounts.get(index);
+            if (!isWithinItemLimits(item, action, amount)) {
+                continue;
+            }
             if (slot < 0 || slot >= inventory.getSize()) {
                 continue;
             }
@@ -277,7 +288,7 @@ public class ServerShopCategoryGui {
 
     private void sendTransactionMessage(Player player, ServerShopItem item, int amount, TransactionResult result) {
         if (!result.success()) {
-            plugin.getLanguageService().send(player, result.messageKey());
+            plugin.getLanguageService().send(player, result.messageKey(), result.placeholders());
             return;
         }
         plugin.getLanguageService().send(player, result.messageKey(), Map.of(
@@ -376,6 +387,10 @@ public class ServerShopCategoryGui {
         placeholders.put("material", item.material().name());
         placeholders.put("buy_price", plugin.getEconomyService().format(item.buyPrice()));
         placeholders.put("sell_price", plugin.getEconomyService().format(item.sellPrice()));
+        placeholders.put("min_buy_amount", Integer.toString(item.minBuyAmount()));
+        placeholders.put("max_buy_amount", limitText(player, item.maxBuyAmount()));
+        placeholders.put("min_sell_amount", Integer.toString(item.minSellAmount()));
+        placeholders.put("max_sell_amount", limitText(player, item.maxSellAmount()));
         placeholders.put("buy_status", Boolean.toString(item.buyEnabled()));
         placeholders.put("sell_status", Boolean.toString(item.sellEnabled()));
         return placeholders;
@@ -401,6 +416,23 @@ public class ServerShopCategoryGui {
         }
         double threshold = plugin.getConfig().getDouble("serverShop.buyConfirmation.threshold", 10000.0D);
         return item.buyPrice() * amount >= threshold;
+    }
+
+    private boolean isWithinItemLimits(ServerShopItem item, ServerShopAction action, int amount) {
+        int min = action == ServerShopAction.BUY ? item.minBuyAmount() : item.minSellAmount();
+        int max = maxAllowed(item, action);
+        return amount >= min && (max <= 0 || amount <= max);
+    }
+
+    private int maxAllowed(ServerShopItem item, ServerShopAction action) {
+        return action == ServerShopAction.BUY ? item.maxBuyAmount() : item.maxSellAmount();
+    }
+
+    private String limitText(Player player, int limit) {
+        if (limit <= 0) {
+            return plugin.getLanguageService().get(player, "serverShop.limitUnlimited");
+        }
+        return Integer.toString(limit);
     }
 
     private String actionName(Player player, ServerShopAction action) {

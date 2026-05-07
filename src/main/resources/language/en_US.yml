@@ -36,6 +36,11 @@ serverShop:
   amountInputCancelled: "%prefix%&cAmount input cancelled."
   invalidAmount: "%prefix%&cThat is not a valid amount."
   amountTooHigh: "%prefix%&cThe amount may be at most &e%max%&c."
+  buyAmountTooLow: "%prefix%&cThat buy amount is too low. Minimum: &e%limit%&c."
+  buyAmountTooHigh: "%prefix%&cThat buy amount is too high. Maximum: &e%limit%&c."
+  sellAmountTooLow: "%prefix%&cThat sell amount is too low. Minimum: &e%limit%&c."
+  sellAmountTooHigh: "%prefix%&cThat sell amount is too high. Maximum: &e%limit%&c."
+  limitUnlimited: "unlimited"
   actionBuy: "Buy"
   actionSell: "Sell"
 

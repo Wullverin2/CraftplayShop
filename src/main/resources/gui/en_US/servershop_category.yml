@@ -50,6 +50,8 @@ items:
       - "&7Item: &f%item%"
       - "&7Action: &f%action%"
       - "&7Total price: &e%price%"
+      - "&7Buy limit: &f%min_buy_amount% &7- &f%max_buy_amount%"
+      - "&7Sell limit: &f%min_sell_amount% &7- &f%max_sell_amount%"
       - ""
       - "&eClick to run"
 
@@ -92,6 +94,8 @@ items:
 shopItemLore:
   - "&7Buy: &e%buy_price%"
   - "&7Sell: &e%sell_price%"
+  - "&7Buy limit: &f%min_buy_amount% &7- &f%max_buy_amount%"
+  - "&7Sell limit: &f%min_sell_amount% &7- &f%max_sell_amount%"
   - ""
   - "&eLeft click: choose buy amount"
   - "&eRight click: choose sell amount"

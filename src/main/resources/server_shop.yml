@@ -12,6 +12,10 @@ categories:
         sellPrice: 1.0
         buyEnabled: true
         sellEnabled: true
+        minBuyAmount: 1
+        maxBuyAmount: 64
+        minSellAmount: 1
+        maxSellAmount: 0
         slot: 10
       cobblestone:
         material: COBBLESTONE
@@ -20,6 +24,10 @@ categories:
         sellPrice: 0.5
         buyEnabled: true
         sellEnabled: true
+        minBuyAmount: 1
+        maxBuyAmount: 64
+        minSellAmount: 1
+        maxSellAmount: 0
         slot: 11
 
   farming:
@@ -35,4 +43,8 @@ categories:
         sellPrice: 2.0
         buyEnabled: true
         sellEnabled: true
+        minBuyAmount: 1
+        maxBuyAmount: 64
+        minSellAmount: 1
+        maxSellAmount: 0
         slot: 10

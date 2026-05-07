@@ -41,7 +41,7 @@ public class SellCommandService {
     public void sellAll(Player player) {
         TransactionResult result = plugin.getServerShopTransactionService().sellAll(player);
         if (!result.success()) {
-            plugin.getLanguageService().send(player, result.messageKey());
+            plugin.getLanguageService().send(player, result.messageKey(), result.placeholders());
             return;
         }
         plugin.getLanguageService().send(player, result.messageKey(), Map.of("price", plugin.getEconomyService().format(result.totalPrice())));
@@ -125,6 +125,13 @@ public class SellCommandService {
             plugin.getLanguageService().send(player, "serverShop.sellGuiNothing");
             return;
         }
+        for (Map.Entry<ServerShopItem, Integer> entry : amounts.entrySet()) {
+            TransactionResult limitResult = plugin.getServerShopTransactionService().validateSellAmount(entry.getKey(), entry.getValue());
+            if (!limitResult.success()) {
+                plugin.getLanguageService().send(player, limitResult.messageKey(), limitResult.placeholders());
+                return;
+            }
+        }
         double total = 0.0D;
         for (Map.Entry<ServerShopItem, Integer> entry : amounts.entrySet()) {
             total += entry.getKey().sellPrice() * entry.getValue();
@@ -164,7 +171,7 @@ public class SellCommandService {
 
     private void send(Player player, ServerShopItem item, int amount, TransactionResult result) {
         if (!result.success()) {
-            plugin.getLanguageService().send(player, result.messageKey());
+            plugin.getLanguageService().send(player, result.messageKey(), result.placeholders());
             return;
         }
         plugin.getLanguageService().send(player, result.messageKey(), Map.of(

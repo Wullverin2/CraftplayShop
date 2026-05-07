@@ -1107,6 +1107,10 @@ public class ServerShopAdminEditor {
         configuration.set(path + ".sellPrice", 0.0D);
         configuration.set(path + ".buyEnabled", false);
         configuration.set(path + ".sellEnabled", false);
+        configuration.set(path + ".minBuyAmount", 1);
+        configuration.set(path + ".maxBuyAmount", 64);
+        configuration.set(path + ".minSellAmount", 1);
+        configuration.set(path + ".maxSellAmount", 0);
         configuration.set(path + ".slot", slot);
         save(configuration);
         return id;
@@ -1123,6 +1127,10 @@ public class ServerShopAdminEditor {
         configuration.set(path + ".sellPrice", 0.0D);
         configuration.set(path + ".buyEnabled", false);
         configuration.set(path + ".sellEnabled", false);
+        configuration.set(path + ".minBuyAmount", 1);
+        configuration.set(path + ".maxBuyAmount", 64);
+        configuration.set(path + ".minSellAmount", 1);
+        configuration.set(path + ".maxSellAmount", 0);
         configuration.set(path + ".slot", slot);
         save(configuration);
         return id;
@@ -1623,15 +1631,26 @@ public class ServerShopAdminEditor {
     }
 
     private ItemStack editorItem(YamlConfiguration gui, ServerShopItem shopItem) {
-        return item(shopItem.material(), shopItem.displayName(), lore(gui, "items.shopItem.lore", Map.of(
-                "item_id", shopItem.id(),
-                "material", shopItem.material().name(),
-                "slot", Integer.toString(shopItem.slot()),
-                "buy_price", money(shopItem.buyPrice()),
-                "sell_price", money(shopItem.sellPrice()),
-                "buy_status", status(gui, shopItem.buyEnabled()),
-                "sell_status", status(gui, shopItem.sellEnabled())
-        )));
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("item_id", shopItem.id());
+        placeholders.put("material", shopItem.material().name());
+        placeholders.put("slot", Integer.toString(shopItem.slot()));
+        placeholders.put("buy_price", money(shopItem.buyPrice()));
+        placeholders.put("sell_price", money(shopItem.sellPrice()));
+        placeholders.put("min_buy_amount", Integer.toString(shopItem.minBuyAmount()));
+        placeholders.put("max_buy_amount", amountLimit(shopItem.maxBuyAmount()));
+        placeholders.put("min_sell_amount", Integer.toString(shopItem.minSellAmount()));
+        placeholders.put("max_sell_amount", amountLimit(shopItem.maxSellAmount()));
+        placeholders.put("buy_status", status(gui, shopItem.buyEnabled()));
+        placeholders.put("sell_status", status(gui, shopItem.sellEnabled()));
+        return item(shopItem.material(), shopItem.displayName(), lore(gui, "items.shopItem.lore", placeholders));
+    }
+
+    private String amountLimit(int limit) {
+        if (limit <= 0) {
+            return "0";
+        }
+        return Integer.toString(limit);
     }
 
     private void priceButton(Player player, Inventory inventory, Map<Integer, String> keys, YamlConfiguration gui, String slotPath, int fallbackSlot, String itemKey, String actionKey, double price) {
