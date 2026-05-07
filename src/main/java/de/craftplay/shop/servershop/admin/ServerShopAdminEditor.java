@@ -540,8 +540,7 @@ public class ServerShopAdminEditor {
             return;
         }
         if ("stock".equals(key)) {
-            adjustInteger(categoryId, itemId, "stock", amountDelta(event), 0);
-            clampStockToMax(categoryId, itemId);
+            adjustStock(categoryId, itemId, amountDelta(event));
             saved(player, categoryId, itemId);
             return;
         }
@@ -902,7 +901,7 @@ public class ServerShopAdminEditor {
             }
             case ITEM_BUY_PRICE -> handlePriceInput(player, session, "buyPrice", message);
             case ITEM_SELL_PRICE -> handlePriceInput(player, session, "sellPrice", message);
-            case ITEM_STOCK -> handleIntegerInput(player, session, "stock", message, 0, true);
+            case ITEM_STOCK -> handleStockInput(player, session, message);
             case ITEM_MAX_STOCK -> handleIntegerInput(player, session, "maxStock", message, 0, true);
             case MATERIAL_SEARCH -> {
                 handleMaterialSearchInput(player, session, message);
@@ -1067,6 +1066,19 @@ public class ServerShopAdminEditor {
                 clampStockToMax(session.categoryId(), session.itemId());
             }
             plugin.getLanguageService().send(player, "adminShop.itemUpdated");
+        } catch (NumberFormatException exception) {
+            plugin.getLanguageService().send(player, "adminShop.invalidAmount");
+        }
+    }
+
+    private void handleStockInput(Player player, TextEditSession session, String message) {
+        try {
+            int amount = Math.max(0, Integer.parseInt(message.trim()));
+            if (plugin.getServerShopRegistry().setStock(session.categoryId(), session.itemId(), amount)) {
+                plugin.getLanguageService().send(player, "adminShop.itemUpdated");
+                return;
+            }
+            plugin.getLanguageService().send(player, "general.databaseError");
         } catch (NumberFormatException exception) {
             plugin.getLanguageService().send(player, "adminShop.invalidAmount");
         }
@@ -1268,14 +1280,18 @@ public class ServerShopAdminEditor {
         save(configuration);
     }
 
-    private void clampStockToMax(String categoryId, String itemId) {
-        YamlConfiguration configuration = loadShopFile();
-        String path = itemPath(categoryId, itemId);
-        int maxStock = configuration.getInt(path + ".maxStock", 0);
-        if (maxStock > 0 && configuration.getInt(path + ".stock", 0) > maxStock) {
-            configuration.set(path + ".stock", maxStock);
-            save(configuration);
+    private void adjustStock(String categoryId, String itemId, int delta) {
+        ServerShopCategory category = plugin.getServerShopRegistry().category(categoryId);
+        ServerShopItem shopItem = category == null ? null : category.item(itemId);
+        if (shopItem == null) {
+            return;
         }
+        int current = shopItem.stockEnabled() ? plugin.getServerShopRegistry().availableStock(shopItem) : shopItem.stock();
+        plugin.getServerShopRegistry().setStock(categoryId, itemId, Math.max(0, current + delta));
+    }
+
+    private void clampStockToMax(String categoryId, String itemId) {
+        plugin.getServerShopRegistry().clampStockToMax(categoryId, itemId);
     }
 
     private void setFromHand(Player player, String categoryId, String itemId) {
@@ -1744,7 +1760,7 @@ public class ServerShopAdminEditor {
         placeholders.put("min_sell_amount", Integer.toString(shopItem.minSellAmount()));
         placeholders.put("max_sell_amount", amountLimit(shopItem.maxSellAmount()));
         placeholders.put("stock_status", status(gui, shopItem.stockEnabled()));
-        placeholders.put("stock", Integer.toString(shopItem.stock()));
+        placeholders.put("stock", Integer.toString(shopItem.stockEnabled() ? plugin.getServerShopRegistry().availableStock(shopItem) : shopItem.stock()));
         placeholders.put("max_stock", amountLimit(shopItem.maxStock()));
         placeholders.put("buy_status", status(gui, shopItem.buyEnabled()));
         placeholders.put("sell_status", status(gui, shopItem.sellEnabled()));

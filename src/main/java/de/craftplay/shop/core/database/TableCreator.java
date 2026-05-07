@@ -36,6 +36,13 @@ public class TableCreator {
                         "direct_trade_enabled BOOLEAN, " +
                         "updated_at BIGINT)");
 
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("server_shop_stock") + " (" +
+                        "category_id TEXT, " +
+                        "item_id TEXT, " +
+                        "stock INTEGER, " +
+                        "updated_at BIGINT, " +
+                        "PRIMARY KEY (category_id, item_id))");
+
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("imports") + " (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "importer_name TEXT, " +

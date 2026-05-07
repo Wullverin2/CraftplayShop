@@ -46,6 +46,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Sauberes Deaktivieren, wenn Vault benoetigt wird und fehlt.
 - SQLite-Datenbankbasis.
 - Tabellen fuer Transaktionen, Spieler-Einstellungen, Imports und Import-Mappings.
+- Tabelle fuer laufenden ServerShop-Stock.
 - Async Transaktionslogging.
 - Spieler-Einstellungen mit Sprache und DirectTrade-Status.
 
@@ -64,10 +65,12 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Sell-All respektiert Verkaufs-Mindestmengen und deckelt konfigurierte Maximalmengen.
 - Konfigurierbare Bestaetigungs-GUI fuer teure Kaeufe.
 - Creative- und Spectator-Verkaufsschutz gegen ServerShop-, Sell-Hand-, Sell-All- und Sell-GUI-Verkaeufe.
-- YAML-basiertes Stock-System pro ServerShop-Item.
+- DB-basiertes Stock-System pro ServerShop-Item.
+- Geaenderter Stock wird im Speicher gehalten und gebuendelt in die Datenbank geschrieben.
 - Kaufen reduziert den Bestand, Verkaufen erhoeht ihn.
 - Zu wenig Bestand blockiert Kaeufe, voller Bestand blockiert oder begrenzt Verkaeufe.
 - Stock-Anzeige in ServerShop-GUI und AdminShop-Lore.
+- `server_shop.yml` liefert nur den Startbestand fuer neue Stock-Zeilen; laufender Bestand wird in der Datenbank gespeichert.
 - AdminShop-Editor kann Kauf-/Verkaufslimits, Stock, Max-Stock und Stock-Aktivierung bearbeiten.
 - Konfigurierbare ServerShop-Schutzregeln fuer Welten und GameModes.
 - Verkauf beschaedigter Items kann blockiert werden.

@@ -123,6 +123,11 @@ serverShop:
     # Ab welchem Gesamtpreis eine Bestaetigungs-GUI angezeigt wird.
     threshold: 10000.0
 
+  stock:
+    # Intervall, in dem geaenderter ServerShop-Stock gebuendelt in die Datenbank geschrieben wird.
+    # Beim Stoppen des Plugins wird zusaetzlich synchron gespeichert.
+    flushIntervalSeconds: 30
+
   sellProtection:
     # Blockiert ServerShop-Verkaeufe aus dem Creative-Modus.
     blockCreative: true
