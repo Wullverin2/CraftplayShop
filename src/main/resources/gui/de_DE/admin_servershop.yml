@@ -74,6 +74,7 @@ items:
   category:
     lore:
       - "&7ID: &f%category_id%"
+      - "&7Slot: &f%slot%"
       - "&7Items: &f%item_count%"
       - "&7Status: %category_status%"
       - ""
@@ -84,6 +85,7 @@ items:
   categoryEditor:
     lore:
       - "&7ID: &f%category_id%"
+      - "&7Slot: &f%slot%"
       - "&7Items: &f%item_count%"
       - "&7Status: %category_status%"
       - "&7Lore-Zeilen: &f%lore_lines%"
@@ -94,6 +96,7 @@ items:
     lore:
       - "&7ID: &f%item_id%"
       - "&7Material: &f%material%"
+      - "&7Slot: &f%slot%"
       - "&7Kaufpreis: &f%buy_price%"
       - "&7Verkaufspreis: &f%sell_price%"
       - "&7Kaufen: %buy_status%"
@@ -104,6 +107,19 @@ items:
       - "&eIm Editor auf das Item klicken: Materialauswahl"
       - "&eShift-Klick: zum Verschieben auswählen"
       - "&eItem auf Slot ziehen: Item ändern"
+  freeSlot:
+    material: LIGHT_GRAY_STAINED_GLASS_PANE
+    name: "&7Freier Slot &f%slot%"
+    lore:
+      - "&7Dieser Editor-Slot ist frei."
+      - ""
+      - "&eKlicken: Materialauswahl"
+      - "&eItem hierhin ziehen: direkt erstellen"
+  moveSelected:
+    lore:
+      - ""
+      - "&bZum Verschieben ausgewaehlt"
+      - "&7Klicke jetzt auf den Zielslot."
   material:
     lore:
       - "&7Material: &f%material%"

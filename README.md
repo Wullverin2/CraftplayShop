@@ -91,6 +91,10 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Kategorien und Items duplizieren.
 - Kategorien und Items loeschen mit Sicherheitsabfrage.
 - Kategorien und Items per Shift-Klick sortieren/anordnen.
+- Freie Kategorie- und Item-Slots werden im Editor sichtbar markiert.
+- Freie Slots koennen direkt angeklickt werden, um neue Kategorien oder Items genau dort per Materialauswahl zu erstellen.
+- Kategorie- und Item-Eintraege zeigen ihre Slotnummer in der Lore.
+- Aktuelle Sortierauswahl wird optisch mit Glanz und Zusatzlore markiert.
 - Material-Picker mit Seitennavigation.
 - Material-Picker mit Suchfunktion.
 - Automatische Backups vor Aenderungen an `server_shop.yml`.

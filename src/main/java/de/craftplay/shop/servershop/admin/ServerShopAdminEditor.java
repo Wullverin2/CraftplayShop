@@ -72,16 +72,20 @@ public class ServerShopAdminEditor {
         Inventory inventory = Bukkit.createInventory(holder, 54, title(gui, "categories", Map.of()));
         holder.setInventory(inventory);
         fill(inventory);
+        MoveSelection selection = moveSelections.get(player.getUniqueId());
 
         for (ServerShopCategory category : plugin.getServerShopRegistry().categories()) {
             int slot = clampSlot(category.slot(), inventory.getSize());
             inventory.setItem(slot, item(category.icon(), category.displayName(), lore(gui, "items.category.lore", Map.of(
                     "category_id", category.id(),
                     "item_count", Integer.toString(category.items().size()),
+                    "slot", Integer.toString(slot),
                     "category_status", status(gui, category.enabled())
             ))));
+            markSelectedIfNeeded(gui, inventory.getItem(slot), selection, ServerShopAdminView.CATEGORIES, "", category.id());
             keys.put(slot, category.id());
         }
+        addFreeCategorySlots(inventory, keys, gui);
         putConfigured(player, inventory, keys, gui, "slots.categories.createCategory", 53, "createCategory", "create_category", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categories.createBackup", 47, "createBackup", "create_backup", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.categories.openBackups", 51, "openBackups", "open_backups", Map.of());
@@ -101,12 +105,15 @@ public class ServerShopAdminEditor {
         Inventory inventory = Bukkit.createInventory(holder, 54, title(gui, "items", Map.of("category", TextUtil.stripColor(category.displayName()))));
         holder.setInventory(inventory);
         fill(inventory);
+        MoveSelection selection = moveSelections.get(player.getUniqueId());
 
         for (ServerShopItem shopItem : category.items()) {
             int slot = clampSlot(shopItem.slot(), inventory.getSize());
             inventory.setItem(slot, editorItem(gui, shopItem));
+            markSelectedIfNeeded(gui, inventory.getItem(slot), selection, ServerShopAdminView.ITEMS, categoryId, shopItem.id());
             keys.put(slot, shopItem.id());
         }
+        addFreeItemSlots(inventory, keys, gui, category);
         putConfigured(player, inventory, keys, gui, "slots.items.createItem", 53, "createItem", "create_item", Map.of());
         putConfigured(player, inventory, keys, gui, "slots.items.back", 49, "backCategories", "back", Map.of());
         player.openInventory(inventory);
@@ -347,6 +354,10 @@ public class ServerShopAdminEditor {
             openMaterialPicker(player, CREATE_CATEGORY_TARGET, "", 0);
             return;
         }
+        if (key.startsWith("free_category_slot:")) {
+            openMaterialPicker(player, CREATE_CATEGORY_TARGET + ":" + key.substring("free_category_slot:".length()), "", 0);
+            return;
+        }
         if ("create_backup".equals(key)) {
             createManualBackup(player);
             openCategories(player);
@@ -370,6 +381,10 @@ public class ServerShopAdminEditor {
         }
         if ("create_item".equals(key)) {
             openMaterialPicker(player, categoryId, CREATE_ITEM_TARGET, 0);
+            return;
+        }
+        if (key.startsWith("free_item_slot:")) {
+            openMaterialPicker(player, categoryId, CREATE_ITEM_TARGET + ":" + key.substring("free_item_slot:".length()), 0);
             return;
         }
         if (rightClick) {
@@ -594,7 +609,7 @@ public class ServerShopAdminEditor {
             return;
         }
         if (isCreateCategoryTarget(holder)) {
-            String categoryId = createCategoryFromMaterial(nextFreeCategorySlot(), material);
+            String categoryId = createCategoryFromMaterial(createCategorySlot(holder), material);
             plugin.getLanguageService().send(player, "adminShop.categoryCreated");
             startTextEdit(player, TextEditType.CATEGORY_ID, categoryId, "");
             return;
@@ -605,7 +620,7 @@ public class ServerShopAdminEditor {
                 plugin.getLanguageService().send(player, "serverShop.categoryNotFound");
                 return;
             }
-            String itemId = createItemFromMaterial(holder.categoryId(), nextFreeItemSlot(category), material);
+            String itemId = createItemFromMaterial(holder.categoryId(), createItemSlot(holder, category), material);
             plugin.getLanguageService().send(player, "adminShop.itemCreated");
             startTextEdit(player, TextEditType.ITEM_ID, holder.categoryId(), itemId);
             return;
@@ -1033,6 +1048,26 @@ public class ServerShopAdminEditor {
         return null;
     }
 
+    private void addFreeCategorySlots(Inventory inventory, Map<Integer, String> keys, YamlConfiguration gui) {
+        for (int slot : EDITABLE_GRID_SLOTS) {
+            if (keys.containsKey(slot)) {
+                continue;
+            }
+            inventory.setItem(slot, freeSlotItem(gui, slot));
+            keys.put(slot, "free_category_slot:" + slot);
+        }
+    }
+
+    private void addFreeItemSlots(Inventory inventory, Map<Integer, String> keys, YamlConfiguration gui, ServerShopCategory category) {
+        for (int slot : EDITABLE_GRID_SLOTS) {
+            if (keys.containsKey(slot) || itemAtSlot(category, slot) != null) {
+                continue;
+            }
+            inventory.setItem(slot, freeSlotItem(gui, slot));
+            keys.put(slot, "free_item_slot:" + slot);
+        }
+    }
+
     private String createCategoryFromStack(int slot, ItemStack source) {
         YamlConfiguration configuration = loadShopFile();
         String id = uniqueCategoryId(configuration, source.getType());
@@ -1222,19 +1257,42 @@ public class ServerShopAdminEditor {
         if (key == null || isControlKey(key)) {
             return false;
         }
+        if (key.startsWith("free_category_slot:") || key.startsWith("free_item_slot:") || key.startsWith("backup:")) {
+            return false;
+        }
         return holder.view() == ServerShopAdminView.CATEGORIES || holder.view() == ServerShopAdminView.ITEMS;
     }
 
     private boolean isCreateCategoryTarget(ServerShopAdminHolder holder) {
-        return CREATE_CATEGORY_TARGET.equals(holder.categoryId());
+        return holder.categoryId() != null && holder.categoryId().startsWith(CREATE_CATEGORY_TARGET);
     }
 
     private boolean isCreateItemTarget(ServerShopAdminHolder holder) {
-        return CREATE_ITEM_TARGET.equals(holder.itemId());
+        return holder.itemId() != null && holder.itemId().startsWith(CREATE_ITEM_TARGET);
     }
 
     private boolean isCategoryEditorTarget(ServerShopAdminHolder holder) {
         return CATEGORY_EDITOR_TARGET.equals(holder.itemId());
+    }
+
+    private int createCategorySlot(ServerShopAdminHolder holder) {
+        return encodedSlot(holder.categoryId(), CREATE_CATEGORY_TARGET, nextFreeCategorySlot());
+    }
+
+    private int createItemSlot(ServerShopAdminHolder holder, ServerShopCategory category) {
+        return encodedSlot(holder.itemId(), CREATE_ITEM_TARGET, nextFreeItemSlot(category));
+    }
+
+    private int encodedSlot(String value, String prefix, int fallback) {
+        if (value == null || !value.startsWith(prefix + ":")) {
+            return fallback;
+        }
+        try {
+            int parsed = Integer.parseInt(value.substring((prefix + ":").length()));
+            return EDITABLE_GRID_SLOTS.contains(parsed) ? parsed : fallback;
+        } catch (NumberFormatException exception) {
+            return fallback;
+        }
     }
 
     private int nextFreeCategorySlot() {
@@ -1558,6 +1616,7 @@ public class ServerShopAdminEditor {
         return item(category.icon(), category.displayName(), lore(gui, "items.categoryEditor.lore", Map.of(
                 "category_id", category.id(),
                 "item_count", Integer.toString(category.items().size()),
+                "slot", Integer.toString(category.slot()),
                 "lore_lines", Integer.toString(category.lore().size()),
                 "category_status", status(gui, category.enabled())
         )));
@@ -1567,6 +1626,7 @@ public class ServerShopAdminEditor {
         return item(shopItem.material(), shopItem.displayName(), lore(gui, "items.shopItem.lore", Map.of(
                 "item_id", shopItem.id(),
                 "material", shopItem.material().name(),
+                "slot", Integer.toString(shopItem.slot()),
                 "buy_price", money(shopItem.buyPrice()),
                 "sell_price", money(shopItem.sellPrice()),
                 "buy_status", status(gui, shopItem.buyEnabled()),
@@ -1610,6 +1670,36 @@ public class ServerShopAdminEditor {
                 plugin.getPlaceholderApiHook().apply(player, PlaceholderUtil.apply(section.getString("name", key), placeholders)),
                 lore(section, "lore", placeholders).stream().map(line -> plugin.getPlaceholderApiHook().apply(player, line)).toList()
         );
+    }
+
+    private ItemStack freeSlotItem(YamlConfiguration gui, int slot) {
+        ConfigurationSection section = gui.getConfigurationSection("items.freeSlot");
+        Material material = material(section == null ? null : section.getString("material"), Material.LIGHT_GRAY_STAINED_GLASS_PANE);
+        String name = section == null ? "&7Freier Slot %slot%" : section.getString("name", "&7Freier Slot %slot%");
+        List<String> itemLore = section == null ? List.of("&eKlicken zum Erstellen") : section.getStringList("lore");
+        Map<String, String> placeholders = Map.of("slot", Integer.toString(slot));
+        return item(material, PlaceholderUtil.apply(name, placeholders), itemLore.stream().map(line -> PlaceholderUtil.apply(line, placeholders)).toList());
+    }
+
+    private void markSelectedIfNeeded(YamlConfiguration gui, ItemStack itemStack, MoveSelection selection,
+                                      ServerShopAdminView view, String categoryId, String entryId) {
+        if (itemStack == null || selection == null || selection.view() != view || !selection.entryId().equals(entryId)) {
+            return;
+        }
+        if (view == ServerShopAdminView.ITEMS && !selection.categoryId().equals(categoryId)) {
+            return;
+        }
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta == null) {
+            return;
+        }
+        meta.setEnchantmentGlintOverride(true);
+        List<String> lore = meta.hasLore() && meta.getLore() != null ? new java.util.ArrayList<>(meta.getLore()) : new java.util.ArrayList<>();
+        for (String line : gui.getStringList("items.moveSelected.lore")) {
+            lore.add(TextUtil.color(line));
+        }
+        meta.setLore(lore);
+        itemStack.setItemMeta(meta);
     }
 
     private boolean isUsableSourceItem(ItemStack source) {

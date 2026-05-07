@@ -74,6 +74,7 @@ items:
   category:
     lore:
       - "&7ID: &f%category_id%"
+      - "&7Slot: &f%slot%"
       - "&7Items: &f%item_count%"
       - "&7Status: %category_status%"
       - ""
@@ -84,6 +85,7 @@ items:
   categoryEditor:
     lore:
       - "&7ID: &f%category_id%"
+      - "&7Slot: &f%slot%"
       - "&7Items: &f%item_count%"
       - "&7Status: %category_status%"
       - "&7Lore lines: &f%lore_lines%"
@@ -94,6 +96,7 @@ items:
     lore:
       - "&7ID: &f%item_id%"
       - "&7Material: &f%material%"
+      - "&7Slot: &f%slot%"
       - "&7Buy price: &f%buy_price%"
       - "&7Sell price: &f%sell_price%"
       - "&7Buying: %buy_status%"
@@ -104,6 +107,19 @@ items:
       - "&eClick the item in the editor: material picker"
       - "&eShift-click: select for moving"
       - "&eDrag item onto slot: change item"
+  freeSlot:
+    material: LIGHT_GRAY_STAINED_GLASS_PANE
+    name: "&7Free Slot &f%slot%"
+    lore:
+      - "&7This editor slot is free."
+      - ""
+      - "&eClick: material picker"
+      - "&eDrag item here: create directly"
+  moveSelected:
+    lore:
+      - ""
+      - "&bSelected for moving"
+      - "&7Now click the target slot."
   material:
     lore:
       - "&7Material: &f%material%"
