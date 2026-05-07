@@ -5,9 +5,10 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
-public record ServerShopItem(String id, Material material, String displayName, List<String> lore, double buyPrice,
+public record ServerShopItem(String categoryId, String id, Material material, String displayName, List<String> lore, double buyPrice,
                              double sellPrice, boolean buyEnabled, boolean sellEnabled, int slot,
-                             int minBuyAmount, int maxBuyAmount, int minSellAmount, int maxSellAmount) {
+                             int minBuyAmount, int maxBuyAmount, int minSellAmount, int maxSellAmount,
+                             boolean stockEnabled, int stock, int maxStock) {
     public ItemStack createStack(int amount) {
         return new ItemStack(material, amount);
     }
@@ -18,5 +19,9 @@ public record ServerShopItem(String id, Material material, String displayName, L
 
     public boolean hasSellMaximum() {
         return maxSellAmount > 0;
+    }
+
+    public boolean hasStockMaximum() {
+        return maxStock > 0;
     }
 }

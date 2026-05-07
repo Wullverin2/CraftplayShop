@@ -40,7 +40,11 @@ serverShop:
   buyAmountTooHigh: "%prefix%&cThat buy amount is too high. Maximum: &e%limit%&c."
   sellAmountTooLow: "%prefix%&cThat sell amount is too low. Minimum: &e%limit%&c."
   sellAmountTooHigh: "%prefix%&cThat sell amount is too high. Maximum: &e%limit%&c."
+  notEnoughStock: "%prefix%&cThe ServerShop does not have enough stock. Available: &e%stock%&c."
+  stockFull: "%prefix%&cThe ServerShop stock for this item is full. Free space: &e%space%&c."
   limitUnlimited: "unlimited"
+  stockEnabled: "enabled"
+  stockDisabled: "disabled"
   actionBuy: "Buy"
   actionSell: "Sell"
 

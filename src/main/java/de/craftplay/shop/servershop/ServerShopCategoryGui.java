@@ -138,6 +138,10 @@ public class ServerShopCategoryGui {
             if (itemMax > 0) {
                 max = Math.min(max, itemMax);
             }
+            int stockMax = stockAllowed(item, pending.action());
+            if (stockMax >= 0) {
+                max = Math.min(max, stockMax);
+            }
         }
         if (amount <= 0) {
             plugin.getLanguageService().send(player, "serverShop.invalidAmount");
@@ -391,6 +395,9 @@ public class ServerShopCategoryGui {
         placeholders.put("max_buy_amount", limitText(player, item.maxBuyAmount()));
         placeholders.put("min_sell_amount", Integer.toString(item.minSellAmount()));
         placeholders.put("max_sell_amount", limitText(player, item.maxSellAmount()));
+        placeholders.put("stock_status", stockStatus(player, item));
+        placeholders.put("stock", stockText(player, item));
+        placeholders.put("max_stock", limitText(player, item.maxStock()));
         placeholders.put("buy_status", Boolean.toString(item.buyEnabled()));
         placeholders.put("sell_status", Boolean.toString(item.sellEnabled()));
         return placeholders;
@@ -421,7 +428,8 @@ public class ServerShopCategoryGui {
     private boolean isWithinItemLimits(ServerShopItem item, ServerShopAction action, int amount) {
         int min = action == ServerShopAction.BUY ? item.minBuyAmount() : item.minSellAmount();
         int max = maxAllowed(item, action);
-        return amount >= min && (max <= 0 || amount <= max);
+        int stockMax = stockAllowed(item, action);
+        return amount >= min && (max <= 0 || amount <= max) && (stockMax < 0 || amount <= stockMax);
     }
 
     private int maxAllowed(ServerShopItem item, ServerShopAction action) {
@@ -433,6 +441,30 @@ public class ServerShopCategoryGui {
             return plugin.getLanguageService().get(player, "serverShop.limitUnlimited");
         }
         return Integer.toString(limit);
+    }
+
+    private int stockAllowed(ServerShopItem item, ServerShopAction action) {
+        if (!item.stockEnabled()) {
+            return -1;
+        }
+        if (action == ServerShopAction.BUY) {
+            return plugin.getServerShopRegistry().availableStock(item);
+        }
+        if (!item.hasStockMaximum()) {
+            return -1;
+        }
+        return plugin.getServerShopRegistry().availableStockCapacity(item);
+    }
+
+    private String stockStatus(Player player, ServerShopItem item) {
+        return plugin.getLanguageService().get(player, item.stockEnabled() ? "serverShop.stockEnabled" : "serverShop.stockDisabled");
+    }
+
+    private String stockText(Player player, ServerShopItem item) {
+        if (!item.stockEnabled()) {
+            return plugin.getLanguageService().get(player, "serverShop.limitUnlimited");
+        }
+        return Integer.toString(plugin.getServerShopRegistry().availableStock(item));
     }
 
     private String actionName(Player player, ServerShopAction action) {

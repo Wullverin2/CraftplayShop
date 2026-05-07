@@ -64,6 +64,10 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Sell-All respektiert Verkaufs-Mindestmengen und deckelt konfigurierte Maximalmengen.
 - Konfigurierbare Bestaetigungs-GUI fuer teure Kaeufe.
 - Creative- und Spectator-Verkaufsschutz gegen ServerShop-, Sell-Hand-, Sell-All- und Sell-GUI-Verkaeufe.
+- YAML-basiertes Stock-System pro ServerShop-Item.
+- Kaufen reduziert den Bestand, Verkaufen erhoeht ihn.
+- Zu wenig Bestand blockiert Kaeufe, voller Bestand blockiert oder begrenzt Verkaeufe.
+- Stock-Anzeige in ServerShop-GUI und AdminShop-Lore.
 - Permission-Pruefungen fuer Kaufen und Verkaufen.
 - Anti-Dupe-Grundlogik mit Pruefung vor Ausfuehrung und Rollback-Versuch.
 - Sell Hand.

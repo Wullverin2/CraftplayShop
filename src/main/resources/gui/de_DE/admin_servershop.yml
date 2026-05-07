@@ -101,6 +101,7 @@ items:
       - "&7Verkaufspreis: &f%sell_price%"
       - "&7Kauflimit: &f%min_buy_amount% &7- &f%max_buy_amount%"
       - "&7Verkaufslimit: &f%min_sell_amount% &7- &f%max_sell_amount%"
+      - "&7Stock: %stock_status% &f%stock% &7/ &f%max_stock%"
       - "&8Max 0 = unbegrenzt"
       - "&7Kaufen: %buy_status%"
       - "&7Verkaufen: %sell_status%"

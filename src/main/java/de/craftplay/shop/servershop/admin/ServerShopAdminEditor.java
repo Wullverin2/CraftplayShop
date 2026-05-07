@@ -1111,6 +1111,9 @@ public class ServerShopAdminEditor {
         configuration.set(path + ".maxBuyAmount", 64);
         configuration.set(path + ".minSellAmount", 1);
         configuration.set(path + ".maxSellAmount", 0);
+        configuration.set(path + ".stockEnabled", false);
+        configuration.set(path + ".stock", 0);
+        configuration.set(path + ".maxStock", 0);
         configuration.set(path + ".slot", slot);
         save(configuration);
         return id;
@@ -1131,6 +1134,9 @@ public class ServerShopAdminEditor {
         configuration.set(path + ".maxBuyAmount", 64);
         configuration.set(path + ".minSellAmount", 1);
         configuration.set(path + ".maxSellAmount", 0);
+        configuration.set(path + ".stockEnabled", false);
+        configuration.set(path + ".stock", 0);
+        configuration.set(path + ".maxStock", 0);
         configuration.set(path + ".slot", slot);
         save(configuration);
         return id;
@@ -1641,6 +1647,9 @@ public class ServerShopAdminEditor {
         placeholders.put("max_buy_amount", amountLimit(shopItem.maxBuyAmount()));
         placeholders.put("min_sell_amount", Integer.toString(shopItem.minSellAmount()));
         placeholders.put("max_sell_amount", amountLimit(shopItem.maxSellAmount()));
+        placeholders.put("stock_status", status(gui, shopItem.stockEnabled()));
+        placeholders.put("stock", Integer.toString(shopItem.stock()));
+        placeholders.put("max_stock", amountLimit(shopItem.maxStock()));
         placeholders.put("buy_status", status(gui, shopItem.buyEnabled()));
         placeholders.put("sell_status", status(gui, shopItem.sellEnabled()));
         return item(shopItem.material(), shopItem.displayName(), lore(gui, "items.shopItem.lore", placeholders));
