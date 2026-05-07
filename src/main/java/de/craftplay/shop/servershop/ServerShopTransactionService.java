@@ -4,6 +4,7 @@ import de.craftplay.shop.CraftplayShopPlugin;
 import de.craftplay.shop.core.permission.PermissionNodes;
 import de.craftplay.shop.core.transaction.TransactionResult;
 import de.craftplay.shop.core.transaction.TransactionType;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -49,6 +50,9 @@ public class ServerShopTransactionService {
     }
 
     public TransactionResult sell(Player player, ServerShopItem item, int amount, TransactionType type) {
+        if (!canSellInCurrentGameMode(player)) {
+            return TransactionResult.failure("serverShop.creativeSellBlocked");
+        }
         if (!player.hasPermission(PermissionNodes.SERVER_SHOP_SELL) || !plugin.getServerShopService().allowSell()) {
             return TransactionResult.failure("serverShop.itemNotSellable");
         }
@@ -69,6 +73,9 @@ public class ServerShopTransactionService {
     }
 
     public TransactionResult sellAll(Player player) {
+        if (!canSellInCurrentGameMode(player)) {
+            return TransactionResult.failure("serverShop.creativeSellBlocked");
+        }
         List<SellBatch> batches = new ArrayList<>();
         for (ItemStack content : player.getInventory().getStorageContents()) {
             ServerShopItem sellable = plugin.getServerShopRegistry().findSellable(content);
@@ -93,6 +100,14 @@ public class ServerShopTransactionService {
             plugin.getTransactionService().logAsync(TransactionType.SERVER_SELL_ALL, player, "servershop", batch.item().createStack(batch.amount()), batch.amount(), batch.item().sellPrice(), batch.item().sellPrice() * batch.amount());
         }
         return TransactionResult.success("serverShop.sellAllDone", total);
+    }
+
+    public boolean canSellInCurrentGameMode(Player player) {
+        GameMode gameMode = player.getGameMode();
+        if (gameMode == GameMode.CREATIVE && plugin.getConfig().getBoolean("serverShop.sellProtection.blockCreative", true)) {
+            return false;
+        }
+        return gameMode != GameMode.SPECTATOR || !plugin.getConfig().getBoolean("serverShop.sellProtection.blockSpectator", true);
     }
 
     private record SellBatch(ServerShopItem item, int amount) {

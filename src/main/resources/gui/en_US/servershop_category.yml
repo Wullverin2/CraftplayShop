@@ -1,6 +1,29 @@
 title: "&8%category%"
 size: 54
 
+amountSelection:
+  title: "&8Choose amount: %item%"
+  size: 54
+  amounts:
+    - 1
+    - 8
+    - 16
+    - 32
+    - 64
+
+buyConfirmation:
+  title: "&8Confirm purchase"
+  size: 54
+
+slots:
+  amountSelection:
+    custom: 31
+    back: 49
+  buyConfirmation:
+    preview: 13
+    confirm: 30
+    cancel: 32
+
 filler:
   enabled: true
   material: BLACK_STAINED_GLASS_PANE
@@ -18,11 +41,57 @@ items:
     leftClickActions:
       - "OPEN_GUI:servershop"
 
+  amountButton:
+    enabled: true
+    material: CHEST
+    amount: 1
+    name: "&e%amount%x"
+    lore:
+      - "&7Item: &f%item%"
+      - "&7Action: &f%action%"
+      - "&7Total price: &e%price%"
+      - ""
+      - "&eClick to run"
+
+  customAmount:
+    enabled: true
+    material: WRITABLE_BOOK
+    amount: 1
+    name: "&eCustom amount"
+    lore:
+      - "&7Enter the amount in chat."
+
+  amountBack:
+    enabled: true
+    material: ARROW
+    amount: 1
+    name: "&cBack"
+    lore:
+      - "&7Back to the category."
+
+  confirmBuy:
+    enabled: true
+    material: EMERALD_BLOCK
+    amount: 1
+    name: "&aConfirm purchase"
+    lore:
+      - "&7Item: &f%item%"
+      - "&7Amount: &f%amount%"
+      - "&7Price: &e%price%"
+      - ""
+      - "&aClick to buy"
+
+  cancelBuy:
+    enabled: true
+    material: REDSTONE_BLOCK
+    amount: 1
+    name: "&cCancel"
+    lore:
+      - "&7Back to amount selection."
+
 shopItemLore:
   - "&7Buy: &e%buy_price%"
   - "&7Sell: &e%sell_price%"
   - ""
-  - "&eLeft click: buy 1"
-  - "&eShift-left click: buy stack"
-  - "&eRight click: sell 1"
-  - "&eShift-right click: sell stack"
+  - "&eLeft click: choose buy amount"
+  - "&eRight click: choose sell amount"

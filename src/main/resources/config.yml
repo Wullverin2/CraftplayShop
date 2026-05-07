@@ -98,6 +98,38 @@ serverShop:
   # Standard-Itemvergleich für einfache ServerShop-Items.
   itemMatchMode: "MATERIAL_ONLY"
 
+  amountSelection:
+    # Wenn true, oeffnet ein Klick auf ein ServerShop-Item zuerst eine Mengenauswahl.
+    enabled: true
+
+    # Vorgegebene Mengen fuer Kaufen und Verkaufen.
+    amounts:
+      - 1
+      - 8
+      - 16
+      - 32
+      - 64
+
+    # Wenn true, koennen Spieler eine eigene Menge per Chat eingeben.
+    allowCustomAmount: true
+
+    # Maximale eigene Menge aus der Chat-Eingabe.
+    maxCustomAmount: 64
+
+  buyConfirmation:
+    # Wenn true, muessen teure Kaeufe im ServerShop bestaetigt werden.
+    enabled: true
+
+    # Ab welchem Gesamtpreis eine Bestaetigungs-GUI angezeigt wird.
+    threshold: 10000.0
+
+  sellProtection:
+    # Blockiert ServerShop-Verkaeufe aus dem Creative-Modus.
+    blockCreative: true
+
+    # Blockiert ServerShop-Verkaeufe aus dem Spectator-Modus.
+    blockSpectator: true
+
 adminShop:
   backups:
     # Erstellt vor Aenderungen ueber den Ingame-Editor ein Backup der server_shop.yml.

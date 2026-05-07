@@ -103,6 +103,10 @@ public class SellCommandService {
     }
 
     private void sellGuiContents(Player player, SellGuiHolder holder) {
+        if (!plugin.getServerShopTransactionService().canSellInCurrentGameMode(player)) {
+            plugin.getLanguageService().send(player, "serverShop.creativeSellBlocked");
+            return;
+        }
         Map<ServerShopItem, Integer> amounts = new java.util.LinkedHashMap<>();
         Map<Integer, ItemStack> originals = new java.util.HashMap<>();
         for (int slot : holder.itemSlots()) {

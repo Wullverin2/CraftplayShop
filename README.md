@@ -56,10 +56,12 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Items mit ID, Material, Anzeigename, Lore, Kaufpreis, Verkaufspreis, Kauf-/Verkaufsstatus und Slot.
 - Haupt-GUI fuer Kategorien.
 - Kategorie-GUI fuer Shop-Items.
-- Kaufen per Linksklick.
-- Stack kaufen per Shift-Linksklick.
-- Verkaufen per Rechtsklick.
-- Stack verkaufen per Shift-Rechtsklick.
+- Kaufen per Linksklick mit Mengenauswahl.
+- Verkaufen per Rechtsklick mit Mengenauswahl.
+- Konfigurierbare Mengenbuttons fuer 1, 8, 16, 32 und 64 Items.
+- Eigene Kauf- oder Verkaufsmenge per Chat-Eingabe.
+- Konfigurierbare Bestaetigungs-GUI fuer teure Kaeufe.
+- Creative- und Spectator-Verkaufsschutz gegen ServerShop-, Sell-Hand-, Sell-All- und Sell-GUI-Verkaeufe.
 - Permission-Pruefungen fuer Kaufen und Verkaufen.
 - Anti-Dupe-Grundlogik mit Pruefung vor Ausfuehrung und Rollback-Versuch.
 - Sell Hand.

@@ -1,6 +1,29 @@
 title: "&8%category%"
 size: 54
 
+amountSelection:
+  title: "&8Menge waehlen: %item%"
+  size: 54
+  amounts:
+    - 1
+    - 8
+    - 16
+    - 32
+    - 64
+
+buyConfirmation:
+  title: "&8Kauf bestaetigen"
+  size: 54
+
+slots:
+  amountSelection:
+    custom: 31
+    back: 49
+  buyConfirmation:
+    preview: 13
+    confirm: 30
+    cancel: 32
+
 filler:
   enabled: true
   material: BLACK_STAINED_GLASS_PANE
@@ -12,17 +35,63 @@ items:
     enabled: true
     slot: 49
     material: ARROW
-    name: "&cZurück"
+    name: "&cZurueck"
     lore:
-      - "&7Zur Kategorienübersicht."
+      - "&7Zur Kategorienuebersicht."
     leftClickActions:
       - "OPEN_GUI:servershop"
+
+  amountButton:
+    enabled: true
+    material: CHEST
+    amount: 1
+    name: "&e%amount%x"
+    lore:
+      - "&7Item: &f%item%"
+      - "&7Aktion: &f%action%"
+      - "&7Gesamtpreis: &e%price%"
+      - ""
+      - "&eKlicken zum Ausfuehren"
+
+  customAmount:
+    enabled: true
+    material: WRITABLE_BOOK
+    amount: 1
+    name: "&eEigene Menge"
+    lore:
+      - "&7Gib die Menge per Chat ein."
+
+  amountBack:
+    enabled: true
+    material: ARROW
+    amount: 1
+    name: "&cZurueck"
+    lore:
+      - "&7Zurueck zur Kategorie."
+
+  confirmBuy:
+    enabled: true
+    material: EMERALD_BLOCK
+    amount: 1
+    name: "&aKauf bestaetigen"
+    lore:
+      - "&7Item: &f%item%"
+      - "&7Menge: &f%amount%"
+      - "&7Preis: &e%price%"
+      - ""
+      - "&aKlicken zum Kaufen"
+
+  cancelBuy:
+    enabled: true
+    material: REDSTONE_BLOCK
+    amount: 1
+    name: "&cAbbrechen"
+    lore:
+      - "&7Zurueck zur Mengenauswahl."
 
 shopItemLore:
   - "&7Kaufen: &e%buy_price%"
   - "&7Verkaufen: &e%sell_price%"
   - ""
-  - "&eLinksklick: 1 kaufen"
-  - "&eShift-Linksklick: Stack kaufen"
-  - "&eRechtsklick: 1 verkaufen"
-  - "&eShift-Rechtsklick: Stack verkaufen"
+  - "&eLinksklick: Kaufmenge waehlen"
+  - "&eRechtsklick: Verkaufsmenge waehlen"

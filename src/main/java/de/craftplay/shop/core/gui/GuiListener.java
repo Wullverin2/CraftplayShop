@@ -1,6 +1,7 @@
 package de.craftplay.shop.core.gui;
 
 import de.craftplay.shop.CraftplayShopPlugin;
+import de.craftplay.shop.servershop.ServerShopAmountHolder;
 import de.craftplay.shop.servershop.ServerShopCategoryHolder;
 import de.craftplay.shop.servershop.ServerShopHolder;
 import de.craftplay.shop.servershop.SellGuiHolder;
@@ -49,6 +50,13 @@ public class GuiListener implements Listener {
             }
             return;
         }
+        if (holder instanceof ServerShopAmountHolder amountHolder) {
+            event.setCancelled(true);
+            if (event.getWhoClicked() instanceof org.bukkit.entity.Player player) {
+                plugin.getServerShopCategoryGui().handleAmountClick(player, amountHolder, event);
+            }
+            return;
+        }
         if (holder instanceof ServerShopAdminHolder adminHolder) {
             event.setCancelled(true);
             if (event.getWhoClicked() instanceof org.bukkit.entity.Player player) {
@@ -64,7 +72,7 @@ public class GuiListener implements Listener {
     @EventHandler
     public void onDrag(InventoryDragEvent event) {
         InventoryHolder holder = event.getInventory().getHolder();
-        if (holder instanceof GuiHolder || holder instanceof ServerShopHolder || holder instanceof ServerShopCategoryHolder || holder instanceof ServerShopAdminHolder || holder instanceof SellGuiHolder) {
+        if (holder instanceof GuiHolder || holder instanceof ServerShopHolder || holder instanceof ServerShopCategoryHolder || holder instanceof ServerShopAmountHolder || holder instanceof ServerShopAdminHolder || holder instanceof SellGuiHolder) {
             event.setCancelled(true);
             if (holder instanceof ServerShopAdminHolder adminHolder && event.getWhoClicked() instanceof org.bukkit.entity.Player player) {
                 plugin.getServerShopAdminEditor().handleDrag(player, adminHolder, event);
@@ -86,6 +94,11 @@ public class GuiListener implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
+        if (plugin.getServerShopCategoryGui().hasAmountInput(event.getPlayer())) {
+            event.setCancelled(true);
+            Bukkit.getScheduler().runTask(plugin, () -> plugin.getServerShopCategoryGui().handleAmountInput(event.getPlayer(), event.getMessage()));
+            return;
+        }
         if (!plugin.getServerShopAdminEditor().hasTextInput(event.getPlayer())) {
             return;
         }

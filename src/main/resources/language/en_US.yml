@@ -31,6 +31,13 @@ serverShop:
   sellAllDone: "%prefix%&aYou sold items for &e%price%&a."
   sellGuiNothing: "%prefix%&cThere are no sellable items in the sell GUI."
   sellGuiDone: "%prefix%&aYou sold the sell GUI items for &e%price%&a."
+  creativeSellBlocked: "%prefix%&cYou cannot sell items in creative or spectator mode."
+  amountInput: "%prefix%&7Write the amount in chat. Example: &e16&7. Write &ccancel &7to cancel."
+  amountInputCancelled: "%prefix%&cAmount input cancelled."
+  invalidAmount: "%prefix%&cThat is not a valid amount."
+  amountTooHigh: "%prefix%&cThe amount may be at most &e%max%&c."
+  actionBuy: "Buy"
+  actionSell: "Sell"
 
 trade:
   disabledSelf: "%prefix%&cYou disabled direct trade requests."
