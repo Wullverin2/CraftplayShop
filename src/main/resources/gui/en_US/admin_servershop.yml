@@ -34,13 +34,22 @@ slots:
   itemEditor:
     preview: 4
     toggleBuy: 10
+    toggleStock: 11
+    minBuyAmount: 12
     buyPrice: 13
     setBuyPrice: 14
+    stock: 15
+    setStock: 16
+    maxStock: 17
     editName: 20
+    maxBuyAmount: 21
     editLore: 22
     toggleSell: 28
+    minSellAmount: 29
+    maxSellAmount: 30
     sellPrice: 31
     setSellPrice: 32
+    setMaxStock: 33
     editId: 18
     duplicate: 36
     delete: 38
@@ -161,6 +170,15 @@ items:
     disabledName: "&cSelling disabled"
     lore:
       - "&7Click to toggle."
+  toggleStock:
+    material: BARREL
+    enabledName: "&aStock enabled"
+    disabledName: "&cStock disabled"
+    lore:
+      - "&7When enabled, buying reduces"
+      - "&7stock and selling fills it."
+      - ""
+      - "&eClick to toggle"
   toggleCategory:
     material: LEVER
     enabledName: "&aCategory enabled"
@@ -202,6 +220,84 @@ items:
     name: "&6Set Sell Price Directly"
     lore:
       - "&7Current: &f%price%"
+      - ""
+      - "&eClick to enter"
+  minBuyAmount:
+    material: LIME_CANDLE
+    name: "&aMin Buy Amount"
+    lore:
+      - "&7Current: &f%amount%"
+      - ""
+      - "&aLeft click: +1"
+      - "&aShift-left click: +10"
+      - "&cRight click: -1"
+      - "&cShift-right click: -10"
+  maxBuyAmount:
+    material: GREEN_CANDLE
+    name: "&aMax Buy Amount"
+    lore:
+      - "&7Current: &f%amount%"
+      - "&8 0 = unlimited"
+      - ""
+      - "&aLeft click: +1"
+      - "&aShift-left click: +10"
+      - "&cRight click: -1"
+      - "&cShift-right click: -10"
+  minSellAmount:
+    material: ORANGE_CANDLE
+    name: "&6Min Sell Amount"
+    lore:
+      - "&7Current: &f%amount%"
+      - ""
+      - "&aLeft click: +1"
+      - "&aShift-left click: +10"
+      - "&cRight click: -1"
+      - "&cShift-right click: -10"
+  maxSellAmount:
+    material: YELLOW_CANDLE
+    name: "&6Max Sell Amount"
+    lore:
+      - "&7Current: &f%amount%"
+      - "&8 0 = unlimited"
+      - ""
+      - "&aLeft click: +1"
+      - "&aShift-left click: +10"
+      - "&cRight click: -1"
+      - "&cShift-right click: -10"
+  stock:
+    material: CHEST
+    name: "&eEdit Stock"
+    lore:
+      - "&7Current: &f%amount%"
+      - ""
+      - "&aLeft click: +1"
+      - "&aShift-left click: +10"
+      - "&cRight click: -1"
+      - "&cShift-right click: -10"
+  setStock:
+    material: CHEST
+    name: "&eSet Stock Directly"
+    lore:
+      - "&7Current: &f%amount%"
+      - ""
+      - "&eClick to enter"
+  maxStock:
+    material: HOPPER
+    name: "&eEdit Max Stock"
+    lore:
+      - "&7Current: &f%amount%"
+      - "&8 0 = unlimited"
+      - ""
+      - "&aLeft click: +1"
+      - "&aShift-left click: +10"
+      - "&cRight click: -1"
+      - "&cShift-right click: -10"
+  setMaxStock:
+    material: HOPPER
+    name: "&eSet Max Stock Directly"
+    lore:
+      - "&7Current: &f%amount%"
+      - "&8 0 = unlimited"
       - ""
       - "&eClick to enter"
   buyMinus10:

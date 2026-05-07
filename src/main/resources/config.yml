@@ -130,6 +130,34 @@ serverShop:
     # Blockiert ServerShop-Verkaeufe aus dem Spectator-Modus.
     blockSpectator: true
 
+    # Blockiert den Verkauf beschaedigter Items.
+    # Wichtig bei MATERIAL_ONLY-Matching, damit abgenutzte Tools nicht wie neue Items verkauft werden.
+    blockDamagedItems: true
+
+  protection:
+    worlds:
+      # Wenn true, wird die Weltenliste unten ausgewertet.
+      enabled: false
+
+      # BLOCKLIST blockiert nur die genannten Welten.
+      # ALLOWLIST erlaubt nur die genannten Welten.
+      mode: "BLOCKLIST"
+
+      # Weltname exakt wie im Server.
+      list: []
+
+    gameModes:
+      # Wenn true, duerfen nur die unten genannten GameModes kaufen/verkaufen.
+      enabled: true
+
+      buyAllowed:
+        - "SURVIVAL"
+        - "ADVENTURE"
+
+      sellAllowed:
+        - "SURVIVAL"
+        - "ADVENTURE"
+
 adminShop:
   backups:
     # Erstellt vor Aenderungen ueber den Ingame-Editor ein Backup der server_shop.yml.

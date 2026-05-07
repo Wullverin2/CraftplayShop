@@ -20,6 +20,10 @@ public class ServerShopTransactionService {
     }
 
     public TransactionResult buy(Player player, ServerShopItem item, int amount) {
+        TransactionResult accessResult = validateAccess(player, false);
+        if (!accessResult.success()) {
+            return accessResult;
+        }
         if (!player.hasPermission(PermissionNodes.SERVER_SHOP_BUY) || !plugin.getServerShopService().allowBuy()) {
             return TransactionResult.failure("serverShop.itemNotBuyable");
         }
@@ -63,6 +67,10 @@ public class ServerShopTransactionService {
     }
 
     public TransactionResult sell(Player player, ServerShopItem item, int amount, TransactionType type) {
+        TransactionResult accessResult = validateAccess(player, true);
+        if (!accessResult.success()) {
+            return accessResult;
+        }
         if (!canSellInCurrentGameMode(player)) {
             return TransactionResult.failure("serverShop.creativeSellBlocked");
         }
@@ -99,6 +107,10 @@ public class ServerShopTransactionService {
     }
 
     public TransactionResult sellAll(Player player) {
+        TransactionResult accessResult = validateAccess(player, true);
+        if (!accessResult.success()) {
+            return accessResult;
+        }
         if (!canSellInCurrentGameMode(player)) {
             return TransactionResult.failure("serverShop.creativeSellBlocked");
         }
@@ -158,6 +170,16 @@ public class ServerShopTransactionService {
             return false;
         }
         return gameMode != GameMode.SPECTATOR || !plugin.getConfig().getBoolean("serverShop.sellProtection.blockSpectator", true);
+    }
+
+    private TransactionResult validateAccess(Player player, boolean sell) {
+        if (!plugin.getServerShopService().canUseInWorld(player)) {
+            return TransactionResult.failure("serverShop.worldBlocked");
+        }
+        if (!plugin.getServerShopService().canUseInGameMode(player, sell)) {
+            return TransactionResult.failure("serverShop.gameModeBlocked");
+        }
+        return TransactionResult.success("", 0.0D);
     }
 
     private TransactionResult validateBuyAmount(ServerShopItem item, int amount) {

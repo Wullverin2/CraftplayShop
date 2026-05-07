@@ -68,6 +68,9 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Kaufen reduziert den Bestand, Verkaufen erhoeht ihn.
 - Zu wenig Bestand blockiert Kaeufe, voller Bestand blockiert oder begrenzt Verkaeufe.
 - Stock-Anzeige in ServerShop-GUI und AdminShop-Lore.
+- AdminShop-Editor kann Kauf-/Verkaufslimits, Stock, Max-Stock und Stock-Aktivierung bearbeiten.
+- Konfigurierbare ServerShop-Schutzregeln fuer Welten und GameModes.
+- Verkauf beschaedigter Items kann blockiert werden.
 - Permission-Pruefungen fuer Kaufen und Verkaufen.
 - Anti-Dupe-Grundlogik mit Pruefung vor Ausfuehrung und Rollback-Versuch.
 - Sell Hand.

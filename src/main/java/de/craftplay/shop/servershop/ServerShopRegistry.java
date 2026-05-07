@@ -91,6 +91,9 @@ public class ServerShopRegistry {
         if (itemStack == null || itemStack.getType().isAir()) {
             return null;
         }
+        if (!plugin.getServerShopService().canSellItemStack(itemStack)) {
+            return null;
+        }
         for (ServerShopCategory category : categories.values()) {
             if (!category.enabled()) {
                 continue;

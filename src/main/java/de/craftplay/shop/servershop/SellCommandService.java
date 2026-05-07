@@ -28,6 +28,14 @@ public class SellCommandService {
 
     public void sellHand(Player player) {
         ItemStack hand = player.getInventory().getItemInMainHand();
+        if (hand == null || hand.getType().isAir()) {
+            plugin.getLanguageService().send(player, "serverShop.sellHandNoItem");
+            return;
+        }
+        if (!plugin.getServerShopService().canSellItemStack(hand)) {
+            plugin.getLanguageService().send(player, "serverShop.damagedItemBlocked");
+            return;
+        }
         ServerShopItem item = plugin.getServerShopRegistry().findSellable(hand);
         if (item == null) {
             plugin.getLanguageService().send(player, "serverShop.sellHandNoItem");
@@ -113,6 +121,10 @@ public class SellCommandService {
             ItemStack stack = holder.getInventory().getItem(slot);
             if (stack == null || stack.getType().isAir()) {
                 continue;
+            }
+            if (!plugin.getServerShopService().canSellItemStack(stack)) {
+                plugin.getLanguageService().send(player, "serverShop.damagedItemBlocked");
+                return;
             }
             ServerShopItem shopItem = plugin.getServerShopRegistry().findSellable(stack);
             if (shopItem == null) {
