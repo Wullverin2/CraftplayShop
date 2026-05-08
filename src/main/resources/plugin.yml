@@ -54,6 +54,14 @@ permissions:
     default: true
   craftplayshop.servershop.sellgui:
     default: true
+  craftplayshop.playershop.use:
+    default: true
+  craftplayshop.playershop.create:
+    default: true
+  craftplayshop.playershop.buy:
+    default: true
+  craftplayshop.playershop.admin:
+    default: op
   craftplayshop.language:
     default: true
   craftplayshop.trade.use:

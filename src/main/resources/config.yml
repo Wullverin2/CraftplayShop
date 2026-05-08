@@ -187,8 +187,53 @@ sellCommands:
   sellInventoryGui: true
 
 playerShops:
-  enabled: false
+  enabled: true
   useGuiCreation: true
+
+  # Itemvergleich fuer PlayerShop-Kisten.
+  # EXACT prueft Material und ItemMeta, MATERIAL_ONLY nur das Material.
+  itemMatchMode: "EXACT"
+
+  creation:
+    # Spieler koennen einen SELL-Kistenshop erstellen, indem sie ein Schild mit [shop]
+    # neben eine Kiste setzen. Zeile 2 = Menge, Zeile 3 = Preis.
+    signCreationEnabled: true
+
+    # Erlaubte Marker in der ersten Schildzeile.
+    signMarkers:
+      - "[shop]"
+      - "[cshop]"
+      - "shop"
+      - "sell"
+
+  sign:
+    sell:
+      # Schildtext fuer SELL-Shops nach dem Erstellen.
+      # Platzhalter: %amount%, %item%, %price%, %owner%, %stock_color%
+      lines:
+        - "%stock_color%&l[shop]"
+        - "Selling; &l%amount%"
+        - "&a%price%"
+        - "%owner%"
+    pending:
+      # Schildtext, wenn der Spieler das Item nicht in der Hand hatte.
+      lines:
+        - "&6&l[shop]"
+        - "&eItem fehlt"
+        - "&7Mit Item klicken"
+        - "&8%owner%"
+
+  protection:
+    # Blockiert das Oeffnen fremder PlayerShop-Kisten.
+    blockContainerOpenByOthers: true
+
+    # Loescht einen PlayerShop automatisch, wenn Besitzer oder Admin Schild/Kiste abbauen.
+    deleteShopOnOwnerBreak: true
+
+  plotsquared:
+    # Wenn PlotSquared vorhanden ist, werden PlayerShops innerhalb eines geloeschten Plots
+    # automatisch aus Cache und Datenbank entfernt.
+    deleteShopsOnPlotDelete: true
 
 autoSellChest:
   enabled: false

@@ -50,6 +50,26 @@ public class TableCreator {
                         "created_at BIGINT, " +
                         "PRIMARY KEY (player_uuid, category_id, item_id))");
 
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("player_shops") + " (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "owner_uuid TEXT, " +
+                        "owner_name TEXT, " +
+                        "type TEXT, " +
+                        "world TEXT, " +
+                        "container_x INTEGER, " +
+                        "container_y INTEGER, " +
+                        "container_z INTEGER, " +
+                        "sign_x INTEGER, " +
+                        "sign_y INTEGER, " +
+                        "sign_z INTEGER, " +
+                        "item_data TEXT, " +
+                        "material TEXT, " +
+                        "amount INTEGER, " +
+                        "price DOUBLE, " +
+                        "active BOOLEAN, " +
+                        "created_at BIGINT, " +
+                        "updated_at BIGINT)");
+
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("imports") + " (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "importer_name TEXT, " +

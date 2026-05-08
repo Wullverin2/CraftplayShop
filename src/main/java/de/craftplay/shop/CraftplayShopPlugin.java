@@ -83,6 +83,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
     private HeadDatabaseHook headDatabaseHook;
     private PlaceholderApiHook placeholderApiHook;
     private ProtectionService protectionService;
+    private PlayerShopService playerShopService;
 
     @Override
     public void onEnable() {
@@ -123,7 +124,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         sellCommandService = new SellCommandService(this);
         directTradeService = new DirectTradeService(this);
 
-        new PlayerShopService(this);
+        playerShopService = new PlayerShopService(this);
         new AutoSellChestService(this);
         new ReferralService(this);
         new RankShopService(this);
@@ -183,6 +184,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         }
         if (protectionService != null) {
             protectionService.loadHooks();
+        }
+        if (playerShopService != null) {
+            playerShopService.load();
         }
     }
 
@@ -357,5 +361,13 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
 
     public PlaceholderApiHook getPlaceholderApiHook() {
         return placeholderApiHook;
+    }
+
+    public ProtectionService getProtectionService() {
+        return protectionService;
+    }
+
+    public PlayerShopService getPlayerShopService() {
+        return playerShopService;
     }
 }

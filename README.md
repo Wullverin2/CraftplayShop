@@ -43,11 +43,13 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 ### Economy und Datenbank
 
 - Vault Economy Hook.
+- Vault-Auszahlung an Offline-Spieler fuer PlayerShop-Verkaeufe.
 - Sauberes Deaktivieren, wenn Vault benoetigt wird und fehlt.
 - SQLite-Datenbankbasis.
 - Tabellen fuer Transaktionen, Spieler-Einstellungen, Imports und Import-Mappings.
 - Tabelle fuer laufenden ServerShop-Stock.
 - Tabelle fuer Spieler-Favoriten im ServerShop.
+- Tabelle fuer PlayerShop-Kistenshops.
 - Async Transaktionslogging.
 - Spieler-Einstellungen mit Sprache und DirectTrade-Status.
 
@@ -126,6 +128,22 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Backup-Detail-GUI mit Dateiname, Datum und Groesse.
 - Restore-Bestaetigungs-GUI vor dem Wiederherstellen eines Backups.
 
+### PlayerShop / ChestShop
+
+- Erster PlayerShop-SELL-MVP ist aktiv.
+- Spieler erstellen einen Kistenshop intuitiv ueber ein Schild mit `[shop]` oder `[cshop]` neben einer Kiste.
+- Zeile 2 des Schilds bestimmt die Verkaufsmenge, Zeile 3 den Preis.
+- Das verkaufte Item wird beim Erstellen aus dem Item in der Hand uebernommen.
+- Rechtsklick auf Schild oder Kiste kauft die konfigurierte Menge aus dem Kistenbestand.
+- Vor dem Kauf werden Permission, Geld, Lagerbestand und Inventarplatz geprueft.
+- Bei Fehlern versucht der Kauf ein Rollback von Geld und Items.
+- Besitzer erhalten das Geld ueber Vault, auch wenn sie offline sind.
+- Fremde Spieler koennen PlayerShop-Kisten nicht als normales Inventar oeffnen.
+- Besitzer oder Admins koennen einen Shop durch Abbauen von Schild oder Kiste loeschen.
+- PlayerShop-Kaeufe werden in den Transaktionslogs gespeichert.
+- Optionaler PlotSquared-Hook entfernt PlayerShops aus Cache und Datenbank, wenn ein Plot geloescht wird.
+- BUY-, BUY_SELL- und TRADE_ITEM-Shops sind weiterhin vorbereitet, aber noch nicht vollstaendig umgesetzt.
+
 ### Commands
 
 - `/shop`
@@ -167,7 +185,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 Folgende Module sind strukturell vorbereitet, aber noch nicht vollstaendig umgesetzt:
 
-- PlayerShop / ChestShop
+- PlayerShop BUY, BUY_SELL, TRADE_ITEM, Trust, Finder und Verwaltungs-GUI
 - AutoSellChest
 - vollstaendiger DirectTrade
 - AuctionHouse

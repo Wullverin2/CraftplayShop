@@ -183,6 +183,18 @@ public class ConfigService {
         }
     }
 
+    public boolean playerShopsEnabled() {
+        return config().getBoolean("playerShops.enabled", true);
+    }
+
+    public ItemMatchMode playerShopItemMatchMode() {
+        try {
+            return ItemMatchMode.valueOf(config().getString("playerShops.itemMatchMode", "EXACT").toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException exception) {
+            return ItemMatchMode.EXACT;
+        }
+    }
+
     public String panelServerId() {
         return config().getString("panel.serverId", "change-this-server-id");
     }

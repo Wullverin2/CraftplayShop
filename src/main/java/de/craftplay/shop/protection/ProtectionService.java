@@ -1,6 +1,7 @@
 package de.craftplay.shop.protection;
 
 import de.craftplay.shop.CraftplayShopPlugin;
+import de.craftplay.shop.protection.hooks.PlotSquaredHook;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -10,6 +11,7 @@ import java.util.List;
 public class ProtectionService {
     private final CraftplayShopPlugin plugin;
     private final List<ProtectionHook> hooks = new ArrayList<>();
+    private PlotSquaredHook plotSquaredHook;
 
     public ProtectionService(CraftplayShopPlugin plugin) {
         this.plugin = plugin;
@@ -17,7 +19,15 @@ public class ProtectionService {
 
     public void loadHooks() {
         hooks.clear();
-        plugin.getPluginLogService().debug("Protection hooks are prepared as Phase 1 skeletons.");
+        if (plugin.getConfig().getBoolean("protection.plotsquared", true)
+                && plugin.getServer().getPluginManager().getPlugin("PlotSquared") != null) {
+            if (plotSquaredHook == null) {
+                plotSquaredHook = new PlotSquaredHook(plugin);
+                plotSquaredHook.register();
+            }
+            hooks.add(plotSquaredHook);
+        }
+        plugin.getPluginLogService().debug("Loaded " + hooks.size() + " protection hooks.");
     }
 
     public boolean canCreateShop(Player player, Location location) {

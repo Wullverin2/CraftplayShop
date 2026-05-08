@@ -3,6 +3,7 @@ package de.craftplay.shop.core.economy;
 import de.craftplay.shop.CraftplayShopPlugin;
 import de.craftplay.shop.core.util.NumberUtil;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
@@ -39,6 +40,11 @@ public class VaultEconomyService implements EconomyService {
 
     @Override
     public boolean deposit(Player player, double amount) {
+        return economy != null && economy.depositPlayer(player, amount).transactionSuccess();
+    }
+
+    @Override
+    public boolean deposit(OfflinePlayer player, double amount) {
         return economy != null && economy.depositPlayer(player, amount).transactionSuccess();
     }
 

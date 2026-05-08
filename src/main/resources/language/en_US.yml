@@ -67,6 +67,23 @@ trade:
   statusEnabled: "&aenabled"
   statusDisabled: "&cdisabled"
 
+playerShop:
+  noContainer: "%prefix%&cThe shop sign must be directly next to a chest or another container."
+  alreadyExists: "%prefix%&cA PlayerShop already exists on this container."
+  noHandItem: "%prefix%&cYou need to hold the item that should be sold."
+  hitSignWithItem: "%prefix%&7Now click the shop sign while holding the item you want to sell."
+  invalidAmount: "%prefix%&cThe amount on line 2 must be a positive whole number."
+  invalidPrice: "%prefix%&cThe price on line 3 must be a positive number."
+  created: "%prefix%&aPlayerShop created: &e%amount%x %item% &7for &e%price%&a."
+  deleted: "%prefix%&aPlayerShop has been deleted."
+  breakProtected: "%prefix%&cYou cannot break this PlayerShop."
+  containerProtected: "%prefix%&cThis container belongs to a PlayerShop."
+  cannotBuyOwn: "%prefix%&cYou cannot buy from your own PlayerShop."
+  missingContainer: "%prefix%&cThe shop container was not found."
+  outOfStock: "%prefix%&cThis PlayerShop does not have enough stock."
+  bought: "%prefix%&aYou bought &e%amount%x %item% &afrom &e%owner% &afor &e%price%&a."
+  sold: "%prefix%&e%buyer% &7bought &e%amount%x %item% &7from your PlayerShop for &e%price%&7."
+
 gui:
   missingFile: "%prefix%&cGUI file missing: %file%"
   missingItem: "%prefix%&cGUI item missing: %item%"

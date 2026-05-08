@@ -1,5 +1,6 @@
 package de.craftplay.shop.core.economy;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public interface EconomyService {
@@ -10,6 +11,8 @@ public interface EconomyService {
     boolean withdraw(Player player, double amount);
 
     boolean deposit(Player player, double amount);
+
+    boolean deposit(OfflinePlayer player, double amount);
 
     String format(double amount);
 }
