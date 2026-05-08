@@ -84,6 +84,10 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             favorites(sender);
             return true;
         }
+        if ("playershop".equals(sub) || "pshop".equals(sub) || "spielershop".equals(sub)) {
+            playerShop(sender, args);
+            return true;
+        }
         plugin.getLanguageService().send(sender, "general.unknownCommand");
         return true;
     }
@@ -265,10 +269,33 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         plugin.getServerShopListGui().openFavorites(player);
     }
 
+    private void playerShop(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            plugin.getLanguageService().send(sender, "general.playerOnly");
+            return;
+        }
+        if (!player.hasPermission(PermissionNodes.PLAYER_SHOP_USE)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        if (args.length > 1 && ("search".equalsIgnoreCase(args[1]) || "suche".equalsIgnoreCase(args[1]))) {
+            plugin.getPlayerShopService().requestSearch(player);
+            return;
+        }
+        if (args.length > 1 && ("mine".equalsIgnoreCase(args[1]) || "own".equalsIgnoreCase(args[1]) || "meine".equalsIgnoreCase(args[1]))) {
+            plugin.getPlayerShopService().openOwn(player);
+            return;
+        }
+        plugin.getPlayerShopService().openHome(player);
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall", "sellgui", "search", "favorites"), args[0]);
+            return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall", "sellgui", "search", "favorites", "playershop", "pshop"), args[0]);
+        }
+        if (args.length == 2 && ("playershop".equalsIgnoreCase(args[0]) || "pshop".equalsIgnoreCase(args[0]))) {
+            return filter(List.of("search", "mine", "own"), args[1]);
         }
         if (args.length == 2 && "admin".equalsIgnoreCase(args[0])) {
             return filter(List.of("editor", "reload", "servershop", "adminshop", "backup", "backups"), args[1]);

@@ -17,6 +17,8 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.WallSign;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemDisplay;
@@ -37,7 +39,9 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitTask;
 
+import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,6 +53,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class PlayerShopService implements Listener {
     private static final String SIGN_MARKER_SHOP = "[shop]";
@@ -61,6 +66,8 @@ public class PlayerShopService implements Listener {
     private final Map<Long, PlayerShop> byId = new HashMap<>();
     private final Map<String, PendingCreation> pendingCreations = new HashMap<>();
     private final Map<UUID, ChatCreation> chatCreations = new HashMap<>();
+    private final Map<UUID, Boolean> searchInputs = new HashMap<>();
+    private BukkitTask cleanupTask;
 
     public PlayerShopService(CraftplayShopPlugin plugin) {
         this.plugin = plugin;
@@ -77,6 +84,14 @@ public class PlayerShopService implements Listener {
                 spawnDisplay(shop);
             }
         }
+        startCleanupTask();
+    }
+
+    public void shutdown() {
+        if (cleanupTask != null && !cleanupTask.isCancelled()) {
+            cleanupTask.cancel();
+        }
+        cleanupTask = null;
     }
 
     public int deleteShopsInRegion(String world, int minX, int maxX, int minZ, int maxZ) {
@@ -99,6 +114,55 @@ public class PlayerShopService implements Listener {
             plugin.getTaskService().runAsync(() -> deleteMany(removed));
         }
         return removed.size();
+    }
+
+    public void openHome(Player player) {
+        YamlConfiguration gui = gui(player);
+        PlayerShopMenuHolder holder = new PlayerShopMenuHolder(PlayerShopMenuView.HOME);
+        Inventory inventory = Bukkit.createInventory(holder, size(gui, "home.size", 27), title(player, gui, "home.title", "&8PlayerShop"));
+        addConfiguredButton(player, gui, inventory, holder, "home.buttons.allShops", PlayerShopMenuAction.ALL_SHOPS);
+        addConfiguredButton(player, gui, inventory, holder, "home.buttons.ownShops", PlayerShopMenuAction.OWN_SHOPS);
+        addConfiguredButton(player, gui, inventory, holder, "home.buttons.search", PlayerShopMenuAction.SEARCH);
+        addConfiguredButton(player, gui, inventory, holder, "home.buttons.close", PlayerShopMenuAction.CLOSE);
+        player.openInventory(inventory);
+    }
+
+    public void openAll(Player player) {
+        openList(player, PlayerShopMenuView.ALL, shops -> shops, "");
+    }
+
+    public void openOwn(Player player) {
+        openList(player, PlayerShopMenuView.OWN, shops -> shops.stream()
+                .filter(shop -> shop.ownerUuid().equals(player.getUniqueId()))
+                .toList(), "");
+    }
+
+    public void requestSearch(Player player) {
+        synchronized (searchInputs) {
+            searchInputs.put(player.getUniqueId(), true);
+        }
+        player.closeInventory();
+        plugin.getLanguageService().send(player, "playerShop.searchPrompt");
+    }
+
+    public boolean hasSearchInput(Player player) {
+        synchronized (searchInputs) {
+            return searchInputs.containsKey(player.getUniqueId());
+        }
+    }
+
+    public void handleSearchInput(Player player, String message) {
+        synchronized (searchInputs) {
+            searchInputs.remove(player.getUniqueId());
+        }
+        String query = message == null ? "" : message.trim();
+        if (query.equalsIgnoreCase("cancel") || query.equalsIgnoreCase("abbrechen")) {
+            plugin.getLanguageService().send(player, "playerShop.searchCancelled");
+            return;
+        }
+        openList(player, PlayerShopMenuView.SEARCH, shops -> shops.stream()
+                .filter(shop -> matchesSearch(shop, query))
+                .toList(), query);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -210,6 +274,11 @@ public class PlayerShopService implements Listener {
             creation = chatCreations.get(event.getPlayer().getUniqueId());
         }
         if (creation == null) {
+            if (hasSearchInput(event.getPlayer())) {
+                event.setCancelled(true);
+                String message = event.getMessage();
+                plugin.getTaskService().runSync(() -> handleSearchInput(event.getPlayer(), message));
+            }
             return;
         }
         event.setCancelled(true);
@@ -234,6 +303,12 @@ public class PlayerShopService implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getInventory().getHolder() instanceof PlayerShopMenuHolder holder
+                && event.getWhoClicked() instanceof Player player) {
+            event.setCancelled(true);
+            handleMenuClick(player, holder, event);
+            return;
+        }
         if (!(event.getInventory().getHolder() instanceof PlayerShopEditHolder holder)
                 || !(event.getWhoClicked() instanceof Player player)) {
             return;
@@ -283,7 +358,8 @@ public class PlayerShopService implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryDrag(InventoryDragEvent event) {
-        if (event.getInventory().getHolder() instanceof PlayerShopEditHolder) {
+        if (event.getInventory().getHolder() instanceof PlayerShopEditHolder
+                || event.getInventory().getHolder() instanceof PlayerShopMenuHolder) {
             event.setCancelled(true);
         }
     }
@@ -594,6 +670,40 @@ public class PlayerShopService implements Listener {
         plugin.getPluginLogService().info("Removed " + shops.size() + " player shops after PlotSquared plot deletion.");
     }
 
+    private void startCleanupTask() {
+        if (cleanupTask != null && !cleanupTask.isCancelled()) {
+            cleanupTask.cancel();
+        }
+        if (!plugin.getConfig().getBoolean("playerShops.cleanup.enabled", true)) {
+            return;
+        }
+        long interval = Math.max(20L, plugin.getConfig().getLong("playerShops.cleanup.intervalSeconds", 60L) * 20L);
+        cleanupTask = plugin.getServer().getScheduler().runTaskTimer(plugin, this::cleanupMissingPhysicalShops, interval, interval);
+    }
+
+    private void cleanupMissingPhysicalShops() {
+        List<PlayerShop> invalid = snapshotShops().stream()
+                .filter(shop -> !physicalShopExists(shop))
+                .toList();
+        if (invalid.isEmpty()) {
+            return;
+        }
+        synchronized (byContainer) {
+            for (PlayerShop shop : invalid) {
+                uncache(shop);
+            }
+        }
+        plugin.getTaskService().runAsync(() -> deleteMany(invalid));
+    }
+
+    private boolean physicalShopExists(PlayerShop shop) {
+        if (Bukkit.getWorld(shop.world()) == null) {
+            return false;
+        }
+        return shop.containerLocation().getBlock().getState() instanceof Container
+                && new Location(Bukkit.getWorld(shop.world()), shop.signX(), shop.signY(), shop.signZ()).getBlock().getState() instanceof Sign;
+    }
+
     private void openEditGui(Player player, PlayerShop shop) {
         if (!player.hasPermission(PermissionNodes.PLAYER_SHOP_EDIT) && !player.hasPermission(PermissionNodes.PLAYER_SHOP_ADMIN)) {
             plugin.getLanguageService().send(player, "general.noPermission");
@@ -622,6 +732,233 @@ public class PlayerShopService implements Listener {
         )));
         inventory.setItem(26, button(Material.BARRIER, "&cSchliessen", List.of()));
         player.openInventory(inventory);
+    }
+
+    private void openList(Player player, PlayerShopMenuView view, Function<List<PlayerShop>, List<PlayerShop>> filter, String query) {
+        YamlConfiguration gui = gui(player);
+        String titlePath = switch (view) {
+            case OWN -> "list.ownTitle";
+            case SEARCH -> "list.searchTitle";
+            default -> "list.allTitle";
+        };
+        PlayerShopMenuHolder holder = new PlayerShopMenuHolder(view);
+        Inventory inventory = Bukkit.createInventory(holder, size(gui, "list.size", 54), title(player, gui, titlePath, "&8PlayerShops"));
+        addConfiguredButton(player, gui, inventory, holder, "list.buttons.back", PlayerShopMenuAction.BACK);
+        addConfiguredButton(player, gui, inventory, holder, "list.buttons.search", PlayerShopMenuAction.SEARCH);
+        addConfiguredButton(player, gui, inventory, holder, "list.buttons.ownShops", PlayerShopMenuAction.OWN_SHOPS);
+        List<Integer> slots = gui.getIntegerList("list.shopSlots");
+        if (slots.isEmpty()) {
+            slots = List.of(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34);
+        }
+        List<PlayerShop> shops = filter.apply(snapshotShops()).stream()
+                .filter(PlayerShop::active)
+                .sorted(Comparator.comparing(PlayerShop::ownerName).thenComparing(PlayerShop::material).thenComparingLong(PlayerShop::id))
+                .toList();
+        if (shops.isEmpty()) {
+            ConfigurationSection empty = gui.getConfigurationSection("list.emptyItem");
+            if (empty != null) {
+                inventory.setItem(empty.getInt("slot", 22), configuredItem(player, empty, Map.of("query", query)));
+            }
+        }
+        for (int index = 0; index < Math.min(slots.size(), shops.size()); index++) {
+            int slot = slots.get(index);
+            PlayerShop shop = shops.get(index);
+            inventory.setItem(slot, shopListItem(player, gui, shop));
+            holder.shops().put(slot, shop.id());
+        }
+        player.openInventory(inventory);
+    }
+
+    private void handleMenuClick(Player player, PlayerShopMenuHolder holder, InventoryClickEvent event) {
+        int slot = event.getRawSlot();
+        if (slot >= event.getInventory().getSize()) {
+            return;
+        }
+        PlayerShopMenuAction action = holder.actions().get(slot);
+        if (action != null) {
+            switch (action) {
+                case HOME, BACK -> openHome(player);
+                case ALL_SHOPS -> openAll(player);
+                case OWN_SHOPS -> openOwn(player);
+                case SEARCH -> requestSearch(player);
+                case CLOSE -> player.closeInventory();
+            }
+            return;
+        }
+        Long shopId = holder.shops().get(slot);
+        if (shopId == null) {
+            return;
+        }
+        PlayerShop shop = findById(shopId);
+        if (shop == null) {
+            player.closeInventory();
+            plugin.getLanguageService().send(player, "playerShop.missingContainer");
+            return;
+        }
+        if (event.isShiftClick() && event.isLeftClick()) {
+            if (!canManage(player, shop)) {
+                plugin.getLanguageService().send(player, "general.noPermission");
+                return;
+            }
+            deleteShop(shop);
+            event.getInventory().clear(slot);
+            plugin.getLanguageService().send(player, "playerShop.deleted");
+            return;
+        }
+        if (event.isRightClick()) {
+            teleportToShop(player, shop);
+            return;
+        }
+        if (event.isLeftClick()) {
+            if (!canManage(player, shop)) {
+                plugin.getLanguageService().send(player, "general.noPermission");
+                return;
+            }
+            openEditGui(player, shop);
+        }
+    }
+
+    private List<PlayerShop> snapshotShops() {
+        synchronized (byContainer) {
+            return new ArrayList<>(byId.values());
+        }
+    }
+
+    private boolean matchesSearch(PlayerShop shop, String query) {
+        String normalized = TextUtil.stripColor(query).toLowerCase(Locale.ROOT);
+        if (normalized.isBlank()) {
+            return true;
+        }
+        return TextUtil.stripColor(displayItem(shop.itemStack())).toLowerCase(Locale.ROOT).contains(normalized)
+                || shop.material().toLowerCase(Locale.ROOT).contains(normalized)
+                || shop.ownerName().toLowerCase(Locale.ROOT).contains(normalized)
+                || shop.type().name().toLowerCase(Locale.ROOT).contains(normalized);
+    }
+
+    private void teleportToShop(Player player, PlayerShop shop) {
+        Location signLocation = new Location(Bukkit.getWorld(shop.world()), shop.signX(), shop.signY(), shop.signZ());
+        if (signLocation.getWorld() == null || !(signLocation.getBlock().getState() instanceof Sign)) {
+            plugin.getLanguageService().send(player, "playerShop.missingContainer");
+            return;
+        }
+        Location target = signLocation.clone().add(0.5D, 0.0D, 0.5D);
+        BlockData data = signLocation.getBlock().getBlockData();
+        if (data instanceof WallSign wallSign) {
+            Block front = signLocation.getBlock().getRelative(wallSign.getFacing());
+            if (front.getType().isAir()) {
+                target = front.getLocation().add(0.5D, 0.0D, 0.5D);
+            }
+        }
+        target.setYaw(player.getLocation().getYaw());
+        target.setPitch(player.getLocation().getPitch());
+        player.teleport(target);
+        plugin.getLanguageService().send(player, "playerShop.teleported");
+    }
+
+    private ItemStack shopListItem(Player player, YamlConfiguration gui, PlayerShop shop) {
+        ItemStack itemStack = shop.itemStack().clone();
+        itemStack.setAmount(Math.max(1, Math.min(64, shop.amount())));
+        ConfigurationSection section = gui.getConfigurationSection("list.shopItem");
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta != null && section != null) {
+            Map<String, String> placeholders = shopPlaceholders(shop);
+            meta.setDisplayName(TextUtil.color(applyPlaceholders(player, section.getString("name", "%item%"), placeholders)));
+            List<String> lore = new ArrayList<>();
+            for (String line : section.getStringList("lore")) {
+                lore.add(TextUtil.color(applyPlaceholders(player, line, placeholders)));
+            }
+            meta.setLore(lore);
+            itemStack.setItemMeta(meta);
+        }
+        return itemStack;
+    }
+
+    private void addConfiguredButton(Player player, YamlConfiguration gui, Inventory inventory, PlayerShopMenuHolder holder, String path, PlayerShopMenuAction action) {
+        ConfigurationSection section = gui.getConfigurationSection(path);
+        if (section == null || !section.getBoolean("enabled", true)) {
+            return;
+        }
+        int slot = section.getInt("slot", -1);
+        if (slot < 0 || slot >= inventory.getSize()) {
+            return;
+        }
+        inventory.setItem(slot, configuredItem(player, section, Map.of()));
+        holder.actions().put(slot, action);
+    }
+
+    private ItemStack configuredItem(Player player, ConfigurationSection section, Map<String, String> placeholders) {
+        Material material = Material.matchMaterial(section.getString("material", "STONE"));
+        ItemStack itemStack = new ItemStack(material == null ? Material.STONE : material, Math.max(1, section.getInt("amount", 1)));
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(TextUtil.color(applyPlaceholders(player, section.getString("name", ""), placeholders)));
+            List<String> lore = new ArrayList<>();
+            for (String line : section.getStringList("lore")) {
+                lore.add(TextUtil.color(applyPlaceholders(player, line, placeholders)));
+            }
+            meta.setLore(lore);
+            itemStack.setItemMeta(meta);
+        }
+        return itemStack;
+    }
+
+    private Map<String, String> shopPlaceholders(PlayerShop shop) {
+        int stock = matchingStock(shop);
+        return Map.ofEntries(
+                Map.entry("id", Long.toString(shop.id())),
+                Map.entry("item", displayItem(shop.itemStack())),
+                Map.entry("material", shop.material()),
+                Map.entry("owner", shop.ownerName()),
+                Map.entry("type", shop.type() == PlayerShopType.BUY ? "Ankauf" : "Verkauf"),
+                Map.entry("type_en", shop.type() == PlayerShopType.BUY ? "Buying" : "Selling"),
+                Map.entry("amount", Integer.toString(shop.amount())),
+                Map.entry("price", plugin.getEconomyService().format(shop.price())),
+                Map.entry("stock", Integer.toString(stock)),
+                Map.entry("world", shop.world()),
+                Map.entry("x", Integer.toString(shop.containerX())),
+                Map.entry("y", Integer.toString(shop.containerY())),
+                Map.entry("z", Integer.toString(shop.containerZ())),
+                Map.entry("display_type", shop.displayType().name())
+        );
+    }
+
+    private int matchingStock(PlayerShop shop) {
+        if (!(shop.containerLocation().getBlock().getState() instanceof Container container)) {
+            return 0;
+        }
+        return countMatching(container.getInventory(), shop.itemStack());
+    }
+
+    private String applyPlaceholders(Player player, String value, Map<String, String> placeholders) {
+        String parsed = value == null ? "" : value;
+        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+            parsed = parsed.replace("%" + entry.getKey() + "%", entry.getValue());
+        }
+        return plugin.getPlaceholderApiHook().apply(player, parsed);
+    }
+
+    private YamlConfiguration gui(Player player) {
+        String language = plugin.getPlayerLanguageService().getLanguage(player);
+        File file = new File(plugin.getDataFolder(), "gui/" + language + "/playershop.yml");
+        if (!file.exists()) {
+            file = new File(plugin.getDataFolder(), "gui/" + plugin.getConfigService().fallbackLanguage() + "/playershop.yml");
+        }
+        return YamlConfiguration.loadConfiguration(file);
+    }
+
+    private int size(YamlConfiguration gui, String path, int fallback) {
+        int size = gui.getInt(path, fallback);
+        if (size < 9) {
+            return 9;
+        }
+        if (size > 54) {
+            return 54;
+        }
+        return ((size + 8) / 9) * 9;
+    }
+
+    private String title(Player player, YamlConfiguration gui, String path, String fallback) {
+        return TextUtil.color(plugin.getPlaceholderApiHook().apply(player, gui.getString(path, fallback)));
     }
 
     private ItemStack editItem(PlayerShop shop) {

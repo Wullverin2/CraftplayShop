@@ -47,6 +47,10 @@ public class GuiService {
             plugin.getServerShopGui().open(player);
             return;
         }
+        if ("playershop".equalsIgnoreCase(guiId)) {
+            plugin.getPlayerShopService().openHome(player);
+            return;
+        }
         String language = plugin.getPlayerLanguageService().getLanguage(player);
         GuiDefinition definition = definition(language, guiId);
         if (definition == null) {

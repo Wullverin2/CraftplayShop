@@ -147,6 +147,12 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Ueber Kistenshops schwebt eine konfigurierbare Item-Anzeige.
 - Verfuegbare Display-Typen: `NONE`, `ITEM`, `GLASS_CASE`, `LARGE_ITEM`, `ITEM_FRAME`.
 - Besitzer oder Admins oeffnen per Shift-Rechtsklick eine Bearbeitungs-GUI fuer Item, Menge, Preis und Display-Typ.
+- PlayerShop-Hauptmenue mit allen Shops, eigener Shopliste und Suche.
+- Suche per Chat nach Item, Material, Besitzer oder Shop-Typ, mit deutschen und englischen Suchbegriffen.
+- Eigene Shops koennen im GUI bearbeitet, per Rechtsklick am Schild besucht und per Shift-Linksklick geloescht werden.
+- Shop-Lore in der Liste zeigt Typ, Besitzer, Menge, Preis, Lagerbestand, Koordinaten, Display-Typ und Klickaktionen.
+- PlayerShop-GUI-Titel, Slots, Buttons und Shop-Lore sind ueber `gui/<sprache>/playershop.yml` konfigurierbar.
+- Regelmaessiger Cleanup entfernt Shops aus Cache und Datenbank, wenn Kiste oder Schild physisch fehlen.
 - Fremde Spieler koennen PlayerShop-Kisten nicht als normales Inventar oeffnen.
 - Besitzer oder Admins koennen einen Shop durch Abbauen von Schild oder Kiste loeschen.
 - PlayerShop-Kaeufe werden in den Transaktionslogs gespeichert.
@@ -164,6 +170,9 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `/shop sellgui`
 - `/shop search <suchbegriff>`
 - `/shop favorites`
+- `/shop playershop`
+- `/shop playershop search`
+- `/shop playershop mine`
 - `/servershop`
 - `/sellhand`
 - `/sellall`

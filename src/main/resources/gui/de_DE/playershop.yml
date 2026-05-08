@@ -1,10 +1,86 @@
-title: "&8PlayerShop"
-size: 27
-items:
-  unavailable:
-    enabled: true
-    slot: 13
+home:
+  title: "&8Spielershops"
+  size: 27
+  buttons:
+    allShops:
+      enabled: true
+      slot: 11
+      material: CHEST
+      name: "&aAlle Shops"
+      lore:
+        - "&7Zeigt alle aktiven Spielershops."
+        - ""
+        - "&eKlicken zum Oeffnen"
+    ownShops:
+      enabled: true
+      slot: 13
+      material: PLAYER_HEAD
+      name: "&eMeine Shops"
+      lore:
+        - "&7Verwalte deine eigenen Shops."
+        - ""
+        - "&eKlicken zum Oeffnen"
+    search:
+      enabled: true
+      slot: 15
+      material: COMPASS
+      name: "&bSuche"
+      lore:
+        - "&7Suche nach Item, Material,"
+        - "&7Besitzer oder Shop-Typ."
+        - ""
+        - "&eKlicken zum Suchen"
+    close:
+      enabled: true
+      slot: 26
+      material: BARRIER
+      name: "&cSchliessen"
+      lore: []
+
+list:
+  allTitle: "&8Alle Spielershops"
+  ownTitle: "&8Meine Spielershops"
+  searchTitle: "&8Spielershop Suche"
+  size: 54
+  shopSlots: [10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34]
+  buttons:
+    back:
+      enabled: true
+      slot: 45
+      material: ARROW
+      name: "&eZurueck"
+      lore: []
+    search:
+      enabled: true
+      slot: 49
+      material: COMPASS
+      name: "&bSuche"
+      lore:
+        - "&7Neue Suche starten."
+    ownShops:
+      enabled: true
+      slot: 53
+      material: PLAYER_HEAD
+      name: "&eMeine Shops"
+      lore:
+        - "&7Zeigt deine Shops."
+  emptyItem:
+    slot: 22
     material: BARRIER
-    name: "&cNoch nicht verfügbar"
-    leftClickActions:
-      - "MESSAGE:general.featureNotAvailable"
+    name: "&cKeine Shops gefunden"
+    lore:
+      - "&7Es wurden keine passenden Shops gefunden."
+  shopItem:
+    name: "&e%item%"
+    lore:
+      - "&7Typ: &f%type%"
+      - "&7Besitzer: &f%owner%"
+      - "&7Menge: &e%amount%"
+      - "&7Preis: &a%price%"
+      - "&7In Kiste: &e%stock%"
+      - "&7Koordinaten: &f%world% %x% %y% %z%"
+      - "&7Anzeige: &f%display_type%"
+      - ""
+      - "&eLinksklick &7Bearbeiten"
+      - "&eRechtsklick &7Zum Schild teleportieren"
+      - "&eShift-Linksklick &7Shop loeschen"

@@ -50,9 +50,23 @@ items:
     leftClickActions:
       - "OPEN_GUI:settings"
 
+  playerShop:
+    enabled: true
+    slot: 22
+    material: CHEST
+    name: "&6Player Shops"
+    lore:
+      - "&7Search shops and manage"
+      - "&7your own chest shops."
+      - ""
+      - "&eClick to open"
+    permission: "craftplayshop.playershop.use"
+    leftClickActions:
+      - "OPEN_GUI:playershop"
+
   sellGui:
     enabled: true
-    slot: 23
+    slot: 30
     material: CHEST
     name: "&6Sell GUI"
     lore:

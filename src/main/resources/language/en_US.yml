@@ -99,6 +99,9 @@ playerShop:
   sold: "%prefix%&e%buyer% &7bought &e%amount%x %item% &7from your PlayerShop for &e%price%&7."
   soldToShop: "%prefix%&aYou sold &e%amount%x %item% &ato &e%owner% &afor &e%price%&a."
   boughtFromPlayer: "%prefix%&e%seller% &7sold &e%amount%x %item% &7to your PlayerShop for &e%price%&7."
+  searchPrompt: "%prefix%&7Write an item, material, owner or shop type in chat. Write &ccancel &7to cancel."
+  searchCancelled: "%prefix%&cPlayer shop search cancelled."
+  teleported: "%prefix%&aYou have been teleported to the player shop."
 
 gui:
   missingFile: "%prefix%&cGUI file missing: %file%"

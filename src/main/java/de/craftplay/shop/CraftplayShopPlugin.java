@@ -157,6 +157,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
             serverShopRegistry.cancelStockFlushTask();
             serverShopRegistry.flushStockSync();
         }
+        if (playerShopService != null) {
+            playerShopService.shutdown();
+        }
         if (taskService != null) {
             taskService.cancelAll();
         }

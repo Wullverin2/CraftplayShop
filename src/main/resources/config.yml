@@ -214,6 +214,8 @@ playerShops:
       - "[cshop]"
       - "shop"
       - "sell"
+      - "buy"
+      - "ankaufen"
 
   sign:
     sell:
@@ -243,6 +245,12 @@ playerShops:
     # Standard-Anzeige ueber neu erstellten Kistenshops.
     # NONE, ITEM, GLASS_CASE, LARGE_ITEM oder ITEM_FRAME.
     defaultType: ITEM
+
+  cleanup:
+    # Prueft regelmaessig, ob Kiste und Schild noch existieren.
+    # Fehlende physische Shops werden aus Cache und Datenbank entfernt.
+    enabled: true
+    intervalSeconds: 60
 
   protection:
     # Blockiert das Oeffnen fremder PlayerShop-Kisten.
