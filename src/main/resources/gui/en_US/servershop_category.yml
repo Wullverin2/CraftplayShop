@@ -101,3 +101,4 @@ shopItemLore:
   - ""
   - "&eLeft click: choose buy amount"
   - "&eRight click: choose sell amount"
+  - "&eShift-click: toggle favorite"

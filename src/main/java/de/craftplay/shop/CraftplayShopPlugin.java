@@ -36,7 +36,9 @@ import de.craftplay.shop.rankshop.RankShopService;
 import de.craftplay.shop.referral.ReferralService;
 import de.craftplay.shop.servershop.SellCommandService;
 import de.craftplay.shop.servershop.ServerShopCategoryGui;
+import de.craftplay.shop.servershop.ServerShopFavoriteService;
 import de.craftplay.shop.servershop.ServerShopGui;
+import de.craftplay.shop.servershop.ServerShopListGui;
 import de.craftplay.shop.servershop.ServerShopRegistry;
 import de.craftplay.shop.servershop.ServerShopService;
 import de.craftplay.shop.servershop.ServerShopTransactionService;
@@ -68,6 +70,8 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
     private ServerShopService serverShopService;
     private ServerShopGui serverShopGui;
     private ServerShopCategoryGui serverShopCategoryGui;
+    private ServerShopListGui serverShopListGui;
+    private ServerShopFavoriteService serverShopFavoriteService;
     private ServerShopTransactionService serverShopTransactionService;
     private ServerShopAdminEditor serverShopAdminEditor;
     private SellCommandService sellCommandService;
@@ -108,10 +112,12 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         guiPlaceholderService = new GuiPlaceholderService(this);
         guiActionExecutor = new GuiActionExecutor(this);
         guiService = new GuiService(this);
+        serverShopFavoriteService = new ServerShopFavoriteService(this);
         serverShopRegistry = new ServerShopRegistry(this);
         serverShopService = new ServerShopService(this);
         serverShopGui = new ServerShopGui(this);
         serverShopCategoryGui = new ServerShopCategoryGui(this);
+        serverShopListGui = new ServerShopListGui(this);
         serverShopTransactionService = new ServerShopTransactionService(this);
         serverShopAdminEditor = new ServerShopAdminEditor(this);
         sellCommandService = new SellCommandService(this);
@@ -131,6 +137,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new GuiListener(this), this);
         for (Player player : getServer().getOnlinePlayers()) {
             playerSettingsService.loadAsync(player);
+            serverShopFavoriteService.loadAsync(player);
         }
         pluginLogService.info("CraftplayShop 0.1.0 enabled.");
     }
@@ -141,6 +148,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         if (playerSettingsService != null) {
             playerSettingsService.saveAllSync();
             playerSettingsService.clear();
+        }
+        if (serverShopFavoriteService != null) {
+            serverShopFavoriteService.clear();
         }
         if (serverShopRegistry != null) {
             serverShopRegistry.cancelStockFlushTask();
@@ -180,6 +190,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (playerSettingsService != null) {
             playerSettingsService.loadAsync(event.getPlayer());
+        }
+        if (serverShopFavoriteService != null) {
+            serverShopFavoriteService.loadAsync(event.getPlayer());
         }
     }
 
@@ -296,6 +309,14 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
 
     public ServerShopCategoryGui getServerShopCategoryGui() {
         return serverShopCategoryGui;
+    }
+
+    public ServerShopListGui getServerShopListGui() {
+        return serverShopListGui;
+    }
+
+    public ServerShopFavoriteService getServerShopFavoriteService() {
+        return serverShopFavoriteService;
     }
 
     public ServerShopTransactionService getServerShopTransactionService() {

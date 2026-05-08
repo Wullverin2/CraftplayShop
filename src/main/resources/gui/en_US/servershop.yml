@@ -1,6 +1,63 @@
 title: "&8ServerShop"
 size: 54
 
+search:
+  title: "&8Search: %query%"
+  size: 54
+  itemSlots: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44]
+  buttons:
+    back:
+      enabled: true
+      slot: 49
+      material: ARROW
+      name: "&cBack"
+      lore:
+        - "&7Back to categories."
+      leftClickActions:
+        - "OPEN_GUI:servershop"
+    newSearch:
+      enabled: true
+      slot: 50
+      material: OAK_SIGN
+      name: "&eNew Search"
+      lore:
+        - "&7Enter a new search term."
+      leftClickActions:
+        - "SERVER_SHOP_SEARCH"
+    favorites:
+      enabled: true
+      slot: 48
+      material: NETHER_STAR
+      name: "&bFavorites"
+      lore:
+        - "&7Open your favorites."
+      leftClickActions:
+        - "SERVER_SHOP_FAVORITES"
+
+favorites:
+  title: "&8ServerShop Favorites"
+  size: 54
+  itemSlots: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44]
+  buttons:
+    back:
+      enabled: true
+      slot: 49
+      material: ARROW
+      name: "&cBack"
+      lore:
+        - "&7Back to categories."
+      leftClickActions:
+        - "OPEN_GUI:servershop"
+    search:
+      enabled: true
+      slot: 50
+      material: COMPASS
+      name: "&eSearch"
+      lore:
+        - "&7Open ServerShop search."
+      leftClickActions:
+        - "SERVER_SHOP_SEARCH"
+
 filler:
   enabled: true
   material: BLACK_STAINED_GLASS_PANE
@@ -8,6 +65,28 @@ filler:
   slots: [0, 1, 2, 3, 4, 5, 6, 7, 8, 45, 46, 47, 48, 50, 51, 52, 53]
 
 items:
+  search:
+    enabled: true
+    slot: 47
+    material: COMPASS
+    name: "&eServerShop Search"
+    lore:
+      - "&7Search by name, ID or material."
+      - ""
+      - "&eClick to search"
+    leftClickActions:
+      - "SERVER_SHOP_SEARCH"
+  favorites:
+    enabled: true
+    slot: 51
+    material: NETHER_STAR
+    name: "&bFavorites"
+    lore:
+      - "&7Your marked shop items."
+      - ""
+      - "&eClick to open"
+    leftClickActions:
+      - "SERVER_SHOP_FAVORITES"
   back:
     enabled: true
     slot: 49
@@ -22,3 +101,15 @@ categoryLore:
   - "&7Click to open this category."
   - ""
   - "&eLeft click: Open"
+
+listItemLore:
+  - "&7Category: &f%category%"
+  - "&7Material: &f%material%"
+  - "&7Buy: &e%buy_price%"
+  - "&7Sell: &e%sell_price%"
+  - "&7Stock: &f%stock% &7/ &f%max_stock%"
+  - "&7Favorite: %favorite_status%"
+  - ""
+  - "&eLeft click: choose buy amount"
+  - "&eRight click: choose sell amount"
+  - "&eShift-click: toggle favorite"

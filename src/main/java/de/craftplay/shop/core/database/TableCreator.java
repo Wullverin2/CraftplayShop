@@ -43,6 +43,13 @@ public class TableCreator {
                         "updated_at BIGINT, " +
                         "PRIMARY KEY (category_id, item_id))");
 
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("server_shop_favorites") + " (" +
+                        "player_uuid TEXT, " +
+                        "category_id TEXT, " +
+                        "item_id TEXT, " +
+                        "created_at BIGINT, " +
+                        "PRIMARY KEY (player_uuid, category_id, item_id))");
+
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("imports") + " (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "importer_name TEXT, " +

@@ -74,6 +74,11 @@ public class ServerShopCategoryGui {
             plugin.getLanguageService().send(player, "gui.missingItem", Map.of("item", itemId));
             return;
         }
+        if (event.isShiftClick()) {
+            plugin.getServerShopListGui().toggleFavorite(player, item);
+            open(player, holder.categoryId());
+            return;
+        }
         if (!plugin.getConfig().getBoolean("serverShop.amountSelection.enabled", true)) {
             int amount = event.isShiftClick() ? item.material().getMaxStackSize() : 1;
             TransactionResult result = event.isRightClick()
@@ -156,7 +161,7 @@ public class ServerShopCategoryGui {
         executeSelectedAmount(player, pending.categoryId(), pending.itemId(), pending.action(), amount, true);
     }
 
-    private void openAmountSelection(Player player, String categoryId, String itemId, ServerShopAction action) {
+    public void openAmountSelection(Player player, String categoryId, String itemId, ServerShopAction action) {
         ServerShopCategory category = plugin.getServerShopRegistry().category(categoryId);
         ServerShopItem item = category == null ? null : category.item(itemId);
         if (category == null || item == null) {

@@ -76,6 +76,14 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             sellGui(sender);
             return true;
         }
+        if ("search".equals(sub) || "suche".equals(sub)) {
+            search(sender, args);
+            return true;
+        }
+        if ("favorites".equals(sub) || "favourites".equals(sub) || "favoriten".equals(sub)) {
+            favorites(sender);
+            return true;
+        }
         plugin.getLanguageService().send(sender, "general.unknownCommand");
         return true;
     }
@@ -229,10 +237,38 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         plugin.getSellCommandService().openSellGui(player);
     }
 
+    private void search(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            plugin.getLanguageService().send(sender, "general.playerOnly");
+            return;
+        }
+        if (!player.hasPermission(PermissionNodes.SERVER_SHOP_USE)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        if (args.length < 2) {
+            plugin.getServerShopListGui().requestSearch(player);
+            return;
+        }
+        plugin.getServerShopListGui().openSearch(player, String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length)));
+    }
+
+    private void favorites(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            plugin.getLanguageService().send(sender, "general.playerOnly");
+            return;
+        }
+        if (!player.hasPermission(PermissionNodes.SERVER_SHOP_USE)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        plugin.getServerShopListGui().openFavorites(player);
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall", "sellgui"), args[0]);
+            return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall", "sellgui", "search", "favorites"), args[0]);
         }
         if (args.length == 2 && "admin".equalsIgnoreCase(args[0])) {
             return filter(List.of("editor", "reload", "servershop", "adminshop", "backup", "backups"), args[1]);

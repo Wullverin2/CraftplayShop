@@ -46,6 +46,9 @@ public class GuiActionExecutor {
             case "OPEN_GUI" -> plugin.getGuiService().open(player, value);
             case "CLOSE" -> player.closeInventory();
             case "SERVER_SHOP_CATEGORY" -> plugin.getServerShopCategoryGui().open(player, value);
+            case "SERVER_SHOP_SEARCH" -> plugin.getServerShopListGui().requestSearch(player);
+            case "SERVER_SHOP_SEARCH_RESULTS" -> plugin.getServerShopListGui().openSearch(player, value);
+            case "SERVER_SHOP_FAVORITES" -> plugin.getServerShopListGui().openFavorites(player);
             case "PLAYER_COMMAND" -> runPlayerCommand(player, value);
             case "CONSOLE_COMMAND" -> runConsoleCommand(player, value);
             case "CUSTOM_COMMAND", "COMMAND" -> runPlayerCommand(player, value);

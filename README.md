@@ -47,6 +47,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - SQLite-Datenbankbasis.
 - Tabellen fuer Transaktionen, Spieler-Einstellungen, Imports und Import-Mappings.
 - Tabelle fuer laufenden ServerShop-Stock.
+- Tabelle fuer Spieler-Favoriten im ServerShop.
 - Async Transaktionslogging.
 - Spieler-Einstellungen mit Sprache und DirectTrade-Status.
 
@@ -74,6 +75,10 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - AdminShop-Editor kann Kauf-/Verkaufslimits, Stock, Max-Stock und Stock-Aktivierung bearbeiten.
 - Konfigurierbare ServerShop-Schutzregeln fuer Welten und GameModes.
 - Verkauf beschaedigter Items kann blockiert werden.
+- ServerShop-Suche nach Item-Name, Item-ID, Material, Kategorie-ID und Kategorie-Name.
+- Favoriten-System pro Spieler mit SQLite-Speicherung.
+- Favoriten-GUI und Such-GUI mit Kaufen/Verkaufen per Mengenauswahl.
+- Shift-Klick auf ein ServerShop-Item setzt oder entfernt den Favoriten.
 - Permission-Pruefungen fuer Kaufen und Verkaufen.
 - Anti-Dupe-Grundlogik mit Pruefung vor Ausfuehrung und Rollback-Versuch.
 - Sell Hand.
@@ -130,6 +135,8 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `/shop sellhand`
 - `/shop sellall`
 - `/shop sellgui`
+- `/shop search <suchbegriff>`
+- `/shop favorites`
 - `/servershop`
 - `/sellhand`
 - `/sellall`

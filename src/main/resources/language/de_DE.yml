@@ -50,6 +50,14 @@ serverShop:
   stockDisabled: "deaktiviert"
   actionBuy: "Kaufen"
   actionSell: "Verkaufen"
+  searchInput: "%prefix%&7Schreibe einen Suchbegriff in den Chat. Suche nach Name, ID oder Material. Schreibe &ccancel &7zum Abbrechen."
+  searchCancelled: "%prefix%&cSuche abgebrochen."
+  searchNoResults: "%prefix%&cKeine ServerShop-Items gefunden."
+  favoritesEmpty: "%prefix%&7Du hast noch keine ServerShop-Favoriten."
+  favoriteAdded: "%prefix%&a%item% &awurde zu deinen Favoriten hinzugefuegt."
+  favoriteRemoved: "%prefix%&e%item% &7wurde aus deinen Favoriten entfernt."
+  favoriteYes: "&aJa"
+  favoriteNo: "&cNein"
 
 trade:
   disabledSelf: "%prefix%&cDu hast direkte Handelsanfragen deaktiviert."
