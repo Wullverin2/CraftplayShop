@@ -15,7 +15,11 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.WallSign;
+import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -23,6 +27,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -30,6 +36,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -46,10 +53,12 @@ import java.util.UUID;
 public class PlayerShopService implements Listener {
     private static final String SIGN_MARKER_SHOP = "[shop]";
     private static final String SIGN_MARKER_CSHOP = "[cshop]";
+    private static final String DISPLAY_TAG_PREFIX = "craftplayshop_playershop_display_";
 
     private final CraftplayShopPlugin plugin;
     private final Map<String, PlayerShop> byContainer = new HashMap<>();
     private final Map<String, PlayerShop> bySign = new HashMap<>();
+    private final Map<Long, PlayerShop> byId = new HashMap<>();
     private final Map<String, PendingCreation> pendingCreations = new HashMap<>();
     private final Map<UUID, ChatCreation> chatCreations = new HashMap<>();
 
@@ -62,8 +71,10 @@ public class PlayerShopService implements Listener {
         synchronized (byContainer) {
             byContainer.clear();
             bySign.clear();
+            byId.clear();
             for (PlayerShop shop : loadShops()) {
                 cache(shop);
+                spawnDisplay(shop);
             }
         }
     }
@@ -171,17 +182,19 @@ public class PlayerShopService implements Listener {
         if (completePendingCreation(event)) {
             return;
         }
+        PlayerShop shop = findByLocation(event.getClickedBlock().getLocation());
+        if (shop != null && event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getPlayer().isSneaking() && canManage(event.getPlayer(), shop)) {
+            event.setCancelled(true);
+            openEditGui(event.getPlayer(), shop);
+            return;
+        }
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
-        PlayerShop shop = findByLocation(event.getClickedBlock().getLocation());
         if (shop == null || !shop.active()) {
             return;
         }
         Player player = event.getPlayer();
-        if (player.getUniqueId().equals(shop.ownerUuid()) && player.isSneaking() && shop.isContainer(event.getClickedBlock().getLocation())) {
-            return;
-        }
         event.setCancelled(true);
         if (shop.type() == PlayerShopType.SELL) {
             buyFromShop(player, shop);
@@ -220,6 +233,62 @@ public class PlayerShopService implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!(event.getInventory().getHolder() instanceof PlayerShopEditHolder holder)
+                || !(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        event.setCancelled(true);
+        PlayerShop shop = findById(holder.shopId());
+        if (shop == null || !canManage(player, shop)) {
+            player.closeInventory();
+            return;
+        }
+        int slot = event.getRawSlot();
+        if (slot >= event.getInventory().getSize()) {
+            return;
+        }
+        if (slot == 11) {
+            ItemStack cursor = event.getCursor();
+            ItemStack replacement = cursor == null || cursor.getType().isAir() ? player.getInventory().getItemInMainHand() : cursor;
+            if (replacement == null || replacement.getType().isAir()) {
+                plugin.getLanguageService().send(player, "playerShop.noHandItem");
+                return;
+            }
+            ItemStack template = replacement.clone();
+            template.setAmount(1);
+            updateShop(player, shop, template, shop.amount(), shop.price(), shop.displayType());
+            return;
+        }
+        if (slot == 13) {
+            int delta = event.isShiftClick() ? 10 : 1;
+            int amount = event.isRightClick() ? shop.amount() - delta : shop.amount() + delta;
+            updateShop(player, shop, shop.itemStack(), Math.max(1, amount), shop.price(), shop.displayType());
+            return;
+        }
+        if (slot == 15) {
+            double delta = event.isShiftClick() ? 10.0D : 1.0D;
+            double price = event.isRightClick() ? shop.price() - delta : shop.price() + delta;
+            updateShop(player, shop, shop.itemStack(), shop.amount(), Math.max(0.01D, price), shop.displayType());
+            return;
+        }
+        if (slot == 22) {
+            updateShop(player, shop, shop.itemStack(), shop.amount(), shop.price(), nextDisplayType(shop.displayType()));
+            return;
+        }
+        if (slot == 26) {
+            player.closeInventory();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (event.getInventory().getHolder() instanceof PlayerShopEditHolder) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         if (!plugin.getConfigService().playerShopsEnabled()) {
             return;
@@ -241,12 +310,16 @@ public class PlayerShopService implements Listener {
     }
 
     private PlayerShop createShop(Player player, PlayerShopType type, Location container, Location sign, ItemStack itemStack, int amount, double price) {
+        return createShop(player, type, container, sign, itemStack, amount, price, defaultDisplayType());
+    }
+
+    private PlayerShop createShop(Player player, PlayerShopType type, Location container, Location sign, ItemStack itemStack, int amount, double price, PlayerShopDisplayType displayType) {
         String table = plugin.getDatabaseService().table("player_shops");
         long now = System.currentTimeMillis();
         synchronized (plugin.getDatabaseService().lock()) {
             try (PreparedStatement statement = plugin.getDatabaseService().connection().prepareStatement(
-                    "INSERT INTO " + table + " (owner_uuid, owner_name, type, world, container_x, container_y, container_z, sign_x, sign_y, sign_z, item_data, material, amount, price, active, created_at, updated_at) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO " + table + " (owner_uuid, owner_name, type, world, container_x, container_y, container_z, sign_x, sign_y, sign_z, item_data, material, amount, price, display_type, active, created_at, updated_at) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS)) {
                 statement.setString(1, player.getUniqueId().toString());
                 statement.setString(2, player.getName());
@@ -262,18 +335,20 @@ public class PlayerShopService implements Listener {
                 statement.setString(12, itemStack.getType().name());
                 statement.setInt(13, amount);
                 statement.setDouble(14, price);
-                statement.setBoolean(15, true);
-                statement.setLong(16, now);
+                statement.setString(15, displayType.name());
+                statement.setBoolean(16, true);
                 statement.setLong(17, now);
+                statement.setLong(18, now);
                 statement.executeUpdate();
                 try (ResultSet keys = statement.getGeneratedKeys()) {
                     if (keys.next()) {
                         PlayerShop shop = new PlayerShop(keys.getLong(1), player.getUniqueId(), player.getName(), type,
                                 container.getWorld().getName(), container.getBlockX(), container.getBlockY(), container.getBlockZ(),
-                                sign.getBlockX(), sign.getBlockY(), sign.getBlockZ(), itemStack, itemStack.getType().name(), amount, price, true, now, now);
+                                sign.getBlockX(), sign.getBlockY(), sign.getBlockZ(), itemStack, itemStack.getType().name(), amount, price, displayType, true, now, now);
                         synchronized (byContainer) {
                             cache(shop);
                         }
+                        spawnDisplay(shop);
                         return shop;
                     }
                 }
@@ -471,6 +546,7 @@ public class PlayerShopService implements Listener {
                             result.getString("material"),
                             result.getInt("amount"),
                             result.getDouble("price"),
+                            displayType(result.getString("display_type")),
                             result.getBoolean("active"),
                             result.getLong("created_at"),
                             result.getLong("updated_at")));
@@ -518,6 +594,100 @@ public class PlayerShopService implements Listener {
         plugin.getPluginLogService().info("Removed " + shops.size() + " player shops after PlotSquared plot deletion.");
     }
 
+    private void openEditGui(Player player, PlayerShop shop) {
+        if (!player.hasPermission(PermissionNodes.PLAYER_SHOP_EDIT) && !player.hasPermission(PermissionNodes.PLAYER_SHOP_ADMIN)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        Inventory inventory = Bukkit.createInventory(new PlayerShopEditHolder(shop.id()), 27,
+                TextUtil.color(plugin.getLanguageService().get(player, "playerShop.editTitle")));
+        inventory.setItem(11, editItem(shop));
+        inventory.setItem(13, button(Material.CLOCK, "&eMenge", List.of(
+                "&7Aktuell: &e" + shop.amount(),
+                "&7Linksklick: +1",
+                "&7Shift-Linksklick: +10",
+                "&7Rechtsklick: -1",
+                "&7Shift-Rechtsklick: -10"
+        )));
+        inventory.setItem(15, button(Material.EMERALD, "&aPreis", List.of(
+                "&7Aktuell: &e" + plugin.getEconomyService().format(shop.price()),
+                "&7Linksklick: +1",
+                "&7Shift-Linksklick: +10",
+                "&7Rechtsklick: -1",
+                "&7Shift-Rechtsklick: -10"
+        )));
+        inventory.setItem(22, button(Material.ITEM_FRAME, "&bAnzeige", List.of(
+                "&7Aktuell: &e" + shop.displayType().name(),
+                "&7Klicken zum Wechseln"
+        )));
+        inventory.setItem(26, button(Material.BARRIER, "&cSchliessen", List.of()));
+        player.openInventory(inventory);
+    }
+
+    private ItemStack editItem(PlayerShop shop) {
+        ItemStack itemStack = shop.itemStack().clone();
+        itemStack.setAmount(1);
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta != null) {
+            List<String> lore = meta.hasLore() && meta.getLore() != null ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+            lore.add("");
+            lore.add(TextUtil.color("&7Klicke mit einem Item am Cursor"));
+            lore.add(TextUtil.color("&7oder in der Hand, um das Shop-Item zu aendern."));
+            meta.setLore(lore);
+            itemStack.setItemMeta(meta);
+        }
+        return itemStack;
+    }
+
+    private ItemStack button(Material material, String name, List<String> loreLines) {
+        ItemStack itemStack = new ItemStack(material);
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(TextUtil.color(name));
+            meta.setLore(loreLines.stream().map(TextUtil::color).toList());
+            itemStack.setItemMeta(meta);
+        }
+        return itemStack;
+    }
+
+    private void updateShop(Player player, PlayerShop oldShop, ItemStack itemStack, int amount, double price, PlayerShopDisplayType displayType) {
+        long now = System.currentTimeMillis();
+        PlayerShop updated = new PlayerShop(oldShop.id(), oldShop.ownerUuid(), oldShop.ownerName(), oldShop.type(),
+                oldShop.world(), oldShop.containerX(), oldShop.containerY(), oldShop.containerZ(),
+                oldShop.signX(), oldShop.signY(), oldShop.signZ(), itemStack, itemStack.getType().name(), amount, price,
+                displayType, oldShop.active(), oldShop.createdAt(), now);
+        synchronized (byContainer) {
+            uncache(oldShop);
+            cache(updated);
+        }
+        updateSign(updated);
+        spawnDisplay(updated);
+        saveShopAsync(updated);
+        openEditGui(player, updated);
+        plugin.getLanguageService().send(player, "playerShop.updated");
+    }
+
+    private void saveShopAsync(PlayerShop shop) {
+        plugin.getTaskService().runAsync(() -> {
+            String table = plugin.getDatabaseService().table("player_shops");
+            synchronized (plugin.getDatabaseService().lock()) {
+                try (PreparedStatement statement = plugin.getDatabaseService().connection().prepareStatement(
+                        "UPDATE " + table + " SET item_data = ?, material = ?, amount = ?, price = ?, display_type = ?, updated_at = ? WHERE id = ?")) {
+                    statement.setString(1, plugin.getItemSerializer().serialize(shop.itemStack()));
+                    statement.setString(2, shop.material());
+                    statement.setInt(3, shop.amount());
+                    statement.setDouble(4, shop.price());
+                    statement.setString(5, shop.displayType().name());
+                    statement.setLong(6, shop.updatedAt());
+                    statement.setLong(7, shop.id());
+                    statement.executeUpdate();
+                } catch (SQLException exception) {
+                    plugin.getPluginLogService().error("Could not update player shop.", exception);
+                }
+            }
+        });
+    }
+
     private PlayerShop findByInventory(Inventory inventory) {
         InventoryHolder holder = inventory.getHolder();
         if (!(holder instanceof BlockState state)) {
@@ -537,14 +707,23 @@ public class PlayerShopService implements Listener {
         }
     }
 
+    private PlayerShop findById(long id) {
+        synchronized (byContainer) {
+            return byId.get(id);
+        }
+    }
+
     private void cache(PlayerShop shop) {
         byContainer.put(key(shop.world(), shop.containerX(), shop.containerY(), shop.containerZ()), shop);
         bySign.put(key(shop.world(), shop.signX(), shop.signY(), shop.signZ()), shop);
+        byId.put(shop.id(), shop);
     }
 
     private void uncache(PlayerShop shop) {
         byContainer.remove(key(shop.world(), shop.containerX(), shop.containerY(), shop.containerZ()));
         bySign.remove(key(shop.world(), shop.signX(), shop.signY(), shop.signZ()));
+        byId.remove(shop.id());
+        removeDisplay(shop);
     }
 
     private String key(String world, int x, int y, int z) {
@@ -605,7 +784,7 @@ public class PlayerShopService implements Listener {
         ItemStack template = handItem.clone();
         template.setAmount(1);
         synchronized (chatCreations) {
-            chatCreations.put(player.getUniqueId(), new ChatCreation(container.getLocation(), template, null, 0, 0.0D, CreationStep.TYPE));
+            chatCreations.put(player.getUniqueId(), new ChatCreation(container.getLocation(), event.getBlockFace(), template, null, 0, 0.0D, CreationStep.TYPE));
         }
         plugin.getLanguageService().send(player, "playerShop.creationTypePrompt");
         event.setCancelled(true);
@@ -634,8 +813,8 @@ public class PlayerShopService implements Listener {
                 plugin.getLanguageService().send(player, "playerShop.creationTypeInvalid");
                 return;
             }
-            updateChatCreation(player, new ChatCreation(creation.containerLocation(), creation.itemStack(), type, 0, 0.0D, CreationStep.AMOUNT));
-            plugin.getLanguageService().send(player, "playerShop.creationAmountPrompt");
+            updateChatCreation(player, new ChatCreation(creation.containerLocation(), creation.clickedFace(), creation.itemStack(), type, 0, 0.0D, CreationStep.AMOUNT));
+            plugin.getLanguageService().send(player, type == PlayerShopType.BUY ? "playerShop.creationBuyAmountPrompt" : "playerShop.creationSellAmountPrompt");
             return;
         }
         if (creation.step() == CreationStep.AMOUNT) {
@@ -644,7 +823,7 @@ public class PlayerShopService implements Listener {
                 plugin.getLanguageService().send(player, "playerShop.invalidAmount");
                 return;
             }
-            updateChatCreation(player, new ChatCreation(creation.containerLocation(), creation.itemStack(), creation.type(), amount, 0.0D, CreationStep.PRICE));
+            updateChatCreation(player, new ChatCreation(creation.containerLocation(), creation.clickedFace(), creation.itemStack(), creation.type(), amount, 0.0D, CreationStep.PRICE));
             plugin.getLanguageService().send(player, "playerShop.creationPricePrompt", Map.of(
                     "amount", Integer.toString(amount),
                     "item", displayItem(creation.itemStack())
@@ -656,7 +835,7 @@ public class PlayerShopService implements Listener {
             plugin.getLanguageService().send(player, "playerShop.invalidPrice");
             return;
         }
-        Location signLocation = placeAutoSign(creation.containerLocation());
+        Location signLocation = placeAutoSign(creation.containerLocation(), creation.clickedFace(), player);
         if (signLocation == null) {
             plugin.getLanguageService().send(player, "playerShop.noSignSpace");
             return;
@@ -694,23 +873,34 @@ public class PlayerShopService implements Listener {
         };
     }
 
-    private Location placeAutoSign(Location containerLocation) {
+    private Location placeAutoSign(Location containerLocation, BlockFace clickedFace, Player player) {
         Block container = containerLocation.getBlock();
-        for (BlockFace face : List.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST)) {
-            Block signBlock = container.getRelative(face);
-            if (!signBlock.getType().isAir()) {
-                continue;
-            }
-            Material material = autoSignMaterial();
-            signBlock.setType(material, false);
-            BlockData data = signBlock.getBlockData();
-            if (data instanceof WallSign wallSign) {
-                wallSign.setFacing(face);
-                signBlock.setBlockData(wallSign, false);
-                return signBlock.getLocation();
-            }
-            signBlock.setType(Material.AIR, false);
+        BlockFace face = clickedFace == null ? BlockFace.NORTH : clickedFace;
+        if (face == BlockFace.DOWN) {
+            return null;
         }
+        Block signBlock = container.getRelative(face);
+        if (!signBlock.getType().isAir()) {
+            return null;
+        }
+        if (face == BlockFace.UP) {
+            signBlock.setType(autoStandingSignMaterial(), false);
+            BlockData data = signBlock.getBlockData();
+            if (data instanceof Directional directional) {
+                directional.setFacing(player.getFacing().getOppositeFace());
+                signBlock.setBlockData(directional, false);
+            }
+            return signBlock.getLocation();
+        }
+        Material material = autoSignMaterial();
+        signBlock.setType(material, false);
+        BlockData data = signBlock.getBlockData();
+        if (data instanceof WallSign wallSign) {
+            wallSign.setFacing(face);
+            signBlock.setBlockData(wallSign, false);
+            return signBlock.getLocation();
+        }
+        signBlock.setType(Material.AIR, false);
         return null;
     }
 
@@ -719,6 +909,15 @@ public class PlayerShopService implements Listener {
         Material material = Material.matchMaterial(configured == null ? "" : configured);
         if (material == null || !material.name().endsWith("_WALL_SIGN")) {
             return Material.OAK_WALL_SIGN;
+        }
+        return material;
+    }
+
+    private Material autoStandingSignMaterial() {
+        String configured = plugin.getConfig().getString("playerShops.creation.autoStandingSignMaterial", "OAK_SIGN");
+        Material material = Material.matchMaterial(configured == null ? "" : configured);
+        if (material == null || !material.name().endsWith("_SIGN") || material.name().endsWith("_WALL_SIGN")) {
+            return Material.OAK_SIGN;
         }
         return material;
     }
@@ -963,6 +1162,70 @@ public class PlayerShopService implements Listener {
         return stack;
     }
 
+    private void spawnDisplay(PlayerShop shop) {
+        removeDisplay(shop);
+        if (shop.displayType() == PlayerShopDisplayType.NONE || Bukkit.getWorld(shop.world()) == null) {
+            return;
+        }
+        Location base = shop.containerLocation().add(0.5D, 1.35D, 0.5D);
+        String tag = displayTag(shop);
+        ItemStack displayItem = shop.itemStack().clone();
+        displayItem.setAmount(1);
+        try {
+            if (shop.displayType() == PlayerShopDisplayType.GLASS_CASE) {
+                BlockDisplay glass = base.getWorld().spawn(base.clone().subtract(0.25D, 0.25D, 0.25D), BlockDisplay.class);
+                glass.setBlock(Material.GLASS.createBlockData());
+                glass.addScoreboardTag(tag);
+            }
+            ItemDisplay itemDisplay = base.getWorld().spawn(base, ItemDisplay.class);
+            itemDisplay.setItemStack(displayItem);
+            itemDisplay.setItemDisplayTransform(shop.displayType() == PlayerShopDisplayType.ITEM_FRAME
+                    ? ItemDisplay.ItemDisplayTransform.GUI
+                    : ItemDisplay.ItemDisplayTransform.FIXED);
+            itemDisplay.addScoreboardTag(tag);
+            if (shop.displayType() == PlayerShopDisplayType.LARGE_ITEM) {
+                itemDisplay.setDisplayWidth(1.4F);
+                itemDisplay.setDisplayHeight(1.4F);
+            }
+        } catch (RuntimeException exception) {
+            plugin.getPluginLogService().warn("Could not spawn player shop display for shop " + shop.id() + ": " + exception.getMessage());
+        }
+    }
+
+    private void removeDisplay(PlayerShop shop) {
+        if (Bukkit.getWorld(shop.world()) == null) {
+            return;
+        }
+        String tag = displayTag(shop);
+        Location center = shop.containerLocation().add(0.5D, 1.2D, 0.5D);
+        for (Entity entity : center.getWorld().getNearbyEntities(center, 2.0D, 2.0D, 2.0D)) {
+            if (entity.getScoreboardTags().contains(tag)) {
+                entity.remove();
+            }
+        }
+    }
+
+    private String displayTag(PlayerShop shop) {
+        return DISPLAY_TAG_PREFIX + shop.id();
+    }
+
+    private PlayerShopDisplayType nextDisplayType(PlayerShopDisplayType current) {
+        PlayerShopDisplayType[] values = PlayerShopDisplayType.values();
+        return values[(current.ordinal() + 1) % values.length];
+    }
+
+    private PlayerShopDisplayType defaultDisplayType() {
+        return displayType(plugin.getConfig().getString("playerShops.display.defaultType", "ITEM"));
+    }
+
+    private PlayerShopDisplayType displayType(String value) {
+        try {
+            return PlayerShopDisplayType.valueOf(value == null ? "ITEM" : value.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException exception) {
+            return PlayerShopDisplayType.ITEM;
+        }
+    }
+
     private String displayItem(ItemStack itemStack) {
         if (itemStack == null || itemStack.getType() == Material.AIR) {
             return "AIR";
@@ -979,7 +1242,7 @@ public class PlayerShopService implements Listener {
         PRICE
     }
 
-    private record ChatCreation(Location containerLocation, ItemStack itemStack, PlayerShopType type, int amount, double price, CreationStep step) {
+    private record ChatCreation(Location containerLocation, BlockFace clickedFace, ItemStack itemStack, PlayerShopType type, int amount, double price, CreationStep step) {
     }
 
     private record PendingCreation(UUID ownerUuid, String ownerName, PlayerShopType type, Location containerLocation, Location signLocation, int amount, double price) {

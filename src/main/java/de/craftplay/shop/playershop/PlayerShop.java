@@ -21,6 +21,7 @@ public record PlayerShop(
         String material,
         int amount,
         double price,
+        PlayerShopDisplayType displayType,
         boolean active,
         long createdAt,
         long updatedAt

@@ -66,9 +66,11 @@ public class TableCreator {
                         "material TEXT, " +
                         "amount INTEGER, " +
                         "price DOUBLE, " +
+                        "display_type TEXT, " +
                         "active BOOLEAN, " +
                         "created_at BIGINT, " +
                         "updated_at BIGINT)");
+                addColumnIfMissing(statement, database.table("player_shops"), "display_type", "TEXT");
 
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("imports") + " (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -95,6 +97,17 @@ public class TableCreator {
                         "target_type TEXT, " +
                         "target_id TEXT, " +
                         "notes TEXT)");
+            }
+        }
+    }
+
+    private void addColumnIfMissing(Statement statement, String table, String column, String type) throws SQLException {
+        try {
+            statement.executeUpdate("ALTER TABLE " + table + " ADD COLUMN " + column + " " + type);
+        } catch (SQLException exception) {
+            String message = exception.getMessage();
+            if (message == null || !message.toLowerCase(java.util.Locale.ROOT).contains("duplicate column")) {
+                throw exception;
             }
         }
     }

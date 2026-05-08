@@ -201,6 +201,9 @@ playerShops:
     # Material fuer automatisch gesetzte Shop-Schilder.
     autoSignMaterial: OAK_WALL_SIGN
 
+    # Material fuer automatische stehende Schilder, wenn oben auf eine Kiste geklickt wird.
+    autoStandingSignMaterial: OAK_SIGN
+
     # Spieler koennen einen SELL-Kistenshop erstellen, indem sie ein Schild mit [shop]
     # neben eine Kiste setzen. Zeile 2 = Menge, Zeile 3 = Preis.
     signCreationEnabled: true
@@ -235,6 +238,11 @@ playerShops:
         - "&eItem fehlt"
         - "&7Mit Item klicken"
         - "&8%owner%"
+
+  display:
+    # Standard-Anzeige ueber neu erstellten Kistenshops.
+    # NONE, ITEM, GLASS_CASE, LARGE_ITEM oder ITEM_FRAME.
+    defaultType: ITEM
 
   protection:
     # Blockiert das Oeffnen fremder PlayerShop-Kisten.
