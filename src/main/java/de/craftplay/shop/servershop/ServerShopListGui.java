@@ -80,12 +80,8 @@ public class ServerShopListGui {
             reopen(player, holder);
             return;
         }
-        if (event.isShiftClick()) {
-            toggleFavorite(player, item);
-            reopen(player, holder);
-            return;
-        }
-        plugin.getServerShopCategoryGui().openAmountSelection(player, item.categoryId(), item.id(), event.isRightClick() ? ServerShopAction.SELL : ServerShopAction.BUY);
+        plugin.getServerShopCategoryGui().executeClassicTransaction(player, item, event.isRightClick(), event.isShiftClick());
+        reopen(player, holder);
     }
 
     public void toggleFavorite(Player player, ServerShopItem item) {

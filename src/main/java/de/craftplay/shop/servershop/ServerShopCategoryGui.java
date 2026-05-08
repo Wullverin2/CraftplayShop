@@ -74,21 +74,8 @@ public class ServerShopCategoryGui {
             plugin.getLanguageService().send(player, "gui.missingItem", Map.of("item", itemId));
             return;
         }
-        if (event.isShiftClick()) {
-            plugin.getServerShopListGui().toggleFavorite(player, item);
-            open(player, holder.categoryId());
-            return;
-        }
-        if (!plugin.getConfig().getBoolean("serverShop.amountSelection.enabled", true)) {
-            int amount = event.isShiftClick() ? item.material().getMaxStackSize() : 1;
-            TransactionResult result = event.isRightClick()
-                    ? plugin.getServerShopTransactionService().sell(player, item, amount, TransactionType.SERVER_SELL)
-                    : plugin.getServerShopTransactionService().buy(player, item, amount);
-            sendTransactionMessage(player, item, amount, result);
-            open(player, holder.categoryId());
-            return;
-        }
-        openAmountSelection(player, holder.categoryId(), item.id(), event.isRightClick() ? ServerShopAction.SELL : ServerShopAction.BUY);
+        executeClassicTransaction(player, item, event.isRightClick(), event.isShiftClick());
+        open(player, holder.categoryId());
     }
 
     public void handleAmountClick(Player player, ServerShopAmountHolder holder, InventoryClickEvent event) {
@@ -207,6 +194,14 @@ public class ServerShopCategoryGui {
             inventory.setItem(backSlot, configuredItem(player, gui.getConfigurationSection("items.amountBack"), placeholders));
         }
         player.openInventory(inventory);
+    }
+
+    public void executeClassicTransaction(Player player, ServerShopItem item, boolean rightClick, boolean shiftClick) {
+        int amount = shiftClick ? Math.max(1, item.material().getMaxStackSize()) : 1;
+        TransactionResult result = rightClick
+                ? plugin.getServerShopTransactionService().sell(player, item, amount, TransactionType.SERVER_SELL)
+                : plugin.getServerShopTransactionService().buy(player, item, amount);
+        sendTransactionMessage(player, item, amount, result);
     }
 
     private void openBuyConfirmation(Player player, String categoryId, ServerShopItem item, int amount) {

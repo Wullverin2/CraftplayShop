@@ -99,8 +99,11 @@ serverShop:
   itemMatchMode: "MATERIAL_ONLY"
 
   amountSelection:
-    # Wenn true, oeffnet ein Klick auf ein ServerShop-Item zuerst eine Mengenauswahl.
-    enabled: true
+    # Wenn true, steht die Mengenauswahl fuer spaetere GUI-Aktionen bereit.
+    # Der normale Spieler-Klick im ServerShop nutzt standardmaessig das EconomyShopGUI-System:
+    # Linksklick kauft 1, Shift-Linksklick kauft einen Stack, Rechtsklick verkauft 1,
+    # Shift-Rechtsklick verkauft einen Stack.
+    enabled: false
 
     # Vorgegebene Mengen fuer Kaufen und Verkaufen.
     amounts:
