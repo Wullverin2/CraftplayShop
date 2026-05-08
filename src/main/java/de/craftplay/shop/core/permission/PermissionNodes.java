@@ -13,6 +13,7 @@ public final class PermissionNodes {
     public static final String PLAYER_SHOP_USE = "craftplayshop.playershop.use";
     public static final String PLAYER_SHOP_CREATE = "craftplayshop.playershop.create";
     public static final String PLAYER_SHOP_BUY = "craftplayshop.playershop.buy";
+    public static final String PLAYER_SHOP_SELL = "craftplayshop.playershop.sell";
     public static final String PLAYER_SHOP_ADMIN = "craftplayshop.playershop.admin";
     public static final String LANGUAGE = "craftplayshop.language";
     public static final String TRADE_USE = "craftplayshop.trade.use";

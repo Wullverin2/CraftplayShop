@@ -195,6 +195,12 @@ playerShops:
   itemMatchMode: "EXACT"
 
   creation:
+    # Spieler koennen mit Shift-Linksklick auf eine Kiste einen Chat-Assistenten starten.
+    chatCreationEnabled: true
+
+    # Material fuer automatisch gesetzte Shop-Schilder.
+    autoSignMaterial: OAK_WALL_SIGN
+
     # Spieler koennen einen SELL-Kistenshop erstellen, indem sie ein Schild mit [shop]
     # neben eine Kiste setzen. Zeile 2 = Menge, Zeile 3 = Preis.
     signCreationEnabled: true
@@ -213,6 +219,13 @@ playerShops:
       lines:
         - "%stock_color%&l[shop]"
         - "Selling; &l%amount%"
+        - "&a%price%"
+        - "%owner%"
+    buy:
+      # Schildtext fuer BUY-Shops, die Items von Spielern ankaufen.
+      lines:
+        - "%stock_color%&l[shop]"
+        - "Buying; &l%amount%"
         - "&a%price%"
         - "%owner%"
     pending:

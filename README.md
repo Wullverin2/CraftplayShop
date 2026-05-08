@@ -131,13 +131,19 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 ### PlayerShop / ChestShop
 
 - Erster PlayerShop-SELL-MVP ist aktiv.
-- Spieler erstellen einen Kistenshop intuitiv ueber ein Schild mit `[shop]` oder `[cshop]` neben einer Kiste.
+- Spieler erstellen einen Kistenshop per Shift-Linksklick mit Item in der Hand auf eine Kiste.
+- Der Chat-Assistent fragt ab, ob der Shop Items verkaufen oder ankaufen soll.
+- Danach fragt der Chat-Assistent Menge pro Transaktion und Preis ab.
+- CraftplayShop setzt automatisch ein Shop-Schild neben die Kiste.
+- Spieler koennen alternativ weiterhin manuell ein Schild mit `shop`, `sell`, `[shop]`, `[cshop]` oder `buy` neben eine Kiste setzen.
 - Zeile 2 des Schilds bestimmt die Verkaufsmenge, Zeile 3 den Preis.
 - Das verkaufte Item wird beim Erstellen aus dem Item in der Hand uebernommen.
-- Rechtsklick auf Schild oder Kiste kauft die konfigurierte Menge aus dem Kistenbestand.
+- Rechtsklick auf SELL-Shop-Schild oder Kiste kauft die konfigurierte Menge aus dem Kistenbestand.
+- Rechtsklick auf BUY-Shop-Schild oder Kiste verkauft die konfigurierte Menge an den Shop und legt die Items in die Shop-Kiste.
 - Vor dem Kauf werden Permission, Geld, Lagerbestand und Inventarplatz geprueft.
 - Bei Fehlern versucht der Kauf ein Rollback von Geld und Items.
 - Besitzer erhalten das Geld ueber Vault, auch wenn sie offline sind.
+- BUY-Shops ziehen dem Besitzer die Kosten per Vault ab und zahlen sie dem verkaufenden Spieler aus.
 - Fremde Spieler koennen PlayerShop-Kisten nicht als normales Inventar oeffnen.
 - Besitzer oder Admins koennen einen Shop durch Abbauen von Schild oder Kiste loeschen.
 - PlayerShop-Kaeufe werden in den Transaktionslogs gespeichert.

@@ -34,7 +34,17 @@ public class VaultEconomyService implements EconomyService {
     }
 
     @Override
+    public boolean has(OfflinePlayer player, double amount) {
+        return economy != null && economy.has(player, amount);
+    }
+
+    @Override
     public boolean withdraw(Player player, double amount) {
+        return economy != null && economy.withdrawPlayer(player, amount).transactionSuccess();
+    }
+
+    @Override
+    public boolean withdraw(OfflinePlayer player, double amount) {
         return economy != null && economy.withdrawPlayer(player, amount).transactionSuccess();
     }
 

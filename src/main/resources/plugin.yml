@@ -60,6 +60,8 @@ permissions:
     default: true
   craftplayshop.playershop.buy:
     default: true
+  craftplayshop.playershop.sell:
+    default: true
   craftplayshop.playershop.admin:
     default: op
   craftplayshop.language:
