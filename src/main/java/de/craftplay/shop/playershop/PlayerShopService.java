@@ -1504,15 +1504,19 @@ public class PlayerShopService implements Listener {
         if (shop.displayType() == PlayerShopDisplayType.NONE || Bukkit.getWorld(shop.world()) == null) {
             return;
         }
-        Location base = shop.containerLocation().add(0.5D, 1.35D, 0.5D);
+        Block anchor = displayAnchorBlock(shop);
+        Location base = anchor.getLocation().add(0.5D, 1.35D, 0.5D);
         String tag = displayTag(shop);
         ItemStack displayItem = shop.itemStack().clone();
         displayItem.setAmount(1);
         try {
             if (shop.displayType() == PlayerShopDisplayType.GLASS_CASE) {
-                BlockDisplay glass = base.getWorld().spawn(base.clone().subtract(0.25D, 0.25D, 0.25D), BlockDisplay.class);
+                Location glassOrigin = anchor.getLocation().add(0.0D, 1.05D, 0.0D);
+                Location itemCenter = glassOrigin.clone().add(0.5D, 0.5D, 0.5D);
+                BlockDisplay glass = glassOrigin.getWorld().spawn(glassOrigin, BlockDisplay.class);
                 glass.setBlock(Material.GLASS.createBlockData());
                 glass.addScoreboardTag(tag);
+                base = itemCenter;
             }
             ItemDisplay itemDisplay = base.getWorld().spawn(base, ItemDisplay.class);
             itemDisplay.setItemStack(displayItem);
@@ -1534,12 +1538,28 @@ public class PlayerShopService implements Listener {
             return;
         }
         String tag = displayTag(shop);
-        Location center = shop.containerLocation().add(0.5D, 1.2D, 0.5D);
+        Location center = displayAnchorBlock(shop).getLocation().add(0.5D, 1.2D, 0.5D);
         for (Entity entity : center.getWorld().getNearbyEntities(center, 2.0D, 2.0D, 2.0D)) {
             if (entity.getScoreboardTags().contains(tag)) {
                 entity.remove();
             }
         }
+    }
+
+    private Block displayAnchorBlock(PlayerShop shop) {
+        Location fallback = shop.containerLocation();
+        if (Bukkit.getWorld(shop.world()) == null) {
+            return fallback.getBlock();
+        }
+        Block signBlock = new Location(Bukkit.getWorld(shop.world()), shop.signX(), shop.signY(), shop.signZ()).getBlock();
+        BlockData signData = signBlock.getBlockData();
+        if (signData instanceof WallSign wallSign) {
+            Block attached = signBlock.getRelative(wallSign.getFacing().getOppositeFace());
+            if (attached.getState() instanceof Container) {
+                return attached;
+            }
+        }
+        return fallback.getBlock();
     }
 
     private String displayTag(PlayerShop shop) {
