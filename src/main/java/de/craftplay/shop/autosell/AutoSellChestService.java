@@ -30,6 +30,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -40,6 +41,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -51,9 +53,11 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
     private final AutoSellChestRegistry registry;
     private final AutoSellChestLogService logService;
     private final AutoSellChestUpgradeService upgradeService;
+    private final AutoSellChestTrustService trustService;
     private final AutoSellChestProcessor processor;
     private final AutoSellChestDisplayService displayService;
     private final AutoSellChestGui gui;
+    private final Map<UUID, PendingTextInput> textInputs = new HashMap<>();
     private BukkitTask cleanupTask;
 
     public AutoSellChestService(CraftplayShopPlugin plugin) {
@@ -62,15 +66,17 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
         this.registry = new AutoSellChestRegistry(plugin);
         this.logService = new AutoSellChestLogService(plugin);
         this.upgradeService = new AutoSellChestUpgradeService(plugin);
+        this.trustService = new AutoSellChestTrustService(plugin);
         this.processor = new AutoSellChestProcessor(plugin, registry, logService, upgradeService);
         this.displayService = new AutoSellChestDisplayService(plugin, registry, upgradeService, processor);
-        this.gui = new AutoSellChestGui(plugin, registry, upgradeService, processor, logService);
+        this.gui = new AutoSellChestGui(plugin, registry, upgradeService, trustService, displayService, processor, logService, this);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     public void load() {
         upgradeService.load();
         registry.load();
+        trustService.load();
         processor.start();
         displayService.start();
         startCleanupTask();
@@ -95,6 +101,14 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
 
     public AutoSellChestUpgradeService upgradeService() {
         return upgradeService;
+    }
+
+    public AutoSellChestTrustService trustService() {
+        return trustService;
+    }
+
+    public AutoSellChestDisplayService displayService() {
+        return displayService;
     }
 
     @Override
@@ -222,7 +236,7 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
         if (chest == null) {
             return;
         }
-        if (!canManage((Player) sender, chest)) {
+        if (!trustService.canDelete((Player) sender, chest)) {
             plugin.getLanguageService().send(sender, "general.noPermission");
             return;
         }
@@ -241,6 +255,7 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
             return;
         }
         registry.delete(chest);
+        trustService.removeAll(chest.id());
         displayService.remove(chest);
         plugin.getLanguageService().send(sender, "autoSellChest.deleted", Map.of("id", Long.toString(chest.id())));
     }
@@ -256,6 +271,112 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
         }
         String query = args.length > 1 ? String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length)) : "";
         gui.openAdmin(player, query, 0);
+    }
+
+    public void startTextInput(Player player, AutoSellChest chest, TextInputType type) {
+        if (!canManage(player, chest)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        if (type == TextInputType.TRUST_ADD && !player.hasPermission(PermissionNodes.AUTOSELL_CHEST_TRUST)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        synchronized (textInputs) {
+            textInputs.put(player.getUniqueId(), new PendingTextInput(chest.id(), type));
+        }
+        player.closeInventory();
+        String key = switch (type) {
+            case RENAME -> "autoSellChest.renamePrompt";
+            case OWNER -> "autoSellChest.ownerPrompt";
+            case TRUST_ADD -> "autoSellChest.trustAddPrompt";
+        };
+        plugin.getLanguageService().send(player, key, Map.of("id", Long.toString(chest.id())));
+    }
+
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent event) {
+        PendingTextInput input;
+        synchronized (textInputs) {
+            input = textInputs.remove(event.getPlayer().getUniqueId());
+        }
+        if (input == null) {
+            return;
+        }
+        event.setCancelled(true);
+        plugin.getTaskService().runSync(() -> handleTextInput(event.getPlayer(), input, event.getMessage()));
+    }
+
+    private void handleTextInput(Player player, PendingTextInput input, String message) {
+        AutoSellChest chest = registry.find(input.chestId());
+        if (chest == null) {
+            plugin.getLanguageService().send(player, "autoSellChest.missingPhysicalChest");
+            return;
+        }
+        if ("cancel".equalsIgnoreCase(message) || "abbrechen".equalsIgnoreCase(message)) {
+            plugin.getLanguageService().send(player, "autoSellChest.inputCancelled");
+            gui.openInfo(player, chest);
+            return;
+        }
+        switch (input.type()) {
+            case RENAME -> rename(player, chest, message);
+            case OWNER -> changeOwner(player, chest, message);
+            case TRUST_ADD -> addTrust(player, chest, message);
+        }
+    }
+
+    private void rename(Player player, AutoSellChest chest, String name) {
+        String updatedName = name.trim();
+        if (updatedName.isBlank() || updatedName.length() > 48) {
+            plugin.getLanguageService().send(player, "autoSellChest.invalidInput");
+            gui.openInfo(player, chest);
+            return;
+        }
+        AutoSellChest updated = chest.withName(updatedName);
+        registry.update(updated);
+        plugin.getLanguageService().send(player, "autoSellChest.renamed", Map.of("id", Long.toString(chest.id()), "name", updatedName));
+        gui.openInfo(player, updated);
+    }
+
+    private void changeOwner(Player player, AutoSellChest chest, String targetName) {
+        if (!player.hasPermission(PermissionNodes.AUTOSELL_CHEST_ADMIN)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        OfflinePlayer target = Bukkit.getOfflinePlayer(targetName.trim());
+        if (!target.hasPlayedBefore() && !target.isOnline()) {
+            plugin.getLanguageService().send(player, "autoSellChest.playerNotFound");
+            gui.openInfo(player, chest);
+            return;
+        }
+        String name = target.getName() == null ? targetName.trim() : target.getName();
+        AutoSellChest updated = chest.withOwner(target.getUniqueId(), name);
+        registry.update(updated);
+        plugin.getLanguageService().send(player, "autoSellChest.ownerChanged", Map.of("id", Long.toString(chest.id()), "owner", name));
+        gui.openInfo(player, updated);
+    }
+
+    private void addTrust(Player player, AutoSellChest chest, String targetName) {
+        OfflinePlayer target = Bukkit.getOfflinePlayer(targetName.trim());
+        if (!target.hasPlayedBefore() && !target.isOnline()) {
+            plugin.getLanguageService().send(player, "autoSellChest.playerNotFound");
+            gui.openTrust(player, chest);
+            return;
+        }
+        String name = target.getName() == null ? targetName.trim() : target.getName();
+        if (target.getUniqueId().equals(chest.ownerUuid())) {
+            plugin.getLanguageService().send(player, "autoSellChest.trustOwnerBlocked");
+            gui.openTrust(player, chest);
+            return;
+        }
+        AutoSellChestTrustEntry entry = trustService.add(chest.id(), target.getUniqueId(), name);
+        if (entry == null) {
+            plugin.getLanguageService().send(player, "autoSellChest.disabledFeature");
+            gui.openInfo(player, chest);
+            return;
+        }
+        plugin.getLanguageService().send(player, "autoSellChest.trustAdded", Map.of("player", name, "id", Long.toString(chest.id())));
+        gui.openTrust(player, chest);
     }
 
     private AutoSellChest lookedAtChest(CommandSender sender) {
@@ -354,12 +475,14 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
             return;
         }
         Player player = event.getPlayer();
-        if (!canManage(player, chest)) {
+        if (plugin.getConfig().getBoolean("autoSellChest.protection.blockBreakingByOthers", true)
+                && !trustService.canDelete(player, chest)) {
             event.setCancelled(true);
             plugin.getLanguageService().send(player, "autoSellChest.breakProtected");
             return;
         }
         registry.delete(chest);
+        trustService.removeAll(chest.id());
         displayService.remove(chest);
         if (plugin.getConfig().getBoolean("autoSellChest.item.dropItemOnBreak", true)) {
             event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation().add(0.5D, 0.5D, 0.5D), createChestItem(1));
@@ -381,7 +504,7 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
             gui.openInfo(event.getPlayer(), chest);
             return;
         }
-        if (!canManage(event.getPlayer(), chest) && plugin.getConfig().getBoolean("autoSellChest.protection.protectContainer", true)) {
+        if (!trustService.canOpen(event.getPlayer(), chest) && plugin.getConfig().getBoolean("autoSellChest.protection.protectContainer", true)) {
             event.setCancelled(true);
             plugin.getLanguageService().send(event.getPlayer(), "autoSellChest.containerProtected");
         }
@@ -436,6 +559,8 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
                 AutoSellChest chest = registry.find(block.getLocation());
                 if (chest != null) {
                     registry.delete(chest);
+                    trustService.removeAll(chest.id());
+                    displayService.remove(chest);
                 }
                 return false;
             });
@@ -451,6 +576,8 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
                 AutoSellChest chest = registry.find(block.getLocation());
                 if (chest != null) {
                     registry.delete(chest);
+                    trustService.removeAll(chest.id());
+                    displayService.remove(chest);
                 }
                 return false;
             });
@@ -481,10 +608,14 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
     }
 
     private boolean canManage(Player player, AutoSellChest chest) {
-        return chest.ownerUuid().equals(player.getUniqueId()) || player.hasPermission(PermissionNodes.AUTOSELL_CHEST_ADMIN);
+        return trustService.canManage(player, chest);
     }
 
-    private int maxChests(Player player) {
+    public int maxChests(Player player) {
+        if (player.hasPermission(PermissionNodes.AUTOSELL_CHEST_ADMIN)
+                && plugin.getConfig().getBoolean("autoSellChest.maxChests.adminBypass", true)) {
+            return -1;
+        }
         int value = plugin.getConfig().getInt("autoSellChest.maxChests.default", 5);
         for (String key : plugin.getConfig().getConfigurationSection("autoSellChest.maxChests.permissionOverrides") == null
                 ? List.<String>of()
@@ -549,5 +680,14 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
                 plugin.getPluginLogService().info("Cleaned up " + removed + " missing AutoSellChest(s).");
             }
         }, interval * 20L, interval * 20L);
+    }
+
+    public record PendingTextInput(long chestId, TextInputType type) {
+    }
+
+    public enum TextInputType {
+        RENAME,
+        OWNER,
+        TRUST_ADD
     }
 }

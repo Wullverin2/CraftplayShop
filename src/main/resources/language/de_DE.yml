@@ -134,6 +134,18 @@ autoSellChest:
   upgradeNotEnoughMoney: "%prefix%&cDu brauchst &e%price% &cfür dieses Upgrade."
   upgradeEconomyFailed: "%prefix%&cDas Upgrade konnte wegen eines Economy-Fehlers nicht gekauft werden."
   upgradeNone: "&7Keins"
+  adminUpdated: "%prefix%&aAutoSellChest &e#%id% &awurde aktualisiert."
+  renamePrompt: "%prefix%&7Schreibe den neuen Namen für AutoSellChest &e#%id% &7in den Chat. &cAbbrechen &7bricht ab."
+  ownerPrompt: "%prefix%&7Schreibe den neuen Besitzer für AutoSellChest &e#%id% &7in den Chat. &cAbbrechen &7bricht ab."
+  trustAddPrompt: "%prefix%&7Schreibe den Spieler, der Zugriff auf AutoSellChest &e#%id% &7erhalten soll, in den Chat. &cAbbrechen &7bricht ab."
+  inputCancelled: "%prefix%&cEingabe abgebrochen."
+  invalidInput: "%prefix%&cDiese Eingabe ist ungültig."
+  renamed: "%prefix%&aAutoSellChest &e#%id% &aheißt jetzt &e%name%&a."
+  ownerChanged: "%prefix%&aAutoSellChest &e#%id% &agehört jetzt &e%owner%&a."
+  trustAdded: "%prefix%&a%player% wurde zu AutoSellChest &e#%id% &ahinzugefügt."
+  trustUpdated: "%prefix%&aTrust-Rechte für &e%player% &awurden aktualisiert."
+  trustRemoved: "%prefix%&c%player% wurde aus AutoSellChest &e#%id% &centfernt."
+  trustOwnerBlocked: "%prefix%&cDer Besitzer muss nicht als Trust-Spieler hinzugefügt werden."
 
 gui:
   missingFile: "%prefix%&cGUI-Datei fehlt: %file%"

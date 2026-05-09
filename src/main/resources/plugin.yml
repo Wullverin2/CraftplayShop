@@ -80,6 +80,8 @@ permissions:
     default: true
   craftplayshop.autosellchest.create:
     default: true
+  craftplayshop.autosellchest.trust:
+    default: true
   craftplayshop.autosellchest.admin:
     default: op
   craftplayshop.autosellchest.upgrade.interval.2:

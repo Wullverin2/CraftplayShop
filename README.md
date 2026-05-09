@@ -230,6 +230,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `craftplayshop.trade.accept` - Für spätere Annahme von Handelsanfragen vorbereitet.
 - `craftplayshop.autosellchest.use` - AutoSellChest-Menue und eigene Kisten anzeigen.
 - `craftplayshop.autosellchest.create` - AutoSellChest-Spezialkisten platzieren.
+- `craftplayshop.autosellchest.trust` - Trust-GUI fuer eigene/vertraute AutoSellChests nutzen.
 - `craftplayshop.autosellchest.admin` - AutoSellChests administrativ geben, bearbeiten und entfernen.
 - `craftplayshop.autosellchest.limit.<key>` - Konfigurierbare AutoSellChest-Limits aus `autoSellChest.maxChests.permissionOverrides`.
 
@@ -247,6 +248,8 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Kisten koennen eigene Intervall-Upgrades kaufen; dadurch verkauft die Kiste schneller.
 - Kisten koennen eigene Multiplikator-Upgrades kaufen; dadurch zahlt der ServerShop-Verkauf mehr aus.
 - Upgrade-Level, Namen, Preise, Zielwerte und Permissions sind in `autoSellChest.upgrades` konfigurierbar.
+- Upgrades sind global deaktivierbar; Intervall- und Multiplikator-Kategorien sind getrennt deaktivierbar.
+- Einzelne Upgrade-Level koennen per `enabled: false` aus der Config deaktiviert werden.
 - Upgrade-Kosten werden erst nach Permission- und Geldpruefung ueber Vault abgezogen.
 - Items werden nur verkauft, wenn sie im CraftplayShop ServerShop ankaufbar sind.
 - Nicht ankaufbare Items bleiben in der Kiste.
@@ -261,6 +264,8 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Das Info-GUI enthaelt Status-Toggle, Teleport, Upgrades, Statistiken und Loeschen.
 - Das Statistik-GUI zeigt Tageswerte, Gesamtwerte, letzte Verkaeufe und Material-Auswertung direkt aus den AutoSellChest-Logs.
 - Admins koennen mit `/asc admin [suche]` eine globale AutoSellChest-Uebersicht oeffnen, filtern, Details anzeigen, zur Kiste teleportieren und Kisten per Bestaetigung loeschen.
+- Admins koennen Name, Besitzer, Aktivstatus sowie Intervall- und Multiplikator-Level direkt im Admin-GUI bearbeiten.
+- AutoSellChest-Trust ist integriert: Besitzer koennen Spieler hinzufuegen und Rechte fuer Oeffnen, Verwalten, Upgrades und Loeschen getrennt schalten.
 - Linksklick im GUI oeffnet Details, Rechtsklick teleportiert zur Kiste, Shift-Linksklick oeffnet die Loeschbestaetigung.
 - Die Loeschfunktion im GUI nutzt eine Bestaetigungs-GUI.
 - Regelmaessiger Cleanup entfernt AutoSellChests aus Cache und Datenbank, wenn die physische Kiste fehlt.

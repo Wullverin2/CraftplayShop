@@ -49,9 +49,28 @@ public class AutoSellChestUpgradeService {
         return multiplierUpgrades.get(level);
     }
 
+    public int maxIntervalLevel() {
+        return intervalUpgrades.keySet().stream().max(Integer::compareTo).orElse(0);
+    }
+
+    public int maxMultiplierLevel() {
+        return multiplierUpgrades.keySet().stream().max(Integer::compareTo).orElse(0);
+    }
+
+    public boolean upgradesEnabled() {
+        return plugin.getConfig().getBoolean("autoSellChest.upgrades.enabled", true);
+    }
+
+    public boolean intervalUpgradesEnabled() {
+        return upgradesEnabled() && plugin.getConfig().getBoolean("autoSellChest.upgrades.interval.enabled", true);
+    }
+
+    public boolean multiplierUpgradesEnabled() {
+        return upgradesEnabled() && plugin.getConfig().getBoolean("autoSellChest.upgrades.multiplier.enabled", true);
+    }
+
     public AutoSellChestUpgrade nextIntervalUpgrade(AutoSellChest chest) {
-        if (!plugin.getConfig().getBoolean("autoSellChest.upgrades.enabled", true)
-                || !plugin.getConfig().getBoolean("autoSellChest.upgrades.interval.enabled", true)) {
+        if (!intervalUpgradesEnabled()) {
             return null;
         }
         return intervalUpgrades.values().stream()
@@ -61,8 +80,7 @@ public class AutoSellChestUpgradeService {
     }
 
     public AutoSellChestUpgrade nextMultiplierUpgrade(AutoSellChest chest) {
-        if (!plugin.getConfig().getBoolean("autoSellChest.upgrades.enabled", true)
-                || !plugin.getConfig().getBoolean("autoSellChest.upgrades.multiplier.enabled", true)) {
+        if (!multiplierUpgradesEnabled()) {
             return null;
         }
         return multiplierUpgrades.values().stream()
@@ -113,6 +131,9 @@ public class AutoSellChestUpgradeService {
                 continue;
             }
             String path = "autoSellChest.upgrades.interval.levels." + key + ".";
+            if (!plugin.getConfig().getBoolean(path + "enabled", true)) {
+                continue;
+            }
             intervalUpgrades.put(level, new AutoSellChestUpgrade(
                     level,
                     key.toLowerCase(Locale.ROOT),
@@ -137,6 +158,9 @@ public class AutoSellChestUpgradeService {
                 continue;
             }
             String path = "autoSellChest.upgrades.multiplier.levels." + key + ".";
+            if (!plugin.getConfig().getBoolean(path + "enabled", true)) {
+                continue;
+            }
             multiplierUpgrades.put(level, new AutoSellChestUpgrade(
                     level,
                     key.toLowerCase(Locale.ROOT),

@@ -89,6 +89,25 @@ info:
         - ""
         - "&eClick to open"
       action: stats
+    trust:
+      enabled: true
+      slot: 13
+      material: PLAYER_HEAD
+      name: "&bTrust"
+      lore:
+        - "&7Manage player access."
+        - ""
+        - "&eClick to open"
+      action: trust
+    admin:
+      enabled: true
+      slot: 10
+      material: COMMAND_BLOCK
+      name: "&cAdmin Management"
+      lore:
+        - "&7Change owner, name, status"
+        - "&7and upgrade levels directly."
+      action: admin_manage
     teleport:
       enabled: true
       slot: 16
@@ -114,6 +133,101 @@ info:
     close:
       enabled: true
       slot: 26
+      material: BARRIER
+      name: "&cClose"
+      action: close
+
+adminManage:
+  title: "&8ASC Admin #%id%"
+  size: 36
+
+  filler:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+    slots: [0,1,2,3,4,5,6,7,8,27,28,29,30,31,32,33,34,35]
+
+  items:
+    info:
+      enabled: true
+      slot: 4
+      material: CHEST
+      name: "&c%name%"
+      lore:
+        - "&7ID: &f%id%"
+        - "&7Owner: &f%owner%"
+        - "&7Limit: &f%owned_chests%/%limit%"
+        - "&7Status: %status%"
+      action: none
+    rename:
+      enabled: true
+      slot: 10
+      material: NAME_TAG
+      name: "&eChange name"
+      action: rename
+    owner:
+      enabled: true
+      slot: 11
+      material: PLAYER_HEAD
+      name: "&eChange owner"
+      action: owner
+    toggle:
+      enabled: true
+      slot: 12
+      material: LEVER
+      name: "&eToggle active"
+      lore:
+        - "&7Current: %status%"
+      action: toggle
+    intervalDown:
+      enabled: true
+      slot: 14
+      material: REDSTONE
+      name: "&cInterval level -1"
+      lore:
+        - "&7Current: &f%interval_level% &8(%interval_name%&8)"
+      action: admin_interval_down
+    intervalUp:
+      enabled: true
+      slot: 15
+      material: CLOCK
+      name: "&aInterval level +1"
+      lore:
+        - "&7Current: &f%interval_level% &8(%interval_name%&8)"
+      action: admin_interval_up
+    multiplierDown:
+      enabled: true
+      slot: 16
+      material: REDSTONE
+      name: "&cMultiplier level -1"
+      lore:
+        - "&7Current: &f%multiplier_level% &8(%multiplier_name%&8)"
+      action: admin_multiplier_down
+    multiplierUp:
+      enabled: true
+      slot: 17
+      material: GOLD_INGOT
+      name: "&aMultiplier level +1"
+      lore:
+        - "&7Current: &f%multiplier_level% &8(%multiplier_name%&8)"
+      action: admin_multiplier_up
+    delete:
+      enabled: true
+      slot: 22
+      material: TNT
+      name: "&cDelete"
+      action: delete
+
+  buttons:
+    back:
+      enabled: true
+      slot: 27
+      material: ARROW
+      name: "&eBack"
+      action: back
+    close:
+      enabled: true
+      slot: 35
       material: BARRIER
       name: "&cClose"
       action: close
@@ -159,6 +273,113 @@ upgrades:
         - ""
         - "&eClick to buy"
       action: upgrade_multiplier
+
+  buttons:
+    back:
+      enabled: true
+      slot: 18
+      material: ARROW
+      name: "&eBack"
+      action: back
+    close:
+      enabled: true
+      slot: 26
+      material: BARRIER
+      name: "&cClose"
+      action: close
+
+trust:
+  title: "&8AutoSellChest Trust"
+  size: 54
+
+  filler:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+    slots: [0,1,2,3,4,5,6,7,8,45,46,47,48,49,50,51,52,53]
+
+  memberSlots: [10,11,12,13,14,15,16,19,20,21,22,23,24,25,28,29,30,31,32,33,34]
+
+  memberItem:
+    material: PLAYER_HEAD
+    name: "&e%trusted_player%"
+    lore:
+      - "&7Open: %trust_open%"
+      - "&7Manage: %trust_manage%"
+      - "&7Upgrades: %trust_upgrade%"
+      - "&7Delete: %trust_delete%"
+      - ""
+      - "&eClick to edit"
+
+  buttons:
+    add:
+      enabled: true
+      slot: 49
+      material: LIME_DYE
+      name: "&aAdd player"
+      action: trust_add
+    back:
+      enabled: true
+      slot: 45
+      material: ARROW
+      name: "&eBack"
+      action: back
+    close:
+      enabled: true
+      slot: 53
+      material: BARRIER
+      name: "&cClose"
+      action: close
+
+trustEntry:
+  title: "&8Trust: %trusted_player%"
+  size: 27
+
+  filler:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+    slots: [0,1,2,3,4,5,6,7,8,18,19,20,21,22,23,24,25,26]
+
+  items:
+    info:
+      enabled: true
+      slot: 4
+      material: PLAYER_HEAD
+      name: "&e%trusted_player%"
+      lore:
+        - "&7UUID: &f%trusted_uuid%"
+      action: none
+    open:
+      enabled: true
+      slot: 10
+      material: CHEST
+      name: "&eOpen: %trust_open%"
+      action: trust_toggle_open
+    manage:
+      enabled: true
+      slot: 11
+      material: COMPARATOR
+      name: "&eManage: %trust_manage%"
+      action: trust_toggle_manage
+    upgrade:
+      enabled: true
+      slot: 12
+      material: ANVIL
+      name: "&eUpgrades: %trust_upgrade%"
+      action: trust_toggle_upgrade
+    delete:
+      enabled: true
+      slot: 13
+      material: TNT
+      name: "&eDelete: %trust_delete%"
+      action: trust_toggle_delete
+    remove:
+      enabled: true
+      slot: 15
+      material: BARRIER
+      name: "&cRemove trust"
+      action: trust_remove
 
   buttons:
     back:

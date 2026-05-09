@@ -109,6 +109,18 @@ public class TableCreator {
                         "total_price DOUBLE, " +
                         "created_at BIGINT)");
 
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("autosell_trust") + " (" +
+                        "chest_id INTEGER, " +
+                        "player_uuid TEXT, " +
+                        "player_name TEXT, " +
+                        "open_allowed BOOLEAN, " +
+                        "manage_allowed BOOLEAN, " +
+                        "upgrade_allowed BOOLEAN, " +
+                        "delete_allowed BOOLEAN, " +
+                        "created_at BIGINT, " +
+                        "updated_at BIGINT, " +
+                        "PRIMARY KEY (chest_id, player_uuid))");
+
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("imports") + " (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "importer_name TEXT, " +

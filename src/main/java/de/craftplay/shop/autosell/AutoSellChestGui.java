@@ -26,24 +26,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 public class AutoSellChestGui {
     private final CraftplayShopPlugin plugin;
     private final AutoSellChestRegistry registry;
     private final AutoSellChestUpgradeService upgradeService;
+    private final AutoSellChestTrustService trustService;
+    private final AutoSellChestDisplayService displayService;
     private final AutoSellChestProcessor processor;
     private final AutoSellChestLogService logService;
+    private final AutoSellChestService service;
 
     public AutoSellChestGui(CraftplayShopPlugin plugin,
                             AutoSellChestRegistry registry,
                             AutoSellChestUpgradeService upgradeService,
+                            AutoSellChestTrustService trustService,
+                            AutoSellChestDisplayService displayService,
                             AutoSellChestProcessor processor,
-                            AutoSellChestLogService logService) {
+                            AutoSellChestLogService logService,
+                            AutoSellChestService service) {
         this.plugin = plugin;
         this.registry = registry;
         this.upgradeService = upgradeService;
+        this.trustService = trustService;
+        this.displayService = displayService;
         this.processor = processor;
         this.logService = logService;
+        this.service = service;
     }
 
     public void openList(Player player) {
@@ -118,6 +128,10 @@ public class AutoSellChestGui {
         item(gui, inventory, "info.items.toggle", placeholders(player, chest));
         item(gui, inventory, "info.items.upgrades", placeholders(player, chest));
         item(gui, inventory, "info.items.stats", placeholders(player, chest));
+        item(gui, inventory, "info.items.trust", placeholders(player, chest));
+        if (player.hasPermission("craftplayshop.autosellchest.admin")) {
+            item(gui, inventory, "info.items.admin", placeholders(player, chest));
+        }
         item(gui, inventory, "info.items.teleport", placeholders(player, chest));
         item(gui, inventory, "info.items.delete", placeholders(player, chest));
         button(gui, inventory, "info.buttons.back");
@@ -161,10 +175,82 @@ public class AutoSellChestGui {
         AutoSellChestHolder holder = new AutoSellChestHolder(AutoSellChestView.UPGRADES, chest.id());
         Inventory inventory = Bukkit.createInventory(holder, size(gui, "upgrades.size", 27), title(player, gui, "upgrades.title", "&8AutoSellChest Upgrades", chest));
         fill(gui, inventory, "upgrades.filler");
-        item(gui, inventory, "upgrades.items.interval", placeholders(player, chest));
-        item(gui, inventory, "upgrades.items.multiplier", placeholders(player, chest));
+        if (upgradeService.intervalUpgradesEnabled()) {
+            item(gui, inventory, "upgrades.items.interval", placeholders(player, chest));
+        }
+        if (upgradeService.multiplierUpgradesEnabled()) {
+            item(gui, inventory, "upgrades.items.multiplier", placeholders(player, chest));
+        }
         button(gui, inventory, "upgrades.buttons.back");
         button(gui, inventory, "upgrades.buttons.close");
+        player.openInventory(inventory);
+    }
+
+    public void openTrust(Player player, AutoSellChest chest) {
+        if (!plugin.getConfig().getBoolean("autoSellChest.trust.enabled", true)
+                || !player.hasPermission("craftplayshop.autosellchest.trust")
+                || !canManage(player, chest)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        YamlConfiguration gui = gui(player);
+        AutoSellChestHolder holder = new AutoSellChestHolder(AutoSellChestView.TRUST_LIST, chest.id());
+        Inventory inventory = Bukkit.createInventory(holder, size(gui, "trust.size", 54), title(player, gui, "trust.title", "&8AutoSellChest Trust", chest));
+        fill(gui, inventory, "trust.filler");
+        List<Integer> slots = gui.getIntegerList("trust.memberSlots");
+        if (slots.isEmpty()) {
+            slots = List.of(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25);
+        }
+        List<AutoSellChestTrustEntry> entries = trustService.trusted(chest.id());
+        for (int index = 0; index < slots.size() && index < entries.size(); index++) {
+            int slot = slots.get(index);
+            AutoSellChestTrustEntry entry = entries.get(index);
+            if (slot < 0 || slot >= inventory.getSize()) {
+                continue;
+            }
+            holder.trusted.put(slot, entry.playerUuid());
+            inventory.setItem(slot, trustItem(player, gui, chest, entry));
+        }
+        item(gui, inventory, "trust.buttons.add", placeholders(player, chest));
+        button(gui, inventory, "trust.buttons.back");
+        button(gui, inventory, "trust.buttons.close");
+        player.openInventory(inventory);
+    }
+
+    public void openTrustEntry(Player player, AutoSellChest chest, AutoSellChestTrustEntry entry) {
+        YamlConfiguration gui = gui(player);
+        AutoSellChestHolder holder = new AutoSellChestHolder(AutoSellChestView.TRUST_ENTRY, chest.id());
+        holder.trustedPlayer = entry.playerUuid();
+        Inventory inventory = Bukkit.createInventory(holder, size(gui, "trustEntry.size", 27), title(player, gui, "trustEntry.title", "&8Trust: %trusted_player%", chest, entry));
+        fill(gui, inventory, "trustEntry.filler");
+        Map<String, String> placeholders = placeholders(player, chest, entry);
+        item(gui, inventory, "trustEntry.items.info", placeholders);
+        item(gui, inventory, "trustEntry.items.open", placeholders);
+        item(gui, inventory, "trustEntry.items.manage", placeholders);
+        item(gui, inventory, "trustEntry.items.upgrade", placeholders);
+        item(gui, inventory, "trustEntry.items.delete", placeholders);
+        item(gui, inventory, "trustEntry.items.remove", placeholders);
+        button(gui, inventory, "trustEntry.buttons.back");
+        button(gui, inventory, "trustEntry.buttons.close");
+        player.openInventory(inventory);
+    }
+
+    public void openAdminManage(Player player, AutoSellChest chest) {
+        YamlConfiguration gui = gui(player);
+        AutoSellChestHolder holder = new AutoSellChestHolder(AutoSellChestView.ADMIN_MANAGE, chest.id());
+        Inventory inventory = Bukkit.createInventory(holder, size(gui, "adminManage.size", 36), title(player, gui, "adminManage.title", "&8AutoSellChest Admin", chest));
+        fill(gui, inventory, "adminManage.filler");
+        item(gui, inventory, "adminManage.items.info", placeholders(player, chest));
+        item(gui, inventory, "adminManage.items.rename", placeholders(player, chest));
+        item(gui, inventory, "adminManage.items.owner", placeholders(player, chest));
+        item(gui, inventory, "adminManage.items.toggle", placeholders(player, chest));
+        item(gui, inventory, "adminManage.items.intervalDown", placeholders(player, chest));
+        item(gui, inventory, "adminManage.items.intervalUp", placeholders(player, chest));
+        item(gui, inventory, "adminManage.items.multiplierDown", placeholders(player, chest));
+        item(gui, inventory, "adminManage.items.multiplierUp", placeholders(player, chest));
+        item(gui, inventory, "adminManage.items.delete", placeholders(player, chest));
+        button(gui, inventory, "adminManage.buttons.back");
+        button(gui, inventory, "adminManage.buttons.close");
         player.openInventory(inventory);
     }
 
@@ -225,9 +311,24 @@ public class AutoSellChestGui {
             case UPGRADES -> "upgrades";
             case DELETE_CONFIRM -> "deleteConfirm";
             case STATS -> "stats";
+            case TRUST_LIST -> "trust";
+            case TRUST_ENTRY -> "trustEntry";
+            case ADMIN_MANAGE -> "adminManage";
             case ADMIN_LIST -> "admin";
             case LIST -> "list";
         };
+        if (holder.view == AutoSellChestView.TRUST_LIST) {
+            UUID trustedId = holder.trusted.get(rawSlot);
+            if (trustedId != null) {
+                AutoSellChestTrustEntry entry = trustService.find(chest.id(), trustedId);
+                if (entry != null) {
+                    openTrustEntry(player, chest, entry);
+                } else {
+                    openTrust(player, chest);
+                }
+                return;
+            }
+        }
         String action = actionForSlot(gui(player), section, rawSlot);
         if ("toggle".equals(action)) {
             toggle(player, chest);
@@ -235,6 +336,34 @@ public class AutoSellChestGui {
             openUpgrades(player, chest);
         } else if ("stats".equals(action)) {
             openStats(player, chest);
+        } else if ("trust".equals(action)) {
+            openTrust(player, chest);
+        } else if ("admin_manage".equals(action)) {
+            openAdminManage(player, chest);
+        } else if ("rename".equals(action)) {
+            service.startTextInput(player, chest, AutoSellChestService.TextInputType.RENAME);
+        } else if ("owner".equals(action)) {
+            service.startTextInput(player, chest, AutoSellChestService.TextInputType.OWNER);
+        } else if ("trust_add".equals(action)) {
+            service.startTextInput(player, chest, AutoSellChestService.TextInputType.TRUST_ADD);
+        } else if ("trust_toggle_open".equals(action)) {
+            toggleTrust(player, chest, holder.trustedPlayer, "open");
+        } else if ("trust_toggle_manage".equals(action)) {
+            toggleTrust(player, chest, holder.trustedPlayer, "manage");
+        } else if ("trust_toggle_upgrade".equals(action)) {
+            toggleTrust(player, chest, holder.trustedPlayer, "upgrade");
+        } else if ("trust_toggle_delete".equals(action)) {
+            toggleTrust(player, chest, holder.trustedPlayer, "delete");
+        } else if ("trust_remove".equals(action)) {
+            removeTrust(player, chest, holder.trustedPlayer);
+        } else if ("admin_interval_down".equals(action)) {
+            setIntervalLevel(player, chest, chest.intervalLevel() - 1);
+        } else if ("admin_interval_up".equals(action)) {
+            setIntervalLevel(player, chest, chest.intervalLevel() + 1);
+        } else if ("admin_multiplier_down".equals(action)) {
+            setMultiplierLevel(player, chest, chest.multiplierLevel() - 1);
+        } else if ("admin_multiplier_up".equals(action)) {
+            setMultiplierLevel(player, chest, chest.multiplierLevel() + 1);
         } else if ("upgrade_interval".equals(action)) {
             buyIntervalUpgrade(player, chest);
         } else if ("upgrade_multiplier".equals(action)) {
@@ -246,8 +375,10 @@ public class AutoSellChestGui {
         } else if ("delete_execute".equals(action)) {
             delete(player, chest);
         } else if ("back".equals(action) || "cancel".equals(action)) {
-            if (holder.view == AutoSellChestView.UPGRADES || holder.view == AutoSellChestView.DELETE_CONFIRM || holder.view == AutoSellChestView.STATS) {
+            if (holder.view == AutoSellChestView.UPGRADES || holder.view == AutoSellChestView.DELETE_CONFIRM || holder.view == AutoSellChestView.STATS || holder.view == AutoSellChestView.TRUST_LIST || holder.view == AutoSellChestView.ADMIN_MANAGE) {
                 openInfo(player, chest);
+            } else if (holder.view == AutoSellChestView.TRUST_ENTRY) {
+                openTrust(player, chest);
             } else {
                 openList(player);
             }
@@ -269,7 +400,7 @@ public class AutoSellChestGui {
     }
 
     private void buyIntervalUpgrade(Player player, AutoSellChest chest) {
-        if (!canManage(player, chest)) {
+        if (!trustService.canUpgrade(player, chest)) {
             plugin.getLanguageService().send(player, "general.noPermission");
             return;
         }
@@ -288,7 +419,7 @@ public class AutoSellChestGui {
     }
 
     private void buyMultiplierUpgrade(Player player, AutoSellChest chest) {
-        if (!canManage(player, chest)) {
+        if (!trustService.canUpgrade(player, chest)) {
             plugin.getLanguageService().send(player, "general.noPermission");
             return;
         }
@@ -320,6 +451,64 @@ public class AutoSellChestGui {
         return false;
     }
 
+    private void toggleTrust(Player player, AutoSellChest chest, UUID trustedPlayer, String right) {
+        if (trustedPlayer == null || !canManage(player, chest)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        AutoSellChestTrustEntry entry = trustService.find(chest.id(), trustedPlayer);
+        if (entry == null) {
+            openTrust(player, chest);
+            return;
+        }
+        AutoSellChestTrustEntry updated = switch (right) {
+            case "open" -> entry.withOpenAllowed(!entry.openAllowed());
+            case "manage" -> entry.withManageAllowed(!entry.manageAllowed());
+            case "upgrade" -> entry.withUpgradeAllowed(!entry.upgradeAllowed());
+            case "delete" -> entry.withDeleteAllowed(!entry.deleteAllowed());
+            default -> entry;
+        };
+        trustService.save(updated);
+        plugin.getLanguageService().send(player, "autoSellChest.trustUpdated", Map.of("player", updated.playerName(), "id", Long.toString(chest.id())));
+        openTrustEntry(player, chest, updated);
+    }
+
+    private void removeTrust(Player player, AutoSellChest chest, UUID trustedPlayer) {
+        if (trustedPlayer == null || !canManage(player, chest)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        AutoSellChestTrustEntry entry = trustService.find(chest.id(), trustedPlayer);
+        trustService.remove(chest.id(), trustedPlayer);
+        plugin.getLanguageService().send(player, "autoSellChest.trustRemoved", Map.of("player", entry == null ? "-" : entry.playerName(), "id", Long.toString(chest.id())));
+        openTrust(player, chest);
+    }
+
+    private void setIntervalLevel(Player player, AutoSellChest chest, int level) {
+        if (!player.hasPermission("craftplayshop.autosellchest.admin")) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        int clamped = Math.max(0, Math.min(upgradeService.maxIntervalLevel(), level));
+        AutoSellChest updated = chest.withIntervalLevel(clamped);
+        registry.update(updated);
+        plugin.getLanguageService().send(player, "autoSellChest.adminUpdated", Map.of("id", Long.toString(chest.id())));
+        openAdminManage(player, updated);
+    }
+
+    private void setMultiplierLevel(Player player, AutoSellChest chest, int level) {
+        if (!player.hasPermission("craftplayshop.autosellchest.admin")) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        int clamped = Math.max(0, Math.min(upgradeService.maxMultiplierLevel(), level));
+        AutoSellChestUpgrade upgrade = upgradeService.multiplierUpgrade(clamped);
+        AutoSellChest updated = chest.withMultiplierLevel(clamped, upgrade == null ? 1.0D : upgrade.multiplier());
+        registry.update(updated);
+        plugin.getLanguageService().send(player, "autoSellChest.adminUpdated", Map.of("id", Long.toString(chest.id())));
+        openAdminManage(player, updated);
+    }
+
     private void teleport(Player player, AutoSellChest chest) {
         Location location = chest.location();
         if (location == null) {
@@ -332,17 +521,19 @@ public class AutoSellChestGui {
     }
 
     private void delete(Player player, AutoSellChest chest) {
-        if (!canManage(player, chest)) {
+        if (!trustService.canDelete(player, chest)) {
             plugin.getLanguageService().send(player, "general.noPermission");
             return;
         }
         registry.delete(chest);
+        trustService.removeAll(chest.id());
+        displayService.remove(chest);
         plugin.getLanguageService().send(player, "autoSellChest.deleted", Map.of("id", Long.toString(chest.id())));
         openList(player);
     }
 
     private boolean canManage(Player player, AutoSellChest chest) {
-        return chest.ownerUuid().equals(player.getUniqueId()) || player.hasPermission("craftplayshop.autosellchest.admin");
+        return trustService.canManage(player, chest);
     }
 
     private ItemStack chestItem(Player player, YamlConfiguration gui, AutoSellChest chest) {
@@ -356,6 +547,21 @@ public class AutoSellChestGui {
         if (meta != null) {
             Map<String, String> placeholders = placeholders(player, chest);
             meta.setDisplayName(TextUtil.color(apply(section == null ? "&aAutoSellChest #%id%" : section.getString("name", "&aAutoSellChest #%id%"), placeholders)));
+            List<String> lore = section == null ? List.of() : section.getStringList("lore");
+            meta.setLore(lore.stream().map(line -> TextUtil.color(apply(line, placeholders))).toList());
+            meta.addItemFlags(ItemFlag.values());
+            itemStack.setItemMeta(meta);
+        }
+        return itemStack;
+    }
+
+    private ItemStack trustItem(Player player, YamlConfiguration gui, AutoSellChest chest, AutoSellChestTrustEntry entry) {
+        ConfigurationSection section = gui.getConfigurationSection("trust.memberItem");
+        ItemStack itemStack = new ItemStack(material(section == null ? "PLAYER_HEAD" : section.getString("material", "PLAYER_HEAD")));
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta != null) {
+            Map<String, String> placeholders = placeholders(player, chest, entry);
+            meta.setDisplayName(TextUtil.color(apply(section == null ? "&e%trusted_player%" : section.getString("name", "&e%trusted_player%"), placeholders)));
             List<String> lore = section == null ? List.of() : section.getStringList("lore");
             meta.setLore(lore.stream().map(line -> TextUtil.color(apply(line, placeholders))).toList());
             meta.addItemFlags(ItemFlag.values());
@@ -405,9 +611,11 @@ public class AutoSellChestGui {
 
     private String actionForSlot(YamlConfiguration gui, String section, int slot) {
         for (String key : List.of(
-                "items.status", "items.toggle", "items.upgrades", "items.stats", "items.teleport", "items.delete",
+                "items.status", "items.toggle", "items.upgrades", "items.stats", "items.trust", "items.admin", "items.teleport", "items.delete",
                 "items.interval", "items.multiplier", "items.info", "items.confirm", "items.cancel", "items.summary", "items.loading",
-                "buttons.previous", "buttons.next", "buttons.search", "buttons.back", "buttons.close")) {
+                "items.rename", "items.owner", "items.intervalDown", "items.intervalUp", "items.multiplierDown", "items.multiplierUp",
+                "items.open", "items.manage", "items.upgrade", "items.remove",
+                "buttons.previous", "buttons.next", "buttons.search", "buttons.add", "buttons.back", "buttons.close")) {
             String path = section + "." + key;
             if (gui.getInt(path + ".slot", -1) == slot) {
                 return gui.getString(path + ".action", key.substring(key.indexOf('.') + 1));
@@ -419,6 +627,7 @@ public class AutoSellChestGui {
     private Map<String, String> placeholders(Player player, AutoSellChest chest) {
         Map<String, String> placeholders = new HashMap<>(plugin.getGuiPlaceholderService().placeholders(player));
         placeholders.put("id", Long.toString(chest.id()));
+        placeholders.put("name", chest.name());
         placeholders.put("owner", chest.ownerName());
         placeholders.put("world", chest.world());
         placeholders.put("x", Integer.toString(chest.x()));
@@ -449,6 +658,23 @@ public class AutoSellChestGui {
         placeholders.put("next_multiplier_name", nextMultiplier == null ? plugin.getLanguageService().get(player, "autoSellChest.upgradeNone", Map.of()) : nextMultiplier.name());
         placeholders.put("next_multiplier_price", nextMultiplier == null ? "-" : plugin.getEconomyService().format(nextMultiplier.price()));
         placeholders.put("next_multiplier", nextMultiplier == null ? "-" : Double.toString(nextMultiplier.multiplier()));
+        int limit = service.maxChests(player);
+        placeholders.put("limit", limit < 0 ? plugin.getLanguageService().get(player, "serverShop.limitUnlimited", Map.of()) : Integer.toString(limit));
+        placeholders.put("owned_chests", Integer.toString(registry.countOwned(player.getUniqueId())));
+        placeholders.put("upgrades_enabled", upgradeService.upgradesEnabled() ? "&aaktiv" : "&cinaktiv");
+        placeholders.put("interval_upgrades_enabled", upgradeService.intervalUpgradesEnabled() ? "&aaktiv" : "&cinaktiv");
+        placeholders.put("multiplier_upgrades_enabled", upgradeService.multiplierUpgradesEnabled() ? "&aaktiv" : "&cinaktiv");
+        return placeholders;
+    }
+
+    private Map<String, String> placeholders(Player player, AutoSellChest chest, AutoSellChestTrustEntry entry) {
+        Map<String, String> placeholders = placeholders(player, chest);
+        placeholders.put("trusted_player", entry.playerName());
+        placeholders.put("trusted_uuid", entry.playerUuid().toString());
+        placeholders.put("trust_open", entry.openAllowed() ? "&aaktiv" : "&cinaktiv");
+        placeholders.put("trust_manage", entry.manageAllowed() ? "&aaktiv" : "&cinaktiv");
+        placeholders.put("trust_upgrade", entry.upgradeAllowed() ? "&aaktiv" : "&cinaktiv");
+        placeholders.put("trust_delete", entry.deleteAllowed() ? "&aaktiv" : "&cinaktiv");
         return placeholders;
     }
 
@@ -555,6 +781,11 @@ public class AutoSellChestGui {
         return TextUtil.color(apply(gui.getString(path, fallback), placeholders));
     }
 
+    private String title(Player player, YamlConfiguration gui, String path, String fallback, AutoSellChest chest, AutoSellChestTrustEntry entry) {
+        Map<String, String> placeholders = entry == null ? placeholders(player, chest) : placeholders(player, chest, entry);
+        return TextUtil.color(apply(gui.getString(path, fallback), placeholders));
+    }
+
     private Material material(String value) {
         Material material = Material.matchMaterial(value == null ? "STONE" : value);
         return material == null ? Material.STONE : material;
@@ -564,6 +795,8 @@ public class AutoSellChestGui {
         private final AutoSellChestView view;
         private final long chestId;
         private final Map<Integer, Long> chests = new HashMap<>();
+        private final Map<Integer, UUID> trusted = new HashMap<>();
+        private UUID trustedPlayer;
         private int page;
         private String query = "";
 
@@ -584,7 +817,10 @@ public class AutoSellChestGui {
         UPGRADES,
         DELETE_CONFIRM,
         STATS,
-        ADMIN_LIST
+        ADMIN_LIST,
+        ADMIN_MANAGE,
+        TRUST_LIST,
+        TRUST_ENTRY
     }
 
     private record StatsSnapshot(List<AutoSellChestLogService.LogEntry> recent,

@@ -347,6 +347,9 @@ autoSellChest:
     dropItemOnBreak: true
 
   maxChests:
+    # Admins mit craftplayshop.autosellchest.admin umgehen das Limit.
+    adminBypass: true
+
     # Standardlimit pro Spieler. -1 bedeutet unbegrenzt.
     default: 5
 
@@ -379,16 +382,19 @@ autoSellChest:
 
       levels:
         1:
+          enabled: true
           name: "&aSchnell"
           intervalSeconds: 5
           price: 2500.0
           permission: ""
         2:
+          enabled: true
           name: "&bTurbo"
           intervalSeconds: 3
           price: 7500.0
           permission: "craftplayshop.autosellchest.upgrade.interval.2"
         3:
+          enabled: true
           name: "&6Blitz"
           intervalSeconds: 1
           price: 20000.0
@@ -403,20 +409,34 @@ autoSellChest:
 
       levels:
         1:
+          enabled: true
           name: "&aBonus I"
           multiplier: 1.10
           price: 5000.0
           permission: ""
         2:
+          enabled: true
           name: "&bBonus II"
           multiplier: 1.25
           price: 15000.0
           permission: "craftplayshop.autosellchest.upgrade.multiplier.2"
         3:
+          enabled: true
           name: "&6Bonus III"
           multiplier: 1.50
           price: 40000.0
           permission: "craftplayshop.autosellchest.upgrade.multiplier.3"
+
+  trust:
+    # Aktiviert das AutoSellChest-Trust-System in der GUI.
+    enabled: true
+
+    # Standardrechte, wenn ein Spieler neu vertraut wird.
+    defaultRights:
+      open: true
+      manage: false
+      upgrade: false
+      delete: false
 
   messages:
     # Sendet dem Besitzer eine kurze Nachricht, wenn online und seine Kiste verkauft hat.
