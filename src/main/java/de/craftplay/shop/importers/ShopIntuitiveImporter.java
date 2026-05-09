@@ -41,20 +41,20 @@ public class ShopIntuitiveImporter {
 
     public ImporterService.ImportExecution preview(File source) {
         ParseResult result = parse(source, false);
-        return new ImporterService.ImportExecution(result.report(), "", result.report().successful());
+        return ImporterService.ImportExecution.of(result.report(), "", result.report().successful());
     }
 
     public ImporterService.ImportExecution apply(File source, ImportMode mode) {
         ParseResult result = parse(source, true);
         if (!result.report().successful() && result.shops().isEmpty()) {
-            return new ImporterService.ImportExecution(result.report(), "", false);
+            return ImporterService.ImportExecution.of(result.report(), "", false);
         }
         File backup = importerService.createBackupFile("playershops", ".yml");
         try {
             writeBackup(backup);
         } catch (IOException | SQLException exception) {
             plugin.getPluginLogService().error("Could not create player shop import backup.", exception);
-            return new ImporterService.ImportExecution(new ImportReport(
+            return ImporterService.ImportExecution.of(new ImportReport(
                     0,
                     result.report().warningCount(),
                     result.report().errorCount() + 1,
@@ -68,7 +68,8 @@ public class ShopIntuitiveImporter {
             if (mode == ImportMode.REPLACE) {
                 clearPlayerShops();
             }
-            int imported = insertShops(result.shops(), mode == ImportMode.MERGE, result.warnings());
+            List<ImporterService.ImportMapping> mappings = new ArrayList<>();
+            int imported = insertShops(result.shops(), mode == ImportMode.MERGE, result.warnings(), mappings);
             plugin.getServer().getScheduler().runTask(plugin, () -> plugin.getPlayerShopService().load());
             ImportReport report = new ImportReport(
                     imported,
@@ -78,10 +79,10 @@ public class ShopIntuitiveImporter {
                     result.warnings(),
                     result.errors()
             );
-            return new ImporterService.ImportExecution(report, backup.getAbsolutePath(), report.successful());
+            return new ImporterService.ImportExecution(report, backup.getAbsolutePath(), report.successful(), mappings);
         } catch (SQLException exception) {
             plugin.getPluginLogService().error("Could not import intuitive shops.", exception);
-            return new ImporterService.ImportExecution(new ImportReport(
+            return ImporterService.ImportExecution.of(new ImportReport(
                     0,
                     result.warnings().size(),
                     result.errors().size() + 1,
@@ -129,7 +130,7 @@ public class ShopIntuitiveImporter {
                             "backup:" + key
                     ));
                 }
-                insertShops(shops, false, new ArrayList<>());
+                insertShops(shops, false, new ArrayList<>(), new ArrayList<>());
             }
             plugin.getServer().getScheduler().runTask(plugin, () -> plugin.getPlayerShopService().load());
             return true;
@@ -321,7 +322,7 @@ public class ShopIntuitiveImporter {
         }
     }
 
-    private int insertShops(List<ImportedPlayerShop> shops, boolean skipExisting, List<String> warnings) throws SQLException {
+    private int insertShops(List<ImportedPlayerShop> shops, boolean skipExisting, List<String> warnings, List<ImporterService.ImportMapping> mappings) throws SQLException {
         if (shops.isEmpty()) {
             return 0;
         }
@@ -358,6 +359,13 @@ public class ShopIntuitiveImporter {
                     statement.setLong(20, now);
                     statement.setLong(21, now);
                     statement.addBatch();
+                    mappings.add(new ImporterService.ImportMapping(
+                            "Shop",
+                            shop.sourceIdentifier(),
+                            "PLAYER_SHOP",
+                            shop.world() + ":" + shop.signX() + ":" + shop.signY() + ":" + shop.signZ(),
+                            shop.type().name()
+                    ));
                     imported++;
                 }
                 statement.executeBatch();

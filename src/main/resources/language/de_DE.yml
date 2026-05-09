@@ -16,6 +16,14 @@ language:
   available: "%prefix%&7Verfügbare Sprachen: &e%languages%"
   invalid: "%prefix%&cDiese Sprache ist nicht verfügbar."
 
+debug:
+  usage: "%prefix%&cNutze: /cshop admin debug <enable|disable|status>"
+  enabled: "%prefix%&aDebug-Dateilogging wurde aktiviert."
+  disabled: "%prefix%&cDebug-Dateilogging wurde deaktiviert."
+  status: "%prefix%&7Debug-Dateilogging ist aktuell: %status%"
+  statusEnabled: "&aaktiv"
+  statusDisabled: "&caus"
+
 serverShop:
   opened: "%prefix%&aServerShop geöffnet."
   categoryNotFound: "%prefix%&cKategorie wurde nicht gefunden."

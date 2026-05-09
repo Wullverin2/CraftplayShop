@@ -29,13 +29,13 @@ public class EconomyShopGuiImporter {
 
     public ImporterService.ImportExecution preview(File source) {
         ParseResult result = parse(source);
-        return new ImporterService.ImportExecution(result.report(), "", result.report().successful());
+        return ImporterService.ImportExecution.of(result.report(), "", result.report().successful());
     }
 
     public ImporterService.ImportExecution apply(File source, ImportMode mode) {
         ParseResult result = parse(source);
         if (!result.report().successful() && result.categories().isEmpty()) {
-            return new ImporterService.ImportExecution(result.report(), "", false);
+            return ImporterService.ImportExecution.of(result.report(), "", false);
         }
 
         File target = new File(plugin.getDataFolder(), "server_shop.yml");
@@ -44,7 +44,7 @@ public class EconomyShopGuiImporter {
             Files.copy(target.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException exception) {
             plugin.getPluginLogService().error("Could not create server shop import backup.", exception);
-            return new ImporterService.ImportExecution(new ImportReport(
+            return ImporterService.ImportExecution.of(new ImportReport(
                     0,
                     result.report().warningCount(),
                     result.report().errorCount() + 1,
@@ -61,6 +61,7 @@ public class EconomyShopGuiImporter {
             output.set("categories", null);
         }
 
+        List<ImporterService.ImportMapping> mappings = new ArrayList<>();
         int slotIndex = 0;
         for (ImportedCategory category : result.categories().values()) {
             String categoryPath = "categories." + category.id();
@@ -81,17 +82,31 @@ public class EconomyShopGuiImporter {
                 output.set(itemPath + ".buyEnabled", item.buyEnabled());
                 output.set(itemPath + ".sellEnabled", item.sellEnabled());
                 output.set(itemPath + ".slot", item.slot());
+                mappings.add(new ImporterService.ImportMapping(
+                        "EconomyShopGUI-Premium",
+                        category.sourceFileName() + "#" + item.sourceKey(),
+                        "SERVER_SHOP_ITEM",
+                        category.id() + ":" + item.id(),
+                        mode.name()
+                ));
             }
+            mappings.add(new ImporterService.ImportMapping(
+                    "EconomyShopGUI-Premium",
+                    category.sourceFileName(),
+                    "SERVER_SHOP_CATEGORY",
+                    category.id(),
+                    mode.name()
+            ));
             slotIndex++;
         }
 
         try {
             output.save(target);
             plugin.getServer().getScheduler().runTask(plugin, plugin::reloadAll);
-            return new ImporterService.ImportExecution(result.report(), backup.getAbsolutePath(), true);
+            return new ImporterService.ImportExecution(result.report(), backup.getAbsolutePath(), true, mappings);
         } catch (IOException exception) {
             plugin.getPluginLogService().error("Could not save imported server shop.", exception);
-            return new ImporterService.ImportExecution(new ImportReport(
+            return ImporterService.ImportExecution.of(new ImportReport(
                     0,
                     result.report().warningCount(),
                     result.report().errorCount() + 1,

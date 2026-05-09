@@ -14,6 +14,16 @@ settings:
   # Aktiviert zusätzliche Debug-Ausgaben.
   debug: false
 
+debug:
+  fileLogging:
+    # Wenn true, schreibt CraftplayShop eigene Logzeilen zusaetzlich in
+    # plugins/CraftplayShop/debuglogs/<datei>. Kann per Admin-Befehl
+    # ein- und ausgeschaltet werden und bleibt dann auch nach Neustarts aktiv.
+    enabled: false
+
+    # Name der Debug-Datei. %date% wird z. B. zu 2026-05-09.
+    fileNamePattern: "debug-%date%.txt"
+
 commands:
   # Hauptbefehl, den du für CraftplayShop verwenden möchtest.
   # In Phase 1 können die in plugin.yml registrierten Befehle genutzt werden:

@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -122,6 +123,7 @@ public class ImporterService {
                 ImportExecution execution = task.run();
                 String reportPath = writeReport(importId, importerName, mode, execution.report());
                 finishImport(importId, execution.report(), execution.success() ? "SUCCESS" : "FAILED", execution.backupPath(), reportPath);
+                saveMappings(importId, execution.mappings());
                 plugin.getServer().getScheduler().runTask(plugin, () -> sendReport(player, importId, mode, execution.report(), reportPath));
             } catch (Exception exception) {
                 plugin.getPluginLogService().error("Importer failed: " + importerName, exception);
@@ -196,7 +198,7 @@ public class ImporterService {
     }
 
     public void saveMappings(long importId, List<ImportMapping> mappings) {
-        if (mappings.isEmpty()) {
+        if (importId <= 0 || mappings.isEmpty()) {
             return;
         }
         String table = plugin.getDatabaseService().table("import_mappings");
@@ -359,7 +361,14 @@ public class ImporterService {
         return input.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-");
     }
 
-    public record ImportExecution(ImportReport report, String backupPath, boolean success) {
+    public record ImportExecution(ImportReport report, String backupPath, boolean success, List<ImportMapping> mappings) {
+        public ImportExecution {
+            mappings = mappings == null ? List.of() : List.copyOf(mappings);
+        }
+
+        public static ImportExecution of(ImportReport report, String backupPath, boolean success) {
+            return new ImportExecution(report, backupPath, success, Collections.emptyList());
+        }
     }
 
     public record ImportMapping(String sourcePlugin, String sourceIdentifier, String targetType, String targetId, String notes) {

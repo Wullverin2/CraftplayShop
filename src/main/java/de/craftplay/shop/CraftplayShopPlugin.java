@@ -96,6 +96,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         taskService = new TaskService(this);
         configService = new ConfigService(this);
         configService.load();
+        pluginLogService.reloadState();
 
         languageService = new LanguageService(this);
         playerLanguageService = new PlayerLanguageService(this);
@@ -180,6 +181,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
 
     public void reloadAll() {
         configService.reload();
+        if (pluginLogService != null) {
+            pluginLogService.reloadState();
+        }
         languageService.load();
         if (guiService != null) {
             guiService.clearCache();

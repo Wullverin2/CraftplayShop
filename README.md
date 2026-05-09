@@ -29,6 +29,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Automatisches Ergaenzen fehlender Keys in vorhandenen `config.yml`, Language- und GUI-Dateien.
 - Reload ueber `/shop reload`, `/cshop reload` und konfigurierten Admin-Befehl.
 - Konfigurierbarer Plugin-Hauptbefehl ueber `commands.pluginCommand`.
+- Zuschaltbares Debug-Dateilogging ueber Config und Admin-Befehl.
 - Saubere Language- und GUI-Dateien fuer `de_DE` und `en_US`.
 
 ### Config, Sprache und GUI
@@ -197,6 +198,9 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `/cshop admin backup confirm`
 - `/cshop admin backup cancel`
 - `/cshop admin backups`
+- `/cshop admin debug enable`
+- `/cshop admin debug disable`
+- `/cshop admin debug status`
 - `/trade toggle`
 - `/trade on`
 - `/trade off`
@@ -360,6 +364,16 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Gamble-Shops werden bewusst uebersprungen.
 - Shops ohne vorhandenes Schild oder ohne vorhandene Kiste werden beim echten Apply uebersprungen.
 - Jeder Import schreibt einen Bericht nach `plugins/CraftplayShop/imports/reports/` und legt Backups unter `plugins/CraftplayShop/imports/backups/` an.
+- Import-Mappings werden in der Datenbank gespeichert, damit Importquellen und Zielobjekte nachvollziehbar bleiben.
+
+### Debugging
+
+- Dateibasiertes Debuglogging nach `plugins/CraftplayShop/debuglogs/`.
+- Status bleibt erhalten, wenn `debug.fileLogging.enabled` in der Config aktiv ist.
+- Laufzeitsteuerung ueber:
+  - `/cshop admin debug enable`
+  - `/cshop admin debug disable`
+  - `/cshop admin debug status`
 
 ### Skeletons / vorbereitet
 

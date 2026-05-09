@@ -174,6 +174,10 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             plugin.getServerShopAdminEditor().createManualBackup(player);
             return;
         }
+        if ("debug".equals(sub)) {
+            debug(sender, args);
+            return;
+        }
         if ("import".equals(sub)) {
             if (plugin.getImporterService().handleCommand(sender, args)) {
                 return;
@@ -207,6 +211,34 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 "categories", Integer.toString(plugin.getServerShopRegistry().countCategories())
         ));
         plugin.getLanguageService().send(sender, "general.reloadDone");
+    }
+
+    private void debug(CommandSender sender, String[] args) {
+        if (!sender.hasPermission(PermissionNodes.ADMIN)) {
+            plugin.getLanguageService().send(sender, "general.noPermission");
+            return;
+        }
+        if (args.length < 3) {
+            plugin.getLanguageService().send(sender, "debug.usage");
+            return;
+        }
+        String mode = args[2].toLowerCase();
+        switch (mode) {
+            case "enable", "on" -> {
+                plugin.getPluginLogService().setFileDebugEnabled(true);
+                plugin.getLanguageService().send(sender, "debug.enabled");
+            }
+            case "disable", "off" -> {
+                plugin.getPluginLogService().setFileDebugEnabled(false);
+                plugin.getLanguageService().send(sender, "debug.disabled");
+            }
+            case "status" -> plugin.getLanguageService().send(sender, "debug.status", Map.of(
+                    "status", plugin.getPluginLogService().isFileDebugEnabled()
+                            ? plugin.getLanguageService().get(sender, "debug.statusEnabled")
+                            : plugin.getLanguageService().get(sender, "debug.statusDisabled")
+            ));
+            default -> plugin.getLanguageService().send(sender, "debug.usage");
+        }
     }
 
     private void language(CommandSender sender, String[] args) {
@@ -437,10 +469,13 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             return filter(List.of("search", "mine", "own"), args[1]);
         }
         if (args.length == 2 && "admin".equalsIgnoreCase(args[0])) {
-            return filter(List.of("editor", "reload", "servershop", "adminshop", "backup", "backups", "import"), args[1]);
+            return filter(List.of("editor", "reload", "servershop", "adminshop", "backup", "backups", "import", "debug"), args[1]);
         }
         if (args.length == 3 && "admin".equalsIgnoreCase(args[0]) && "backup".equalsIgnoreCase(args[1])) {
             return filter(List.of("list", "restore", "confirm", "cancel"), args[2]);
+        }
+        if (args.length == 3 && "admin".equalsIgnoreCase(args[0]) && "debug".equalsIgnoreCase(args[1])) {
+            return filter(List.of("enable", "disable", "status"), args[2]);
         }
         if (args.length == 3 && "admin".equalsIgnoreCase(args[0]) && "import".equalsIgnoreCase(args[1])) {
             return filter(List.of("economyshopgui", "shopintuitive"), args[2]);

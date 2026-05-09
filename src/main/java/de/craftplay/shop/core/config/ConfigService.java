@@ -34,6 +34,7 @@ public class ConfigService {
 
     private void createDirectories() {
         new File(plugin.getDataFolder(), "data").mkdirs();
+        new File(plugin.getDataFolder(), "debuglogs").mkdirs();
         new File(plugin.getDataFolder(), "gui/de_DE").mkdirs();
         new File(plugin.getDataFolder(), "gui/en_US").mkdirs();
         new File(plugin.getDataFolder(), "language").mkdirs();
@@ -141,6 +142,19 @@ public class ConfigService {
 
     public boolean debug() {
         return config().getBoolean("settings.debug", false);
+    }
+
+    public boolean debugFileLoggingEnabled() {
+        return config().getBoolean("debug.fileLogging.enabled", false);
+    }
+
+    public void setDebugFileLoggingEnabled(boolean enabled) {
+        config().set("debug.fileLogging.enabled", enabled);
+        plugin.saveConfig();
+    }
+
+    public String debugFileNamePattern() {
+        return config().getString("debug.fileLogging.fileNamePattern", "debug-%date%.txt");
     }
 
     public String pluginCommand() {
