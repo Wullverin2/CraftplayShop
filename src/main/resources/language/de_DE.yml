@@ -276,3 +276,18 @@ permissionshop:
   alreadyOwned: "%prefix%&cDieses Produkt besitzt du bereits."
   commandFailed: "%prefix%&cDer Kauf konnte nicht vollstaendig ausgefuehrt werden."
   bought: "%prefix%&aDu hast &e%product% &afuer &e%price% &agekauft."
+
+referral:
+  code: "%prefix%&aDein Referral-Code: &e%code%"
+  redeemPrompt: "%prefix%&7Schreibe den Referral-Code fuer &e%package% &7in den Chat. &cCancel &7bricht ab."
+  inputCancelled: "%prefix%&cEingabe abgebrochen."
+  invalidCode: "%prefix%&cDieser Referral-Code ist ungueltig."
+  selfRedeemBlocked: "%prefix%&cDu kannst deinen eigenen Code nicht einloesen."
+  alreadyRedeemed: "%prefix%&cDu hast bereits einen Referral-Code eingeloest."
+  minPlaytime: "%prefix%&cDu brauchst mindestens &e%minutes% &cMinuten Spielzeit, um einen Code einzuloesen."
+  redeemed: "%prefix%&aDu hast den Code von &e%referrer% &amit dem Paket &e%package% &aeingeloest."
+  referrerRewarded: "%prefix%&aDein Referral-Code wurde von &e%player% &aeingeloest. Paket: &e%package%"
+  topHeader: "%prefix%&6Top Werber:"
+  topEntry: "%prefix%&7#%place% &e%player% &7- &f%count%"
+  topEmpty: "%prefix%&7Es gibt noch keine erfolgreichen Empfehlungen."
+  pendingClaimed: "%prefix%&aEine ausstehende Referral-Belohnung wurde zugestellt: &e%amount%x %item%"

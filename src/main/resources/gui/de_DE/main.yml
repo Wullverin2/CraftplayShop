@@ -26,7 +26,7 @@ items:
     lore:
       - "&7Kaufe und verkaufe Items."
       - ""
-      - "&eKlicken zum Öffnen"
+      - "&eKlicken zum Oeffnen"
     permission: "craftplayshop.servershop.use"
     leftClickActions:
       - "OPEN_GUI:servershop"
@@ -46,7 +46,7 @@ items:
     lore:
       - "&7Sprache und Handelsoptionen."
       - ""
-      - "&eKlicken zum Öffnen"
+      - "&eKlicken zum Oeffnen"
     leftClickActions:
       - "OPEN_GUI:settings"
 
@@ -59,7 +59,7 @@ items:
       - "&7Suche Shops und verwalte"
       - "&7deine eigenen Kistenshops."
       - ""
-      - "&eKlicken zum Öffnen"
+      - "&eKlicken zum Oeffnen"
     permission: "craftplayshop.playershop.use"
     leftClickActions:
       - "OPEN_GUI:playershop"
@@ -85,8 +85,8 @@ items:
     material: NAME_TAG
     name: "&dRankShop"
     lore:
-      - "&7Kaufe Ränge und Upgrades"
-      - "&7mit Ingame-Währung."
+      - "&7Kaufe Raenge und Upgrades"
+      - "&7mit Ingame-Waehrung."
       - ""
       - "&eKlicken zum Oeffnen"
     permission: "craftplayshop.rankshop.use"
@@ -107,20 +107,6 @@ items:
     leftClickActions:
       - "OPEN_GUI:permissionshop"
 
-  sellGui:
-    enabled: true
-    slot: 30
-    material: CHEST
-    name: "&6Verkauf-GUI"
-    lore:
-      - "&7Lege Items hinein und verkaufe"
-      - "&7alle ankaufbaren Items."
-      - ""
-      - "&eKlicken zum Öffnen"
-    permission: "craftplayshop.servershop.sellgui"
-    leftClickActions:
-      - "SELL_GUI"
-
   referral:
     enabled: true
     slot: 26
@@ -130,7 +116,24 @@ items:
       id: "12345"
     name: "&bWerbt einen Freund"
     lore:
-      - "&7Zeige deinen Freundescode."
-      - "&8Kommt in einer späteren Version."
+      - "&7Zeige deinen Freundescode,"
+      - "&7loese Codes ein und"
+      - "&7pruefe die Top-Werber."
+      - ""
+      - "&eKlicken zum Oeffnen"
     leftClickActions:
       - "OPEN_GUI:referral"
+
+  sellGui:
+    enabled: true
+    slot: 30
+    material: CHEST
+    name: "&6Verkauf-GUI"
+    lore:
+      - "&7Lege Items hinein und verkaufe"
+      - "&7alle ankaufbaren Items."
+      - ""
+      - "&eKlicken zum Oeffnen"
+    permission: "craftplayshop.servershop.sellgui"
+    leftClickActions:
+      - "SELL_GUI"

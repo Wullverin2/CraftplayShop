@@ -1,10 +1,36 @@
 title: "&8Referral"
-size: 27
+size: 36
+
+filler:
+  enabled: true
+  material: BLACK_STAINED_GLASS_PANE
+  name: " "
+  slots: [0,1,2,3,4,5,6,7,8,9,17,18,26,27,28,29,30,31,32,33,34,35]
+
 items:
-  unavailable:
-    enabled: true
+  code:
+    slot: 11
+    material: PAPER
+    name: "&bDein Code"
+    lore:
+      - "&7Code: &f%code%"
+      - ""
+      - "&eKlicken zum Anzeigen"
+  redeem:
     slot: 13
-    material: BARRIER
-    name: "&cNoch nicht verfügbar"
-    leftClickActions:
-      - "MESSAGE:general.featureNotAvailable"
+    material: NAME_TAG
+    name: "&aCode einloesen"
+    lore:
+      - "&7Starte die Chat-Eingabe"
+      - "&7zum Einloesen eines Codes."
+      - ""
+      - "&eKlicken zum Starten"
+  top:
+    slot: 15
+    material: GOLD_INGOT
+    name: "&6Top Werber"
+    lore:
+      - "&7Zeigt die besten Werber"
+      - "&7direkt im Chat und in dieser Lore."
+      - ""
+      - "&eKlicken zum Anzeigen"

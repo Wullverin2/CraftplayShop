@@ -740,7 +740,86 @@ permissionShop:
         - "&eKlicken zum Kaufen"
 
 referral:
-  enabled: false
+  enabled: true
+  codeLength: 8
+  defaultPackage: "starter"
+  topLimit: 10
+  allowSelfRedeem: false
+  minPlaytimeMinutes: 30
+
+  packages:
+    starter:
+      enabled: true
+      displayName: "&aStarter Paket"
+      material: EMERALD
+      slot: 20
+      lore:
+        - "&7Standard Belohnung fuer"
+        - "&7Werber und Geworbenen."
+        - ""
+        - "&eKlicken zum Einloesen"
+      referrer:
+        money: 5000.0
+        commands:
+          - "crate key give %player% vote 1"
+        items:
+          - material: DIAMOND
+            amount: 3
+      redeemer:
+        money: 2500.0
+        commands:
+          - "crate key give %player% starter 1"
+        items:
+          - material: GOLDEN_APPLE
+            amount: 2
+    builder:
+      enabled: true
+      displayName: "&bBuilder Paket"
+      material: BRICKS
+      slot: 22
+      lore:
+        - "&7Baulastige Belohnung"
+        - "&7mit Geld und Items."
+        - ""
+        - "&eKlicken zum Einloesen"
+      referrer:
+        money: 6000.0
+        commands: []
+        items:
+          - material: OAK_LOG
+            amount: 64
+      redeemer:
+        money: 3000.0
+        commands: []
+        items:
+          - material: STONE
+            amount: 64
+          - material: GLASS
+            amount: 32
+    tools:
+      enabled: true
+      displayName: "&6Werkzeug Paket"
+      material: IRON_PICKAXE
+      slot: 24
+      lore:
+        - "&7Belohnung mit Werkzeugen"
+        - "&7und Startgeld."
+        - ""
+        - "&eKlicken zum Einloesen"
+      referrer:
+        money: 7000.0
+        commands: []
+        items:
+          - material: IRON_PICKAXE
+            amount: 1
+      redeemer:
+        money: 3500.0
+        commands: []
+        items:
+          - material: IRON_PICKAXE
+            amount: 1
+          - material: IRON_AXE
+            amount: 1
 
 auctionHouse:
   enabled: true

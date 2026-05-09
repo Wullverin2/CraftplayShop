@@ -107,6 +107,23 @@ items:
     leftClickActions:
       - "OPEN_GUI:permissionshop"
 
+  referral:
+    enabled: true
+    slot: 26
+    material: PLAYER_HEAD
+    head:
+      type: HEAD_DATABASE
+      id: "12345"
+    name: "&bRefer a Friend"
+    lore:
+      - "&7Show your friend code,"
+      - "&7redeem codes and"
+      - "&7check the top referrers."
+      - ""
+      - "&eClick to open"
+    leftClickActions:
+      - "OPEN_GUI:referral"
+
   sellGui:
     enabled: true
     slot: 30
@@ -120,17 +137,3 @@ items:
     permission: "craftplayshop.servershop.sellgui"
     leftClickActions:
       - "SELL_GUI"
-
-  referral:
-    enabled: true
-    slot: 26
-    material: PLAYER_HEAD
-    head:
-      type: HEAD_DATABASE
-      id: "12345"
-    name: "&bRefer a Friend"
-    lore:
-      - "&7Show your friend code."
-      - "&8Coming in a later version."
-    leftClickActions:
-      - "OPEN_GUI:referral"

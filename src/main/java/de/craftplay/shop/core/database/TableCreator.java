@@ -170,6 +170,36 @@ public class TableCreator {
                         "expires_at BIGINT, " +
                         "sold_at BIGINT, " +
                         "claimed_at BIGINT)");
+
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("referral_codes") + " (" +
+                        uuidColumn("player_uuid") + " PRIMARY KEY, " +
+                        shortTextColumn("player_name") + ", " +
+                        shortTextColumn("code") + " UNIQUE, " +
+                        "created_at BIGINT, " +
+                        "updated_at BIGINT)");
+
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("referral_redemptions") + " (" +
+                        idColumn() + ", " +
+                        shortTextColumn("code") + ", " +
+                        uuidColumn("referrer_uuid") + ", " +
+                        shortTextColumn("referrer_name") + ", " +
+                        uuidColumn("redeemer_uuid") + " UNIQUE, " +
+                        shortTextColumn("redeemer_name") + ", " +
+                        shortTextColumn("package_id") + ", " +
+                        "created_at BIGINT)");
+
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("referral_pending_rewards") + " (" +
+                        idColumn() + ", " +
+                        uuidColumn("player_uuid") + ", " +
+                        shortTextColumn("player_name") + ", " +
+                        shortTextColumn("source_type") + ", " +
+                        shortTextColumn("source_id") + ", " +
+                        shortTextColumn("reward_kind") + ", " +
+                        largeTextColumn("item_data") + ", " +
+                        textColumn("command") + ", " +
+                        "money DOUBLE, " +
+                        "created_at BIGINT, " +
+                        "claimed_at BIGINT)");
             }
         }
     }

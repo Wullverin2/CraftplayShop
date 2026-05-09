@@ -17,7 +17,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 ## Aktueller Stand
 
-**Version v0.8.0 ist der aktuelle Stand.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault, SQLite, MySQL/MariaDB, ServerShop/AdminShop, AutoSellChest, PlayerShop mit SELL/BUY/BUY_SELL/TRADE_ITEM, Protection-Hooks, DirectTrade, AuctionHouse, PermissionShop und RankShop.
+**Version v0.9.0 ist der aktuelle Stand.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault, SQLite, MySQL/MariaDB, ServerShop/AdminShop, AutoSellChest, PlayerShop mit SELL/BUY/BUY_SELL/TRADE_ITEM, Protection-Hooks, DirectTrade, AuctionHouse, PermissionShop, RankShop und ReferralSystem.
 
 ### Core
 
@@ -331,12 +331,22 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - GUI ist integriert und ueber das Hauptmenue erreichbar.
 - Kaeufe werden ueber das Transaktionslogging erfasst.
 
+### ReferralSystem
+
+- Referral-Codes werden pro Spieler automatisch erzeugt und gespeichert.
+- Referral-GUI mit eigenem Code, Redeem-Flow und Top-Werbern.
+- Redeem per Chat-Eingabe oder ueber `/shop referral redeem <code> [paket]`.
+- Mehrere Reward-Pakete aus der `config.yml`.
+- Belohnungen fuer Werber und Geworbenen mit Geld, Commands und Items.
+- Pending Rewards fuer Items, wenn der Spieler offline ist oder das Inventar voll ist.
+- Mindestspielzeit und Selbst-Einloesungsschutz gegen einfachen Missbrauch.
+- Top-Werber werden aus erfolgreichen Einloesungen berechnet.
+
 ### Skeletons / vorbereitet
 
 Folgende Module sind strukturell vorbereitet, aber noch nicht vollstaendig umgesetzt:
 
 - PlayerShop-Trust, erweiterter Finder und erweiterte Verwaltungs-GUI
-- ReferralSystem
 - weitergehende Protection-Logik fuer WorldGuard, Lands und BentoBox ueber die aktuelle Hook-Erkennung hinaus
 - PlaceholderAPI, HeadDatabase, Floodgate, Citizens, Discord
 - EconomyShopGUI Importer
@@ -376,7 +386,7 @@ adminShop:
 mvn clean package
 ```
 
-Die fertige Plugin-JAR liegt danach unter `target/CraftplayShop-0.5.0.jar`.
+Die fertige Plugin-JAR liegt danach unter `target/CraftplayShop-0.9.0.jar`.
 
 ## Lizenz
 

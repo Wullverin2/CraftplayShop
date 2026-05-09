@@ -104,6 +104,10 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             permissionShop(sender);
             return true;
         }
+        if ("referral".equals(sub) || "ref".equals(sub)) {
+            referral(sender, java.util.Arrays.copyOfRange(args, 1, args.length));
+            return true;
+        }
         plugin.getLanguageService().send(sender, "general.unknownCommand");
         return true;
     }
@@ -375,13 +379,45 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         plugin.getPermissionProductService().open(player);
     }
 
+    private void referral(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            plugin.getLanguageService().send(sender, "general.playerOnly");
+            return;
+        }
+        if (!player.hasPermission(PermissionNodes.REFERRAL_USE)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        if (args.length == 0) {
+            plugin.getReferralService().open(player);
+            return;
+        }
+        String sub = args[0].toLowerCase();
+        switch (sub) {
+            case "code" -> plugin.getLanguageService().send(player, "referral.code", Map.of("code", plugin.getReferralService().ownCode(player)));
+            case "redeem", "einloesen" -> {
+                if (args.length < 2) {
+                    plugin.getReferralService().requestRedeem(player, "");
+                    return;
+                }
+                String packageId = args.length > 2 ? args[2] : "";
+                plugin.getReferralService().redeem(player, args[1], packageId);
+            }
+            case "top" -> plugin.getReferralService().sendTop(player);
+            default -> plugin.getReferralService().open(player);
+        }
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
             if ("ah".equalsIgnoreCase(command.getName())) {
                 return filter(List.of("browse", "search", "sell", "mine", "claims"), args[0]);
             }
-            return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall", "sellgui", "search", "favorites", "playershop", "pshop", "auctionhouse", "ah", "rankshop", "permissionshop"), args[0]);
+            return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall", "sellgui", "search", "favorites", "playershop", "pshop", "auctionhouse", "ah", "rankshop", "permissionshop", "referral"), args[0]);
+        }
+        if (args.length == 2 && "referral".equalsIgnoreCase(args[0])) {
+            return filter(List.of("code", "redeem", "top"), args[1]);
         }
         if (args.length == 2 && ("auctionhouse".equalsIgnoreCase(args[0]) || "ah".equalsIgnoreCase(args[0]))) {
             return filter(List.of("browse", "search", "sell", "mine", "claims"), args[1]);

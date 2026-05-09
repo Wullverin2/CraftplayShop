@@ -63,6 +63,10 @@ public class GuiService {
             plugin.getPermissionProductService().open(player);
             return;
         }
+        if ("referral".equalsIgnoreCase(guiId)) {
+            plugin.getReferralService().open(player);
+            return;
+        }
         String language = plugin.getPlayerLanguageService().getLanguage(player);
         GuiDefinition definition = definition(language, guiId);
         if (definition == null) {

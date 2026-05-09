@@ -276,3 +276,18 @@ permissionshop:
   alreadyOwned: "%prefix%&cYou already own this product."
   commandFailed: "%prefix%&cThe purchase could not be completed fully."
   bought: "%prefix%&aYou bought &e%product% &afor &e%price%&a."
+
+referral:
+  code: "%prefix%&aYour referral code: &e%code%"
+  redeemPrompt: "%prefix%&7Write the referral code for &e%package% &7in chat. &cCancel &7cancels."
+  inputCancelled: "%prefix%&cInput cancelled."
+  invalidCode: "%prefix%&cThat referral code is invalid."
+  selfRedeemBlocked: "%prefix%&cYou cannot redeem your own code."
+  alreadyRedeemed: "%prefix%&cYou have already redeemed a referral code."
+  minPlaytime: "%prefix%&cYou need at least &e%minutes% &cminutes of playtime to redeem a code."
+  redeemed: "%prefix%&aYou redeemed the code from &e%referrer% &awith package &e%package%&a."
+  referrerRewarded: "%prefix%&aYour referral code was redeemed by &e%player%&a. Package: &e%package%"
+  topHeader: "%prefix%&6Top referrers:"
+  topEntry: "%prefix%&7#%place% &e%player% &7- &f%count%"
+  topEmpty: "%prefix%&7There are no successful referrals yet."
+  pendingClaimed: "%prefix%&aA pending referral reward was delivered: &e%amount%x %item%"
