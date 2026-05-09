@@ -198,7 +198,11 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `/trade toggle`
 - `/trade on`
 - `/trade off`
-- `/asc` als saubere Noch-nicht-verfuegbar-Meldung
+- `/asc`
+- `/asc list`
+- `/asc give <spieler> [menge]`
+- `/asc toggle`
+- `/asc remove`
 
 ### Permissions
 
@@ -222,9 +226,30 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `craftplayshop.trade.toggle` - `/trade toggle`, `/trade on`, `/trade off`.
 - `craftplayshop.trade.request` - Für spätere Handelsanfragen vorbereitet.
 - `craftplayshop.trade.accept` - Für spätere Annahme von Handelsanfragen vorbereitet.
-- `craftplayshop.autosellchest.use` - Für AutoSellChest vorbereitet.
-- `craftplayshop.autosellchest.create` - Für AutoSellChest-Erstellung vorbereitet.
-- `craftplayshop.autosellchest.admin` - Für AutoSellChest-Administration vorbereitet.
+- `craftplayshop.autosellchest.use` - AutoSellChest-Menue und eigene Kisten anzeigen.
+- `craftplayshop.autosellchest.create` - AutoSellChest-Spezialkisten platzieren.
+- `craftplayshop.autosellchest.admin` - AutoSellChests administrativ geben, bearbeiten und entfernen.
+- `craftplayshop.autosellchest.limit.<key>` - Konfigurierbare AutoSellChest-Limits aus `autoSellChest.maxChests.permissionOverrides`.
+
+### AutoSellChest
+
+- AutoSellChest ist als Start von v0.2 integriert.
+- Admins geben Spezialkisten ueber `/asc give <spieler> [menge]` aus.
+- Spieler platzieren das Spezialitem, um eine AutoSellChest zu registrieren.
+- AutoSellChests werden in SQLite gespeichert und beim Reload neu geladen.
+- Es werden nur bekannte Kisten verarbeitet; es gibt keinen Welt-Scan.
+- Hopper- und Inventar-Events markieren Kisten als dirty, damit Einfuegen gebuendelt verkauft wird.
+- Der Verkaufs-Takt, Dirty-Cooldown, maximale Kisten pro Durchlauf und maximale Items pro Scan sind in `config.yml` konfigurierbar.
+- Items werden nur verkauft, wenn sie im CraftplayShop ServerShop ankaufbar sind.
+- Nicht ankaufbare Items bleiben in der Kiste.
+- Besitzer erhalten Vault-Geld, auch wenn sie offline sind.
+- AutoSellChest-Verkaeufe werden in `craftplay_shop_autosell_logs` gespeichert.
+- Wenn der Besitzer online ist, wird zusaetzlich ein Transaktionslog vom Typ `AUTOSELL_CHEST` geschrieben.
+- Fremde Spieler koennen AutoSellChests nicht normal oeffnen, wenn der Schutz aktiv ist.
+- Hopper-Extraktion, Hopper-Insertion und Explosionsschutz sind konfigurierbar.
+- Shift-Rechtsklick auf eine AutoSellChest oeffnet das Info-GUI.
+- Das AutoSellChest-GUI zeigt eigene Kisten, Status, Koordinaten, verkaufte Items und verdientes Geld.
+- Linksklick im GUI oeffnet Details, Rechtsklick teleportiert zur Kiste, Shift-Linksklick loescht den Datenbankeintrag.
 
 ### DirectTrade Vorbereitung
 
@@ -238,7 +263,6 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 Folgende Module sind strukturell vorbereitet, aber noch nicht vollstaendig umgesetzt:
 
 - PlayerShop BUY_SELL, TRADE_ITEM, Trust, erweiterter Finder und erweiterte Verwaltungs-GUI
-- AutoSellChest
 - vollstaendiger DirectTrade
 - AuctionHouse
 - RankShop

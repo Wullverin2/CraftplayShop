@@ -187,6 +187,10 @@ public class ConfigService {
         return config().getBoolean("playerShops.enabled", true);
     }
 
+    public boolean autoSellChestEnabled() {
+        return config().getBoolean("autoSellChest.enabled", false);
+    }
+
     public ItemMatchMode playerShopItemMatchMode() {
         try {
             return ItemMatchMode.valueOf(config().getString("playerShops.itemMatchMode", "EXACT").toUpperCase(Locale.ROOT));

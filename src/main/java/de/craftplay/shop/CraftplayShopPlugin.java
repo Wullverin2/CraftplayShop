@@ -2,7 +2,6 @@ package de.craftplay.shop;
 
 import de.craftplay.shop.auctionhouse.AuctionHouseService;
 import de.craftplay.shop.autosell.AutoSellChestService;
-import de.craftplay.shop.core.command.FeatureUnavailableCommand;
 import de.craftplay.shop.core.command.MainCommand;
 import de.craftplay.shop.core.command.ShopCommand;
 import de.craftplay.shop.core.command.TradeCommand;
@@ -84,6 +83,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
     private PlaceholderApiHook placeholderApiHook;
     private ProtectionService protectionService;
     private PlayerShopService playerShopService;
+    private AutoSellChestService autoSellChestService;
 
     @Override
     public void onEnable() {
@@ -125,7 +125,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         directTradeService = new DirectTradeService(this);
 
         playerShopService = new PlayerShopService(this);
-        new AutoSellChestService(this);
+        autoSellChestService = new AutoSellChestService(this);
         new ReferralService(this);
         new RankShopService(this);
         new PermissionProductService(this);
@@ -159,6 +159,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         if (playerShopService != null) {
             playerShopService.shutdown();
         }
+        if (autoSellChestService != null) {
+            autoSellChestService.shutdown();
+        }
         if (taskService != null) {
             taskService.cancelAll();
         }
@@ -188,6 +191,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         }
         if (playerShopService != null) {
             playerShopService.load();
+        }
+        if (autoSellChestService != null) {
+            autoSellChestService.load();
         }
     }
 
@@ -246,7 +252,11 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         register("sellall", mainCommand);
         register("sellgui", mainCommand);
         register("trade", new TradeCommand(this));
-        register("asc", new FeatureUnavailableCommand(this));
+        register("asc", autoSellChestService);
+        PluginCommand ascCommand = getCommand("asc");
+        if (ascCommand != null) {
+            ascCommand.setTabCompleter(autoSellChestService);
+        }
     }
 
     private void register(String command, org.bukkit.command.CommandExecutor executor) {
@@ -370,5 +380,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
 
     public PlayerShopService getPlayerShopService() {
         return playerShopService;
+    }
+
+    public AutoSellChestService getAutoSellChestService() {
+        return autoSellChestService;
     }
 }

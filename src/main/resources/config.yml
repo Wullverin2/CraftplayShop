@@ -325,26 +325,89 @@ playerShops:
     deleteShopsOnPlotDelete: true
 
 autoSellChest:
-  enabled: false
+  # Aktiviert AutoSellChest. Bestehende Configs behalten ihren Wert und koennen hier auf true gesetzt werden.
+  enabled: true
+
+  # Anzeigename fuer neu registrierte Verkaufskisten. %id% wird durch die Datenbank-ID ersetzt.
+  defaultName: "&cAutoSellChest #%id%"
+
+  # Besitzer erhalten standardmaessig eine Nachricht, wenn ihre Kiste Items verkauft.
+  notifyOwnerDefault: true
+
+  # Spezial-Item, das per /asc give <spieler> [menge] ausgegeben und platziert wird.
+  item:
+    material: CHEST
+    name: "&cAutoSellChest"
+    lore:
+      - "&7Platziere diese Kiste, um eine"
+      - "&7automatische Verkaufskiste zu erstellen."
+      - ""
+      - "&eVerkauft an den Craftplay ServerShop."
+    customModelData: 0
+    dropItemOnBreak: true
+
+  maxChests:
+    # Standardlimit pro Spieler. -1 bedeutet unbegrenzt.
+    default: 5
+
+    # Spieler mit craftplayshop.autosellchest.limit.<key> nutzen den hoechsten passenden Wert.
+    permissionOverrides:
+      vip: 10
+      premium: 20
+      admin: -1
 
   selling:
+    # BOTH ist fuer spaetere Modi vorbereitet. Aktuell verkauft AutoSellChest immer an den ServerShop.
     mode: "BOTH"
+
+    # Mindestabstand zwischen automatischen Verkaufsdurchlaeufen je Kiste.
     intervalSeconds: 10
+
+    # Wenn true, verkauft eine Kiste nur, solange der Besitzer online ist.
     sellOnlyWhenOwnerOnline: false
 
+  messages:
+    # Sendet dem Besitzer eine kurze Nachricht, wenn online und seine Kiste verkauft hat.
+    notifyOwnerOnSell: true
+
+  effects:
+    placeParticles: true
+    placeSound: true
+
   performance:
+    # Takt, in dem bekannte AutoSellChests verarbeitet werden. Es werden keine Welt-Scans gemacht.
     scanIntervalSeconds: 10
+
+    # Maximale AutoSellChests pro Durchlauf.
     maxChestsPerTick: 5
+
+    # Maximale Item-Anzahl, die pro Kiste in einem Durchlauf geprueft wird.
     maxItemsPerScan: 2304
-    processOnlyDirtyChests: true
+
+    # Wenn true, werden nur Kisten verarbeitet, die durch Hopper/Inventar-Events als dirty markiert wurden.
+    # Wenn false, werden zusaetzlich alle faelligen Kisten anhand von intervalSeconds verarbeitet.
+    processOnlyDirtyChests: false
+
+    # Dirty-Kisten werden erst nach dieser Ruhezeit verkauft, damit Hopper-Bursts gebuendelt werden.
     dirtyCooldownSeconds: 5
+
+    # Schreibt AutoSellChest-Logs asynchron.
     asyncDatabaseLogging: true
 
   protection:
+    # Blockiert normales Oeffnen fremder AutoSellChests.
     protectContainer: true
+
+    # Nur Besitzer oder Admins duerfen AutoSellChests abbauen.
     blockBreakingByOthers: true
+
+    # Explosionen zerstoeren AutoSellChests nicht.
     blockExplosionDamage: true
+
+    # Hopper duerfen keine Items aus AutoSellChests ziehen.
     blockHopperExtraction: true
+
+    # Hopper duerfen Items in AutoSellChests einfuegen.
     allowHopperInsertion: true
 
 directTrade:

@@ -72,6 +72,39 @@ public class TableCreator {
                         "updated_at BIGINT)");
                 addColumnIfMissing(statement, database.table("player_shops"), "display_type", "TEXT");
 
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("autosell_chests") + " (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "owner_uuid TEXT, " +
+                        "owner_name TEXT, " +
+                        "world TEXT, " +
+                        "x INTEGER, " +
+                        "y INTEGER, " +
+                        "z INTEGER, " +
+                        "name TEXT, " +
+                        "active BOOLEAN, " +
+                        "notify_owner BOOLEAN, " +
+                        "multiplier DOUBLE, " +
+                        "total_items_sold INTEGER, " +
+                        "total_money_earned DOUBLE, " +
+                        "last_sold_at BIGINT, " +
+                        "created_at BIGINT, " +
+                        "updated_at BIGINT)");
+
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("autosell_logs") + " (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "chest_id INTEGER, " +
+                        "owner_uuid TEXT, " +
+                        "owner_name TEXT, " +
+                        "world TEXT, " +
+                        "x INTEGER, " +
+                        "y INTEGER, " +
+                        "z INTEGER, " +
+                        "material TEXT, " +
+                        "amount INTEGER, " +
+                        "price_each DOUBLE, " +
+                        "total_price DOUBLE, " +
+                        "created_at BIGINT)");
+
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("imports") + " (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "importer_name TEXT, " +

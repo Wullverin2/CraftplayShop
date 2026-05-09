@@ -21,6 +21,9 @@ public final class PermissionNodes {
     public static final String TRADE_TOGGLE = "craftplayshop.trade.toggle";
     public static final String TRADE_REQUEST = "craftplayshop.trade.request";
     public static final String TRADE_ACCEPT = "craftplayshop.trade.accept";
+    public static final String AUTOSELL_CHEST_USE = "craftplayshop.autosellchest.use";
+    public static final String AUTOSELL_CHEST_CREATE = "craftplayshop.autosellchest.create";
+    public static final String AUTOSELL_CHEST_ADMIN = "craftplayshop.autosellchest.admin";
 
     private PermissionNodes() {
     }
