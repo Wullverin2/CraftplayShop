@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -356,17 +357,34 @@ public class ServerShopCategoryGui {
     }
 
     private List<String> shopItemLore(Player player, YamlConfiguration gui, ServerShopItem item, Map<String, String> placeholders) {
-        List<String> lore = new ArrayList<>();
         if (!item.lore().isEmpty()) {
-            lore.addAll(item.lore());
-            if (!gui.getStringList("shopItemLore").isEmpty()) {
-                lore.add("");
-            }
+            return item.lore().stream()
+                    .map(line -> TextUtil.color(parse(player, line, placeholders)))
+                    .toList();
         }
-        lore.addAll(gui.getStringList("shopItemLore"));
-        return lore.stream()
+        return gui.getStringList("shopItemLore").stream()
+                .filter(line -> !isLegacyStockOrLimitLore(line))
                 .map(line -> TextUtil.color(parse(player, line, placeholders)))
                 .toList();
+    }
+
+    private boolean isLegacyStockOrLimitLore(String line) {
+        String normalized = line == null ? "" : line.toLowerCase(Locale.ROOT);
+        return normalized.contains("kauflimit")
+                || normalized.contains("verkaufslimit")
+                || normalized.contains("buy limit")
+                || normalized.contains("sell limit")
+                || normalized.contains("bestand")
+                || normalized.contains("stock")
+                || normalized.contains("serverankauf")
+                || normalized.contains("server purchases")
+                || normalized.contains("%min_buy_amount%")
+                || normalized.contains("%max_buy_amount%")
+                || normalized.contains("%min_sell_amount%")
+                || normalized.contains("%max_sell_amount%")
+                || normalized.contains("%stock%")
+                || normalized.contains("%max_stock%")
+                || normalized.contains("%stock_status%");
     }
 
     private Map<String, String> itemPlaceholders(Player player, ServerShopItem item) {

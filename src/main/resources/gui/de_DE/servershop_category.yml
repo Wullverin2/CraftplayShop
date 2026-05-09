@@ -50,8 +50,6 @@ items:
       - "&7Item: &f%item%"
       - "&7Aktion: &f%action%"
       - "&7Gesamtpreis: &e%price%"
-      - "&7Serverbestand: &funbegrenzt"
-      - "&7Serverankauf: &funbegrenzt"
       - ""
       - "&eKlicken zum Ausfuehren"
 
@@ -94,8 +92,6 @@ items:
 shopItemLore:
   - "&7Kaufen: &e%buy_price%"
   - "&7Verkaufen: &e%sell_price%"
-  - "&7Serverbestand: &funbegrenzt"
-  - "&7Serverankauf: &funbegrenzt"
   - ""
   - "&eLinksklick: 1 kaufen"
   - "&eShift-Linksklick: Stack kaufen"

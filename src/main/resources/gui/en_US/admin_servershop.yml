@@ -101,8 +101,6 @@ items:
       - "&7Sell price: &f%sell_price%"
       - "&7Buying: %buy_status%"
       - "&7Selling: %sell_status%"
-      - "&7Server stock: &funlimited"
-      - "&7Server purchases: &funlimited"
       - ""
       - "&eClick to edit"
       - "&eRight click: material picker"

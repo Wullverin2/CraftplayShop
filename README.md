@@ -79,6 +79,8 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Sell GUI.
 - Transaktionslogs fuer Kauf, Verkauf und Sell-All.
 - Custom Category- und Item-Lore wird im ServerShop angezeigt.
+- Hat ein ServerShop-Item eigene Lore, wird diese im Spieler-ServerShop vollständig allein angezeigt.
+- Alte Kauflimit-, Verkaufslimit- und Bestand-Zeilen aus bestehenden GUI-Dateien werden beim Anzeigen herausgefiltert.
 - Deaktivierte Kategorien sind im normalen ServerShop verborgen.
 
 ### AdminShop / Ingame Editor
@@ -88,6 +90,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Items anzeigen und bearbeiten.
 - Item-Kaufen und Item-Verkaufen aktivieren/deaktivieren.
 - Kauf- und Verkaufspreise per GUI setzen.
+- Item-Lore vollständig per Editor bearbeiten; Zeilen werden per `|` getrennt, `clear` oder `-` leert die Lore.
 - Neue Kategorien per Materialauswahl oder Drag-and-Drop erstellen.
 - Neue Items per Materialauswahl oder Drag-and-Drop erstellen.
 - Kategorie-Icon ueber Materialauswahl oder Item-Drop setzen.

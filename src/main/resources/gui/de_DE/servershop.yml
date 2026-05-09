@@ -107,8 +107,6 @@ listItemLore:
   - "&7Material: &f%material%"
   - "&7Kaufen: &e%buy_price%"
   - "&7Verkaufen: &e%sell_price%"
-  - "&7Serverbestand: &funbegrenzt"
-  - "&7Serverankauf: &funbegrenzt"
   - "&7Favorit: %favorite_status%"
   - ""
   - "&eLinksklick: 1 kaufen"

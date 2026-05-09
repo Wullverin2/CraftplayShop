@@ -183,11 +183,31 @@ public class ServerShopListGui {
             Map<String, String> placeholders = itemPlaceholders(player, item);
             meta.setDisplayName(TextUtil.color(parse(player, item.displayName(), placeholders)));
             meta.setLore(gui.getStringList("listItemLore").stream()
+                    .filter(line -> !isLegacyStockOrLimitLore(line))
                     .map(line -> TextUtil.color(parse(player, line, placeholders)))
                     .toList());
             stack.setItemMeta(meta);
         }
         return stack;
+    }
+
+    private boolean isLegacyStockOrLimitLore(String line) {
+        String normalized = line == null ? "" : line.toLowerCase(Locale.ROOT);
+        return normalized.contains("kauflimit")
+                || normalized.contains("verkaufslimit")
+                || normalized.contains("buy limit")
+                || normalized.contains("sell limit")
+                || normalized.contains("bestand")
+                || normalized.contains("stock")
+                || normalized.contains("serverankauf")
+                || normalized.contains("server purchases")
+                || normalized.contains("%min_buy_amount%")
+                || normalized.contains("%max_buy_amount%")
+                || normalized.contains("%min_sell_amount%")
+                || normalized.contains("%max_sell_amount%")
+                || normalized.contains("%stock%")
+                || normalized.contains("%max_stock%")
+                || normalized.contains("%stock_status%");
     }
 
     private Map<String, String> itemPlaceholders(Player player, ServerShopItem item) {
