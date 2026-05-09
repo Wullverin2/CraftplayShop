@@ -40,7 +40,7 @@ home:
 list:
   allTitle: "&8All Player Shops"
   ownTitle: "&8My Player Shops"
-  searchTitle: "&8Player Shop Search"
+  searchTitle: "&8Player Shop Search: %query%"
   size: 54
   shopSlots: [10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34]
   buttons:
@@ -84,3 +84,54 @@ list:
       - "&eLeft click &7Edit"
       - "&eRight click &7Teleport to sign"
       - "&eShift-left click &7Delete shop"
+
+edit:
+  title: "&8Edit ChestShop"
+  size: 27
+  slots:
+    item: 11
+    amount: 13
+    price: 15
+    display: 22
+    close: 26
+  items:
+    item:
+      name: "&e%item%"
+      lore:
+        - "&7ID: &f%id%"
+        - "&7Material: &f%material%"
+        - "&7Owner: &f%owner%"
+        - ""
+        - "&eClick with an item on your cursor"
+        - "&eor in your hand to change the shop item."
+    amount:
+      material: CLOCK
+      name: "&eAmount"
+      lore:
+        - "&7Current: &e%amount%"
+        - ""
+        - "&aLeft click: +1"
+        - "&aShift-left click: +10"
+        - "&cRight click: -1"
+        - "&cShift-right click: -10"
+    price:
+      material: EMERALD
+      name: "&aPrice"
+      lore:
+        - "&7Current: &e%price%"
+        - ""
+        - "&aLeft click: +1"
+        - "&aShift-left click: +10"
+        - "&cRight click: -1"
+        - "&cShift-right click: -10"
+    display:
+      material: ITEM_FRAME
+      name: "&bDisplay"
+      lore:
+        - "&7Current: &e%display_type%"
+        - ""
+        - "&eClick to switch"
+    close:
+      material: BARRIER
+      name: "&cClose"
+      lore: []

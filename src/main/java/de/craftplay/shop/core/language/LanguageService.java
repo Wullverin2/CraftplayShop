@@ -68,21 +68,36 @@ public class LanguageService {
 
     public String get(CommandSender sender, String key, Map<String, String> placeholders) {
         String language = plugin.getConfigService().defaultLanguage();
-        if (sender instanceof Player player && plugin.getPlayerLanguageService() != null) {
-            language = plugin.getPlayerLanguageService().getLanguage(player);
+        Player player = null;
+        if (sender instanceof Player senderPlayer && plugin.getPlayerLanguageService() != null) {
+            player = senderPlayer;
+            language = plugin.getPlayerLanguageService().getLanguage(senderPlayer);
         }
-        return get(language, key, placeholders);
+        return get(language, key, placeholders, player);
     }
 
     public String get(String language, String key, Map<String, String> placeholders) {
+        return get(language, key, placeholders, null);
+    }
+
+    private String get(String language, String key, Map<String, String> placeholders, Player player) {
         String prefix = raw(language, "prefix");
         Map<String, String> merged = new HashMap<>();
+        if (player != null) {
+            merged.putAll(PlaceholderUtil.player(player));
+            merged.put("language", language);
+            merged.put("currency", plugin.getConfigService().currencySymbol());
+        }
         if (placeholders != null) {
             merged.putAll(placeholders);
         }
         merged.putIfAbsent("prefix", prefix);
         String raw = raw(language, key);
-        return TextUtil.color(PlaceholderUtil.apply(raw, merged));
+        String parsed = PlaceholderUtil.apply(raw, merged);
+        if (player != null) {
+            parsed = plugin.getPlaceholderApiHook().apply(player, parsed);
+        }
+        return TextUtil.color(parsed);
     }
 
     private String raw(String language, String key) {

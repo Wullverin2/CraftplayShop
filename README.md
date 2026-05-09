@@ -35,8 +35,8 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Externe Sprachdateien unter `plugins/CraftplayShop/language/`.
 - Spieler koennen ihre Sprache speichern und umstellen.
 - Fallback-Sprache, falls Keys oder Dateien fehlen.
-- Platzhalter in GUI-Namen, Lores und Button-Texten.
-- PlaceholderAPI-Hook vorbereitet und optional.
+- CraftplayShop-Platzhalter und PlaceholderAPI-Platzhalter in GUI-Namen, GUI-Lores, Button-Texten und Sprachdateien.
+- PlaceholderAPI-Hook optional; CMI, Jobs Reborn und andere Expansions werden durchgereicht, wenn PlaceholderAPI sie bereitstellt.
 - HeadDatabase-Hook vorbereitet und optional.
 - GUI-Sicherheitslogik gegen Item-Entnahme, Drag, Shift-Click und Number-Key.
 
@@ -150,7 +150,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Suche per Chat nach Item, Material, Besitzer oder Shop-Typ, mit deutschen und englischen Suchbegriffen.
 - Eigene Shops koennen im GUI bearbeitet, per Rechtsklick am Schild besucht und per Shift-Linksklick geloescht werden.
 - Shop-Lore in der Liste zeigt Typ, Besitzer, Menge, Preis, Lagerbestand, Koordinaten, Display-Typ und Klickaktionen.
-- PlayerShop-GUI-Titel, Slots, Buttons und Shop-Lore sind ueber `gui/<sprache>/playershop.yml` konfigurierbar.
+- PlayerShop-GUI-Titel, Slots, Buttons, Bearbeitungs-GUI und Shop-Lore sind ueber `gui/<sprache>/playershop.yml` konfigurierbar.
 - Regelmaessiger Cleanup entfernt Shops aus Cache und Datenbank, wenn Kiste oder Schild physisch fehlen.
 - Fremde Spieler koennen PlayerShop-Kisten nicht als normales Inventar oeffnen.
 - Besitzer oder Admins koennen einen Shop durch Abbauen von Schild oder Kiste loeschen.

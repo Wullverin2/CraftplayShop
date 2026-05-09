@@ -40,7 +40,7 @@ home:
 list:
   allTitle: "&8Alle Spielershops"
   ownTitle: "&8Meine Spielershops"
-  searchTitle: "&8Spielershop Suche"
+  searchTitle: "&8Spielershop Suche: %query%"
   size: 54
   shopSlots: [10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34]
   buttons:
@@ -84,3 +84,54 @@ list:
       - "&eLinksklick &7Bearbeiten"
       - "&eRechtsklick &7Zum Schild teleportieren"
       - "&eShift-Linksklick &7Shop loeschen"
+
+edit:
+  title: "&8Kistenshop bearbeiten"
+  size: 27
+  slots:
+    item: 11
+    amount: 13
+    price: 15
+    display: 22
+    close: 26
+  items:
+    item:
+      name: "&e%item%"
+      lore:
+        - "&7ID: &f%id%"
+        - "&7Material: &f%material%"
+        - "&7Besitzer: &f%owner%"
+        - ""
+        - "&eKlicke mit einem Item am Cursor"
+        - "&eoder in der Hand, um das Shop-Item zu aendern."
+    amount:
+      material: CLOCK
+      name: "&eMenge"
+      lore:
+        - "&7Aktuell: &e%amount%"
+        - ""
+        - "&aLinksklick: +1"
+        - "&aShift-Linksklick: +10"
+        - "&cRechtsklick: -1"
+        - "&cShift-Rechtsklick: -10"
+    price:
+      material: EMERALD
+      name: "&aPreis"
+      lore:
+        - "&7Aktuell: &e%price%"
+        - ""
+        - "&aLinksklick: +1"
+        - "&aShift-Linksklick: +10"
+        - "&cRechtsklick: -1"
+        - "&cShift-Rechtsklick: -10"
+    display:
+      material: ITEM_FRAME
+      name: "&bAnzeige"
+      lore:
+        - "&7Aktuell: &e%display_type%"
+        - ""
+        - "&eKlicken zum Wechseln"
+    close:
+      material: BARRIER
+      name: "&cSchliessen"
+      lore: []

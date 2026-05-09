@@ -4,6 +4,7 @@ import de.craftplay.shop.CraftplayShopPlugin;
 import de.craftplay.shop.core.permission.PermissionNodes;
 import de.craftplay.shop.core.transaction.TransactionType;
 import de.craftplay.shop.core.util.LocationUtil;
+import de.craftplay.shop.core.util.PlaceholderUtil;
 import de.craftplay.shop.core.util.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -323,7 +324,13 @@ public class PlayerShopService implements Listener {
         if (slot >= event.getInventory().getSize()) {
             return;
         }
-        if (slot == 11) {
+        YamlConfiguration gui = gui(player);
+        int itemSlot = slot(gui, "edit.slots.item", 11);
+        int amountSlot = slot(gui, "edit.slots.amount", 13);
+        int priceSlot = slot(gui, "edit.slots.price", 15);
+        int displaySlot = slot(gui, "edit.slots.display", 22);
+        int closeSlot = slot(gui, "edit.slots.close", 26);
+        if (slot == itemSlot) {
             ItemStack cursor = event.getCursor();
             ItemStack replacement = cursor == null || cursor.getType().isAir() ? player.getInventory().getItemInMainHand() : cursor;
             if (replacement == null || replacement.getType().isAir()) {
@@ -335,23 +342,23 @@ public class PlayerShopService implements Listener {
             updateShop(player, shop, template, shop.amount(), shop.price(), shop.displayType());
             return;
         }
-        if (slot == 13) {
+        if (slot == amountSlot) {
             int delta = event.isShiftClick() ? 10 : 1;
             int amount = event.isRightClick() ? shop.amount() - delta : shop.amount() + delta;
             updateShop(player, shop, shop.itemStack(), Math.max(1, amount), shop.price(), shop.displayType());
             return;
         }
-        if (slot == 15) {
+        if (slot == priceSlot) {
             double delta = event.isShiftClick() ? 10.0D : 1.0D;
             double price = event.isRightClick() ? shop.price() - delta : shop.price() + delta;
             updateShop(player, shop, shop.itemStack(), shop.amount(), Math.max(0.01D, price), shop.displayType());
             return;
         }
-        if (slot == 22) {
+        if (slot == displaySlot) {
             updateShop(player, shop, shop.itemStack(), shop.amount(), shop.price(), nextDisplayType(shop.displayType()));
             return;
         }
-        if (slot == 26) {
+        if (slot == closeSlot) {
             player.closeInventory();
         }
     }
@@ -709,28 +716,15 @@ public class PlayerShopService implements Listener {
             plugin.getLanguageService().send(player, "general.noPermission");
             return;
         }
-        Inventory inventory = Bukkit.createInventory(new PlayerShopEditHolder(shop.id()), 27,
-                TextUtil.color(plugin.getLanguageService().get(player, "playerShop.editTitle")));
-        inventory.setItem(11, editItem(shop));
-        inventory.setItem(13, button(Material.CLOCK, "&eMenge", List.of(
-                "&7Aktuell: &e" + shop.amount(),
-                "&7Linksklick: +1",
-                "&7Shift-Linksklick: +10",
-                "&7Rechtsklick: -1",
-                "&7Shift-Rechtsklick: -10"
-        )));
-        inventory.setItem(15, button(Material.EMERALD, "&aPreis", List.of(
-                "&7Aktuell: &e" + plugin.getEconomyService().format(shop.price()),
-                "&7Linksklick: +1",
-                "&7Shift-Linksklick: +10",
-                "&7Rechtsklick: -1",
-                "&7Shift-Rechtsklick: -10"
-        )));
-        inventory.setItem(22, button(Material.ITEM_FRAME, "&bAnzeige", List.of(
-                "&7Aktuell: &e" + shop.displayType().name(),
-                "&7Klicken zum Wechseln"
-        )));
-        inventory.setItem(26, button(Material.BARRIER, "&cSchliessen", List.of()));
+        YamlConfiguration gui = gui(player);
+        Map<String, String> placeholders = shopPlaceholders(shop);
+        Inventory inventory = Bukkit.createInventory(new PlayerShopEditHolder(shop.id()), size(gui, "edit.size", 27),
+                title(player, gui, "edit.title", plugin.getLanguageService().get(player, "playerShop.editTitle"), placeholders));
+        inventory.setItem(slot(gui, "edit.slots.item", 11), editItem(player, gui, shop, placeholders));
+        inventory.setItem(slot(gui, "edit.slots.amount", 13), configuredItem(player, gui.getConfigurationSection("edit.items.amount"), placeholders));
+        inventory.setItem(slot(gui, "edit.slots.price", 15), configuredItem(player, gui.getConfigurationSection("edit.items.price"), placeholders));
+        inventory.setItem(slot(gui, "edit.slots.display", 22), configuredItem(player, gui.getConfigurationSection("edit.items.display"), placeholders));
+        inventory.setItem(slot(gui, "edit.slots.close", 26), configuredItem(player, gui.getConfigurationSection("edit.items.close"), placeholders));
         player.openInventory(inventory);
     }
 
@@ -742,7 +736,7 @@ public class PlayerShopService implements Listener {
             default -> "list.allTitle";
         };
         PlayerShopMenuHolder holder = new PlayerShopMenuHolder(view);
-        Inventory inventory = Bukkit.createInventory(holder, size(gui, "list.size", 54), title(player, gui, titlePath, "&8PlayerShops"));
+        Inventory inventory = Bukkit.createInventory(holder, size(gui, "list.size", 54), title(player, gui, titlePath, "&8PlayerShops", Map.of("query", query)));
         addConfiguredButton(player, gui, inventory, holder, "list.buttons.back", PlayerShopMenuAction.BACK);
         addConfiguredButton(player, gui, inventory, holder, "list.buttons.search", PlayerShopMenuAction.SEARCH);
         addConfiguredButton(player, gui, inventory, holder, "list.buttons.ownShops", PlayerShopMenuAction.OWN_SHOPS);
@@ -887,6 +881,9 @@ public class PlayerShopService implements Listener {
     }
 
     private ItemStack configuredItem(Player player, ConfigurationSection section, Map<String, String> placeholders) {
+        if (section == null) {
+            return new ItemStack(Material.BARRIER);
+        }
         Material material = Material.matchMaterial(section.getString("material", "STONE"));
         ItemStack itemStack = new ItemStack(material == null ? Material.STONE : material, Math.max(1, section.getInt("amount", 1)));
         ItemMeta meta = itemStack.getItemMeta();
@@ -930,10 +927,11 @@ public class PlayerShopService implements Listener {
     }
 
     private String applyPlaceholders(Player player, String value, Map<String, String> placeholders) {
-        String parsed = value == null ? "" : value;
-        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-            parsed = parsed.replace("%" + entry.getKey() + "%", entry.getValue());
+        Map<String, String> merged = new HashMap<>(plugin.getGuiPlaceholderService().placeholders(player));
+        if (placeholders != null) {
+            merged.putAll(placeholders);
         }
+        String parsed = PlaceholderUtil.apply(value, merged);
         return plugin.getPlaceholderApiHook().apply(player, parsed);
     }
 
@@ -957,19 +955,40 @@ public class PlayerShopService implements Listener {
         return ((size + 8) / 9) * 9;
     }
 
-    private String title(Player player, YamlConfiguration gui, String path, String fallback) {
-        return TextUtil.color(plugin.getPlaceholderApiHook().apply(player, gui.getString(path, fallback)));
+    private int slot(YamlConfiguration gui, String path, int fallback) {
+        return gui.getInt(path, fallback);
     }
 
-    private ItemStack editItem(PlayerShop shop) {
+    private String title(Player player, YamlConfiguration gui, String path, String fallback) {
+        return title(player, gui, path, fallback, Map.of());
+    }
+
+    private String title(Player player, YamlConfiguration gui, String path, String fallback, Map<String, String> placeholders) {
+        return TextUtil.color(applyPlaceholders(player, gui.getString(path, fallback), placeholders));
+    }
+
+    private ItemStack editItem(Player player, YamlConfiguration gui, PlayerShop shop, Map<String, String> placeholders) {
         ItemStack itemStack = shop.itemStack().clone();
         itemStack.setAmount(1);
         ItemMeta meta = itemStack.getItemMeta();
         if (meta != null) {
-            List<String> lore = meta.hasLore() && meta.getLore() != null ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-            lore.add("");
-            lore.add(TextUtil.color("&7Klicke mit einem Item am Cursor"));
-            lore.add(TextUtil.color("&7oder in der Hand, um das Shop-Item zu aendern."));
+            ConfigurationSection section = gui.getConfigurationSection("edit.items.item");
+            if (section != null && section.contains("name")) {
+                meta.setDisplayName(TextUtil.color(applyPlaceholders(player, section.getString("name", "%item%"), placeholders)));
+            }
+            List<String> lore = new ArrayList<>();
+            if (section != null && section.contains("lore")) {
+                for (String line : section.getStringList("lore")) {
+                    lore.add(TextUtil.color(applyPlaceholders(player, line, placeholders)));
+                }
+            } else {
+                if (meta.hasLore() && meta.getLore() != null) {
+                    lore.addAll(meta.getLore());
+                }
+                lore.add("");
+                lore.add(TextUtil.color("&7Klicke mit einem Item am Cursor"));
+                lore.add(TextUtil.color("&7oder in der Hand, um das Shop-Item zu aendern."));
+            }
             meta.setLore(lore);
             itemStack.setItemMeta(meta);
         }
