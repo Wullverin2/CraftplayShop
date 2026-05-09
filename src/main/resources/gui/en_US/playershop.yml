@@ -38,9 +38,9 @@ home:
       lore: []
 
 list:
-  allTitle: "&8All Player Shops"
-  ownTitle: "&8My Player Shops"
-  searchTitle: "&8Player Shop Search: %query%"
+  allTitle: "&8All Player Shops %page%/%pages%"
+  ownTitle: "&8My Player Shops %page%/%pages%"
+  searchTitle: "&8Player Shop Search: %query% %page%/%pages%"
   size: 54
   shopSlots: [10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34]
   buttons:
@@ -64,6 +64,20 @@ list:
       name: "&eMy Shops"
       lore:
         - "&7Shows your shops."
+    previous:
+      enabled: true
+      slot: 48
+      material: ARROW
+      name: "&ePrevious Page"
+      lore:
+        - "&7Page &f%page%&7/&f%pages%"
+    next:
+      enabled: true
+      slot: 50
+      material: ARROW
+      name: "&eNext Page"
+      lore:
+        - "&7Page &f%page%&7/&f%pages%"
   emptyItem:
     slot: 22
     material: BARRIER
@@ -83,7 +97,30 @@ list:
       - ""
       - "&eLeft click &7Edit"
       - "&eRight click &7Teleport to sign"
-      - "&eShift-left click &7Delete shop"
+      - "&eShift-left click &7Confirm deletion"
+
+deleteConfirm:
+  title: "&8Delete shop?"
+  size: 27
+  slots:
+    confirm: 11
+    preview: 13
+    cancel: 15
+  items:
+    confirm:
+      material: REDSTONE_BLOCK
+      name: "&cDelete shop"
+      lore:
+        - "&7Item: &f%item%"
+        - "&7Owner: &f%owner%"
+        - "&7Coordinates: &f%world% %x% %y% %z%"
+        - ""
+        - "&cClick to delete permanently"
+    cancel:
+      material: EMERALD_BLOCK
+      name: "&aCancel"
+      lore:
+        - "&7Back to shop list."
 
 edit:
   title: "&8Edit ChestShop"

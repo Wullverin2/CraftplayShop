@@ -48,13 +48,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 
 public class PlayerShopService implements Listener {
     private static final String SIGN_MARKER_SHOP = "[shop]";
@@ -129,13 +129,11 @@ public class PlayerShopService implements Listener {
     }
 
     public void openAll(Player player) {
-        openList(player, PlayerShopMenuView.ALL, shops -> shops, "");
+        openList(player, PlayerShopMenuView.ALL, "", 0);
     }
 
     public void openOwn(Player player) {
-        openList(player, PlayerShopMenuView.OWN, shops -> shops.stream()
-                .filter(shop -> shop.ownerUuid().equals(player.getUniqueId()))
-                .toList(), "");
+        openList(player, PlayerShopMenuView.OWN, "", 0);
     }
 
     public void requestSearch(Player player) {
@@ -161,9 +159,7 @@ public class PlayerShopService implements Listener {
             plugin.getLanguageService().send(player, "playerShop.searchCancelled");
             return;
         }
-        openList(player, PlayerShopMenuView.SEARCH, shops -> shops.stream()
-                .filter(shop -> matchesSearch(shop, query))
-                .toList(), query);
+        openList(player, PlayerShopMenuView.SEARCH, query, 0);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -304,6 +300,12 @@ public class PlayerShopService implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getInventory().getHolder() instanceof PlayerShopDeleteHolder holder
+                && event.getWhoClicked() instanceof Player player) {
+            event.setCancelled(true);
+            handleDeleteConfirmClick(player, holder, event);
+            return;
+        }
         if (event.getInventory().getHolder() instanceof PlayerShopMenuHolder holder
                 && event.getWhoClicked() instanceof Player player) {
             event.setCancelled(true);
@@ -366,7 +368,8 @@ public class PlayerShopService implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryDrag(InventoryDragEvent event) {
         if (event.getInventory().getHolder() instanceof PlayerShopEditHolder
-                || event.getInventory().getHolder() instanceof PlayerShopMenuHolder) {
+                || event.getInventory().getHolder() instanceof PlayerShopMenuHolder
+                || event.getInventory().getHolder() instanceof PlayerShopDeleteHolder) {
             event.setCancelled(true);
         }
     }
@@ -497,9 +500,19 @@ public class PlayerShopService implements Listener {
         }
         Map<Integer, ItemStack> leftovers = buyer.getInventory().addItem(createStack(shop.itemStack(), shop.amount()));
         if (!leftovers.isEmpty()) {
-            for (ItemStack stack : leftovers.values()) {
-                buyer.getWorld().dropItemNaturally(buyer.getLocation(), stack);
+            int delivered = shop.amount() - totalAmount(leftovers.values());
+            if (delivered > 0) {
+                List<ItemStack> takenBack = removeMatching(buyer.getInventory(), shop.itemStack(), delivered);
+                for (ItemStack stack : takenBack) {
+                    inventory.addItem(stack);
+                }
             }
+            for (ItemStack stack : leftovers.values()) {
+                inventory.addItem(stack);
+            }
+            plugin.getEconomyService().deposit(buyer, shop.price());
+            plugin.getLanguageService().send(buyer, "serverShop.inventoryFull");
+            return;
         }
         plugin.getTransactionService().logAsync(TransactionType.PLAYER_SHOP_BUY, buyer, "playershop:" + shop.id(), shop.itemStack(), shop.amount(), shop.price() / shop.amount(), shop.price());
         plugin.getLanguageService().send(buyer, "playerShop.bought", Map.of(
@@ -567,7 +580,14 @@ public class PlayerShopService implements Listener {
         }
         Map<Integer, ItemStack> leftovers = inventory.addItem(createStack(shop.itemStack(), shop.amount()));
         if (!leftovers.isEmpty()) {
-            for (ItemStack stack : removed) {
+            int delivered = shop.amount() - totalAmount(leftovers.values());
+            if (delivered > 0) {
+                List<ItemStack> takenBack = removeMatching(inventory, shop.itemStack(), delivered);
+                for (ItemStack stack : takenBack) {
+                    seller.getInventory().addItem(stack);
+                }
+            }
+            for (ItemStack stack : leftovers.values()) {
                 seller.getInventory().addItem(stack);
             }
             plugin.getEconomyService().deposit(owner, shop.price());
@@ -728,39 +748,69 @@ public class PlayerShopService implements Listener {
         player.openInventory(inventory);
     }
 
-    private void openList(Player player, PlayerShopMenuView view, Function<List<PlayerShop>, List<PlayerShop>> filter, String query) {
+    private void openList(Player player, PlayerShopMenuView view, String query, int page) {
         YamlConfiguration gui = gui(player);
         String titlePath = switch (view) {
             case OWN -> "list.ownTitle";
             case SEARCH -> "list.searchTitle";
             default -> "list.allTitle";
         };
-        PlayerShopMenuHolder holder = new PlayerShopMenuHolder(view);
-        Inventory inventory = Bukkit.createInventory(holder, size(gui, "list.size", 54), title(player, gui, titlePath, "&8PlayerShops", Map.of("query", query)));
-        addConfiguredButton(player, gui, inventory, holder, "list.buttons.back", PlayerShopMenuAction.BACK);
-        addConfiguredButton(player, gui, inventory, holder, "list.buttons.search", PlayerShopMenuAction.SEARCH);
-        addConfiguredButton(player, gui, inventory, holder, "list.buttons.ownShops", PlayerShopMenuAction.OWN_SHOPS);
         List<Integer> slots = gui.getIntegerList("list.shopSlots");
         if (slots.isEmpty()) {
             slots = List.of(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34);
         }
-        List<PlayerShop> shops = filter.apply(snapshotShops()).stream()
+        List<PlayerShop> shops = shopsForView(player, view, query).stream()
                 .filter(PlayerShop::active)
                 .sorted(Comparator.comparing(PlayerShop::ownerName).thenComparing(PlayerShop::material).thenComparingLong(PlayerShop::id))
                 .toList();
+        int perPage = Math.max(1, slots.size());
+        int totalPages = Math.max(1, (int) Math.ceil(shops.size() / (double) perPage));
+        int safePage = Math.max(0, Math.min(page, totalPages - 1));
+        Map<String, String> pagePlaceholders = Map.of(
+                "query", query == null ? "" : query,
+                "page", Integer.toString(safePage + 1),
+                "pages", Integer.toString(totalPages),
+                "count", Integer.toString(shops.size())
+        );
+        PlayerShopMenuHolder holder = new PlayerShopMenuHolder(view, query, safePage, totalPages);
+        Inventory inventory = Bukkit.createInventory(holder, size(gui, "list.size", 54), title(player, gui, titlePath, "&8PlayerShops", pagePlaceholders));
+        addConfiguredButton(player, gui, inventory, holder, "list.buttons.back", PlayerShopMenuAction.BACK, pagePlaceholders);
+        addConfiguredButton(player, gui, inventory, holder, "list.buttons.search", PlayerShopMenuAction.SEARCH, pagePlaceholders);
+        addConfiguredButton(player, gui, inventory, holder, "list.buttons.ownShops", PlayerShopMenuAction.OWN_SHOPS, pagePlaceholders);
+        if (safePage > 0) {
+            addConfiguredButton(player, gui, inventory, holder, "list.buttons.previous", PlayerShopMenuAction.PREVIOUS_PAGE, pagePlaceholders);
+        }
+        if (safePage + 1 < totalPages) {
+            addConfiguredButton(player, gui, inventory, holder, "list.buttons.next", PlayerShopMenuAction.NEXT_PAGE, pagePlaceholders);
+        }
         if (shops.isEmpty()) {
             ConfigurationSection empty = gui.getConfigurationSection("list.emptyItem");
             if (empty != null) {
-                inventory.setItem(empty.getInt("slot", 22), configuredItem(player, empty, Map.of("query", query)));
+                inventory.setItem(empty.getInt("slot", 22), configuredItem(player, empty, pagePlaceholders));
             }
         }
-        for (int index = 0; index < Math.min(slots.size(), shops.size()); index++) {
-            int slot = slots.get(index);
+        int start = safePage * perPage;
+        int end = Math.min(shops.size(), start + perPage);
+        for (int index = start; index < end; index++) {
+            int slotIndex = index - start;
+            int slot = slots.get(slotIndex);
             PlayerShop shop = shops.get(index);
             inventory.setItem(slot, shopListItem(player, gui, shop));
             holder.shops().put(slot, shop.id());
         }
         player.openInventory(inventory);
+    }
+
+    private List<PlayerShop> shopsForView(Player player, PlayerShopMenuView view, String query) {
+        return switch (view) {
+            case OWN -> snapshotShops().stream()
+                    .filter(shop -> shop.ownerUuid().equals(player.getUniqueId()))
+                    .toList();
+            case SEARCH -> snapshotShops().stream()
+                    .filter(shop -> matchesSearch(shop, query))
+                    .toList();
+            default -> snapshotShops();
+        };
     }
 
     private void handleMenuClick(Player player, PlayerShopMenuHolder holder, InventoryClickEvent event) {
@@ -775,6 +825,8 @@ public class PlayerShopService implements Listener {
                 case ALL_SHOPS -> openAll(player);
                 case OWN_SHOPS -> openOwn(player);
                 case SEARCH -> requestSearch(player);
+                case NEXT_PAGE -> openList(player, holder.view(), holder.query(), holder.page() + 1);
+                case PREVIOUS_PAGE -> openList(player, holder.view(), holder.query(), holder.page() - 1);
                 case CLOSE -> player.closeInventory();
             }
             return;
@@ -794,9 +846,7 @@ public class PlayerShopService implements Listener {
                 plugin.getLanguageService().send(player, "general.noPermission");
                 return;
             }
-            deleteShop(shop);
-            event.getInventory().clear(slot);
-            plugin.getLanguageService().send(player, "playerShop.deleted");
+            openDeleteConfirm(player, shop, holder);
             return;
         }
         if (event.isRightClick()) {
@@ -810,6 +860,57 @@ public class PlayerShopService implements Listener {
             }
             openEditGui(player, shop);
         }
+    }
+
+    private void openDeleteConfirm(Player player, PlayerShop shop, PlayerShopMenuHolder returnHolder) {
+        YamlConfiguration gui = gui(player);
+        Map<String, String> placeholders = shopPlaceholders(shop);
+        placeholders = new HashMap<>(placeholders);
+        placeholders.put("page", Integer.toString(returnHolder.page() + 1));
+        placeholders.put("pages", Integer.toString(returnHolder.totalPages()));
+        placeholders.put("query", returnHolder.query());
+        PlayerShopDeleteHolder holder = new PlayerShopDeleteHolder(shop.id(), returnHolder.view(), returnHolder.query(), returnHolder.page());
+        Inventory inventory = Bukkit.createInventory(holder, size(gui, "deleteConfirm.size", 27),
+                title(player, gui, "deleteConfirm.title", "&8Delete PlayerShop", placeholders));
+        int previewSlot = slot(gui, "deleteConfirm.slots.preview", 13);
+        int confirmSlot = slot(gui, "deleteConfirm.slots.confirm", 11);
+        int cancelSlot = slot(gui, "deleteConfirm.slots.cancel", 15);
+        if (previewSlot >= 0 && previewSlot < inventory.getSize()) {
+            inventory.setItem(previewSlot, shopListItem(player, gui, shop));
+        }
+        if (confirmSlot >= 0 && confirmSlot < inventory.getSize()) {
+            inventory.setItem(confirmSlot, configuredItem(player, gui.getConfigurationSection("deleteConfirm.items.confirm"), placeholders));
+        }
+        if (cancelSlot >= 0 && cancelSlot < inventory.getSize()) {
+            inventory.setItem(cancelSlot, configuredItem(player, gui.getConfigurationSection("deleteConfirm.items.cancel"), placeholders));
+        }
+        player.openInventory(inventory);
+    }
+
+    private void handleDeleteConfirmClick(Player player, PlayerShopDeleteHolder holder, InventoryClickEvent event) {
+        int slot = event.getRawSlot();
+        YamlConfiguration gui = gui(player);
+        if (slot == slot(gui, "deleteConfirm.slots.cancel", 15)) {
+            openList(player, holder.returnView(), holder.query(), holder.page());
+            return;
+        }
+        if (slot != slot(gui, "deleteConfirm.slots.confirm", 11)) {
+            return;
+        }
+        PlayerShop shop = findById(holder.shopId());
+        if (shop == null) {
+            plugin.getLanguageService().send(player, "playerShop.missingContainer");
+            openList(player, holder.returnView(), holder.query(), holder.page());
+            return;
+        }
+        if (!canManage(player, shop)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            openList(player, holder.returnView(), holder.query(), holder.page());
+            return;
+        }
+        deleteShop(shop);
+        plugin.getLanguageService().send(player, "playerShop.deleted");
+        openList(player, holder.returnView(), holder.query(), holder.page());
     }
 
     private List<PlayerShop> snapshotShops() {
@@ -868,6 +969,10 @@ public class PlayerShopService implements Listener {
     }
 
     private void addConfiguredButton(Player player, YamlConfiguration gui, Inventory inventory, PlayerShopMenuHolder holder, String path, PlayerShopMenuAction action) {
+        addConfiguredButton(player, gui, inventory, holder, path, action, Map.of());
+    }
+
+    private void addConfiguredButton(Player player, YamlConfiguration gui, Inventory inventory, PlayerShopMenuHolder holder, String path, PlayerShopMenuAction action, Map<String, String> placeholders) {
         ConfigurationSection section = gui.getConfigurationSection(path);
         if (section == null || !section.getBoolean("enabled", true)) {
             return;
@@ -876,7 +981,7 @@ public class PlayerShopService implements Listener {
         if (slot < 0 || slot >= inventory.getSize()) {
             return;
         }
-        inventory.setItem(slot, configuredItem(player, section, Map.of()));
+        inventory.setItem(slot, configuredItem(player, section, placeholders));
         holder.actions().put(slot, action);
     }
 
@@ -1493,6 +1598,10 @@ public class PlayerShopService implements Listener {
     }
 
     private int removedAmount(List<ItemStack> stacks) {
+        return stacks.stream().mapToInt(ItemStack::getAmount).sum();
+    }
+
+    private int totalAmount(Collection<ItemStack> stacks) {
         return stacks.stream().mapToInt(ItemStack::getAmount).sum();
     }
 

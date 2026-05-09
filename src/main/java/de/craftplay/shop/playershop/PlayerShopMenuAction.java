@@ -6,5 +6,7 @@ public enum PlayerShopMenuAction {
     OWN_SHOPS,
     SEARCH,
     BACK,
+    NEXT_PAGE,
+    PREVIOUS_PAGE,
     CLOSE
 }

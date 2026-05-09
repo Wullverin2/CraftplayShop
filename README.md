@@ -78,8 +78,8 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Verkauf beschaedigter Items kann blockiert werden.
 - ServerShop-Suche nach Item-Name, Item-ID, Material, Kategorie-ID und Kategorie-Name.
 - Favoriten-System pro Spieler mit SQLite-Speicherung.
-- Favoriten-GUI und Such-GUI mit Kaufen/Verkaufen per Mengenauswahl.
-- Shift-Klick auf ein ServerShop-Item setzt oder entfernt den Favoriten.
+- Favoriten-GUI und Such-GUI nutzen dasselbe EconomyShopGUI-aehnliche Klicksystem wie die Kategorie-GUI.
+- ServerShop-Favoriten bleiben gespeichert und koennen ueber das Favoriten-GUI geoeffnet werden.
 - Permission-Pruefungen fuer Kaufen und Verkaufen.
 - Anti-Dupe-Grundlogik mit Pruefung vor Ausfuehrung und Rollback-Versuch.
 - Sell Hand.
@@ -148,15 +148,16 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Besitzer oder Admins oeffnen per Shift-Rechtsklick eine Bearbeitungs-GUI fuer Item, Menge, Preis und Display-Typ.
 - PlayerShop-Hauptmenue mit allen Shops, eigener Shopliste und Suche.
 - Suche per Chat nach Item, Material, Besitzer oder Shop-Typ, mit deutschen und englischen Suchbegriffen.
-- Eigene Shops koennen im GUI bearbeitet, per Rechtsklick am Schild besucht und per Shift-Linksklick geloescht werden.
+- Eigene Shops koennen im GUI bearbeitet, per Rechtsklick am Schild besucht und per Shift-Linksklick mit Bestaetigungs-GUI geloescht werden.
+- PlayerShop-Listen haben Seiten-Navigation fuer groessere Shopmengen.
 - Shop-Lore in der Liste zeigt Typ, Besitzer, Menge, Preis, Lagerbestand, Koordinaten, Display-Typ und Klickaktionen.
 - PlayerShop-GUI-Titel, Slots, Buttons, Bearbeitungs-GUI und Shop-Lore sind ueber `gui/<sprache>/playershop.yml` konfigurierbar.
 - Regelmaessiger Cleanup entfernt Shops aus Cache und Datenbank, wenn Kiste oder Schild physisch fehlen.
 - Fremde Spieler koennen PlayerShop-Kisten nicht als normales Inventar oeffnen.
 - Besitzer oder Admins koennen einen Shop durch Abbauen von Schild oder Kiste loeschen.
-- PlayerShop-Kaeufe werden in den Transaktionslogs gespeichert.
+- PlayerShop-Kaeufe und Ankaeufe werden in den Transaktionslogs gespeichert.
 - Optionaler PlotSquared-Hook entfernt PlayerShops aus Cache und Datenbank, wenn ein Plot geloescht wird.
-- BUY-, BUY_SELL- und TRADE_ITEM-Shops sind weiterhin vorbereitet, aber noch nicht vollstaendig umgesetzt.
+- BUY-Shops sind als v0.1-Funktion aktiv. BUY_SELL- und TRADE_ITEM-Shops sind weiterhin vorbereitet, aber noch nicht vollstaendig umgesetzt.
 
 ### Commands
 
@@ -202,7 +203,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 Folgende Module sind strukturell vorbereitet, aber noch nicht vollstaendig umgesetzt:
 
-- PlayerShop BUY, BUY_SELL, TRADE_ITEM, Trust, Finder und Verwaltungs-GUI
+- PlayerShop BUY_SELL, TRADE_ITEM, Trust, erweiterter Finder und erweiterte Verwaltungs-GUI
 - AutoSellChest
 - vollstaendiger DirectTrade
 - AuctionHouse

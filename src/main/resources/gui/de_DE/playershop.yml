@@ -38,9 +38,9 @@ home:
       lore: []
 
 list:
-  allTitle: "&8Alle Spielershops"
-  ownTitle: "&8Meine Spielershops"
-  searchTitle: "&8Spielershop Suche: %query%"
+  allTitle: "&8Alle Spielershops %page%/%pages%"
+  ownTitle: "&8Meine Spielershops %page%/%pages%"
+  searchTitle: "&8Spielershop Suche: %query% %page%/%pages%"
   size: 54
   shopSlots: [10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34]
   buttons:
@@ -64,6 +64,20 @@ list:
       name: "&eMeine Shops"
       lore:
         - "&7Zeigt deine Shops."
+    previous:
+      enabled: true
+      slot: 48
+      material: ARROW
+      name: "&eVorherige Seite"
+      lore:
+        - "&7Seite &f%page%&7/&f%pages%"
+    next:
+      enabled: true
+      slot: 50
+      material: ARROW
+      name: "&eNaechste Seite"
+      lore:
+        - "&7Seite &f%page%&7/&f%pages%"
   emptyItem:
     slot: 22
     material: BARRIER
@@ -83,7 +97,30 @@ list:
       - ""
       - "&eLinksklick &7Bearbeiten"
       - "&eRechtsklick &7Zum Schild teleportieren"
-      - "&eShift-Linksklick &7Shop loeschen"
+      - "&eShift-Linksklick &7Loeschen bestaetigen"
+
+deleteConfirm:
+  title: "&8Shop loeschen?"
+  size: 27
+  slots:
+    confirm: 11
+    preview: 13
+    cancel: 15
+  items:
+    confirm:
+      material: REDSTONE_BLOCK
+      name: "&cShop loeschen"
+      lore:
+        - "&7Item: &f%item%"
+        - "&7Besitzer: &f%owner%"
+        - "&7Koordinaten: &f%world% %x% %y% %z%"
+        - ""
+        - "&cKlicken zum endgueltigen Loeschen"
+    cancel:
+      material: EMERALD_BLOCK
+      name: "&aAbbrechen"
+      lore:
+        - "&7Zurueck zur Shopliste."
 
 edit:
   title: "&8Kistenshop bearbeiten"
