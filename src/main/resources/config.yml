@@ -366,6 +366,58 @@ autoSellChest:
     # Wenn true, verkauft eine Kiste nur, solange der Besitzer online ist.
     sellOnlyWhenOwnerOnline: false
 
+  upgrades:
+    # Aktiviert kaufbare AutoSellChest-Upgrades.
+    enabled: true
+
+    interval:
+      # Aktiviert Intervall-Upgrades. Level 0 nutzt selling.intervalSeconds.
+      enabled: true
+
+      # Name fuer Level 0.
+      defaultName: "&7Standard"
+
+      levels:
+        1:
+          name: "&aSchnell"
+          intervalSeconds: 5
+          price: 2500.0
+          permission: ""
+        2:
+          name: "&bTurbo"
+          intervalSeconds: 3
+          price: 7500.0
+          permission: "craftplayshop.autosellchest.upgrade.interval.2"
+        3:
+          name: "&6Blitz"
+          intervalSeconds: 1
+          price: 20000.0
+          permission: "craftplayshop.autosellchest.upgrade.interval.3"
+
+    multiplier:
+      # Aktiviert Preis-Multiplikator-Upgrades.
+      enabled: true
+
+      # Name fuer Level 0.
+      defaultName: "&7Standard"
+
+      levels:
+        1:
+          name: "&aBonus I"
+          multiplier: 1.10
+          price: 5000.0
+          permission: ""
+        2:
+          name: "&bBonus II"
+          multiplier: 1.25
+          price: 15000.0
+          permission: "craftplayshop.autosellchest.upgrade.multiplier.2"
+        3:
+          name: "&6Bonus III"
+          multiplier: 1.50
+          price: 40000.0
+          permission: "craftplayshop.autosellchest.upgrade.multiplier.3"
+
   messages:
     # Sendet dem Besitzer eine kurze Nachricht, wenn online und seine Kiste verkauft hat.
     notifyOwnerOnSell: true
@@ -393,6 +445,12 @@ autoSellChest:
 
     # Schreibt AutoSellChest-Logs asynchron.
     asyncDatabaseLogging: true
+
+  cleanup:
+    # Prueft regelmaessig, ob registrierte AutoSellChests physisch noch existieren.
+    # Es werden nur bereits bekannte und geladene Kisten geprueft, keine Welt-Scans.
+    enabled: true
+    intervalSeconds: 60
 
   protection:
     # Blockiert normales Oeffnen fremder AutoSellChests.

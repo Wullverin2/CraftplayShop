@@ -4,6 +4,8 @@ import de.craftplay.shop.CraftplayShopPlugin;
 import de.craftplay.shop.core.util.LocationUtil;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 
 import java.sql.PreparedStatement;
@@ -49,13 +51,13 @@ public class AutoSellChestRegistry {
         String name = plugin.getConfig().getString("autoSellChest.defaultName", "&cAutoSellChest #%id%");
         AutoSellChest draft = new AutoSellChest(0L, owner.getUniqueId(), owner.getName(), block.getWorld().getName(),
                 block.getX(), block.getY(), block.getZ(), name, true,
-                plugin.getConfig().getBoolean("autoSellChest.notifyOwnerDefault", true), 1.0D,
+                plugin.getConfig().getBoolean("autoSellChest.notifyOwnerDefault", true), 0, 0, 1.0D,
                 0L, 0.0D, 0L, now, now);
         synchronized (plugin.getDatabaseService().lock()) {
             try (PreparedStatement statement = plugin.getDatabaseService().connection().prepareStatement(
                     "INSERT INTO " + plugin.getDatabaseService().table("autosell_chests") + " " +
-                            "(owner_uuid, owner_name, world, x, y, z, name, active, notify_owner, multiplier, total_items_sold, total_money_earned, last_sold_at, created_at, updated_at) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            "(owner_uuid, owner_name, world, x, y, z, name, active, notify_owner, interval_level, multiplier_level, multiplier, total_items_sold, total_money_earned, last_sold_at, created_at, updated_at) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS)) {
                 fillStatement(statement, draft, false);
                 statement.executeUpdate();
@@ -63,7 +65,7 @@ public class AutoSellChestRegistry {
                     if (keys.next()) {
                         AutoSellChest created = new AutoSellChest(keys.getLong(1), draft.ownerUuid(), draft.ownerName(), draft.world(),
                                 draft.x(), draft.y(), draft.z(), name.replace("%id%", Long.toString(keys.getLong(1))), draft.active(),
-                                draft.notifyOwner(), draft.multiplier(), draft.totalItemsSold(), draft.totalMoneyEarned(),
+                                draft.notifyOwner(), draft.intervalLevel(), draft.multiplierLevel(), draft.multiplier(), draft.totalItemsSold(), draft.totalMoneyEarned(),
                                 draft.lastSoldAt(), draft.createdAt(), draft.updatedAt());
                         cache(created);
                         update(created);
@@ -86,7 +88,7 @@ public class AutoSellChestRegistry {
             synchronized (plugin.getDatabaseService().lock()) {
                 try (PreparedStatement statement = plugin.getDatabaseService().connection().prepareStatement(
                         "UPDATE " + plugin.getDatabaseService().table("autosell_chests") + " SET " +
-                                "owner_uuid = ?, owner_name = ?, world = ?, x = ?, y = ?, z = ?, name = ?, active = ?, notify_owner = ?, multiplier = ?, " +
+                                "owner_uuid = ?, owner_name = ?, world = ?, x = ?, y = ?, z = ?, name = ?, active = ?, notify_owner = ?, interval_level = ?, multiplier_level = ?, multiplier = ?, " +
                                 "total_items_sold = ?, total_money_earned = ?, last_sold_at = ?, created_at = ?, updated_at = ? WHERE id = ?")) {
                     fillStatement(statement, chest, true);
                     statement.executeUpdate();
@@ -148,6 +150,36 @@ public class AutoSellChestRegistry {
         }
     }
 
+    public int cleanupMissingPhysicalChests() {
+        List<AutoSellChest> missing = new ArrayList<>();
+        synchronized (byLocation) {
+            for (AutoSellChest chest : byId.values()) {
+                Location location = chest.location();
+                if (location == null || location.getWorld() == null) {
+                    missing.add(chest);
+                    continue;
+                }
+                if (!location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
+                    continue;
+                }
+                BlockState state = location.getBlock().getState();
+                if (!(state instanceof Container)) {
+                    missing.add(chest);
+                }
+            }
+            for (AutoSellChest chest : missing) {
+                byLocation.remove(chest.locationKey());
+                byId.remove(chest.id());
+                dirty.remove(chest.locationKey());
+                dirtyTimestamps.remove(chest.locationKey());
+            }
+        }
+        if (!missing.isEmpty()) {
+            plugin.getTaskService().runAsync(() -> deleteMany(missing));
+        }
+        return missing.size();
+    }
+
     public void markDirty(AutoSellChest chest) {
         markDirty(chest.locationKey());
     }
@@ -166,7 +198,7 @@ public class AutoSellChestRegistry {
         }
     }
 
-    public List<AutoSellChest> nextProcessBatch(int maxChests, long intervalMillis, boolean dirtyOnly, long dirtyCooldownMillis) {
+    public List<AutoSellChest> nextProcessBatch(int maxChests, long intervalMillis, boolean dirtyOnly, long dirtyCooldownMillis, AutoSellChestUpgradeService upgradeService) {
         List<AutoSellChest> chests;
         synchronized (byLocation) {
             chests = new ArrayList<>(byId.values());
@@ -183,7 +215,8 @@ public class AutoSellChestRegistry {
             }
             AutoSellChest chest = chests.get(cursor++);
             checked++;
-            boolean due = chest.lastSoldAt() <= 0L || now - chest.lastSoldAt() >= intervalMillis;
+            long chestInterval = intervalMillis > 0L ? intervalMillis : Math.max(1L, upgradeService.intervalSeconds(chest)) * 1000L;
+            boolean due = chest.lastSoldAt() <= 0L || now - chest.lastSoldAt() >= chestInterval;
             boolean dirtyReady;
             synchronized (byLocation) {
                 Long dirtyAt = dirtyTimestamps.get(chest.locationKey());
@@ -221,6 +254,8 @@ public class AutoSellChestRegistry {
                             result.getString("name"),
                             result.getBoolean("active"),
                             result.getBoolean("notify_owner"),
+                            result.getInt("interval_level"),
+                            result.getInt("multiplier_level"),
                             result.getDouble("multiplier"),
                             result.getLong("total_items_sold"),
                             result.getDouble("total_money_earned"),
@@ -241,6 +276,20 @@ public class AutoSellChestRegistry {
         byId.put(chest.id(), chest);
     }
 
+    private void deleteMany(List<AutoSellChest> chests) {
+        synchronized (plugin.getDatabaseService().lock()) {
+            for (AutoSellChest chest : chests) {
+                try (PreparedStatement statement = plugin.getDatabaseService().connection().prepareStatement(
+                        "DELETE FROM " + plugin.getDatabaseService().table("autosell_chests") + " WHERE id = ?")) {
+                    statement.setLong(1, chest.id());
+                    statement.executeUpdate();
+                } catch (SQLException exception) {
+                    plugin.getPluginLogService().error("Could not cleanup AutoSellChest.", exception);
+                }
+            }
+        }
+    }
+
     private void fillStatement(PreparedStatement statement, AutoSellChest chest, boolean includeId) throws SQLException {
         statement.setString(1, chest.ownerUuid().toString());
         statement.setString(2, chest.ownerName());
@@ -251,14 +300,16 @@ public class AutoSellChestRegistry {
         statement.setString(7, chest.name());
         statement.setBoolean(8, chest.active());
         statement.setBoolean(9, chest.notifyOwner());
-        statement.setDouble(10, chest.multiplier());
-        statement.setLong(11, chest.totalItemsSold());
-        statement.setDouble(12, chest.totalMoneyEarned());
-        statement.setLong(13, chest.lastSoldAt());
-        statement.setLong(14, chest.createdAt());
-        statement.setLong(15, chest.updatedAt());
+        statement.setInt(10, chest.intervalLevel());
+        statement.setInt(11, chest.multiplierLevel());
+        statement.setDouble(12, chest.multiplier());
+        statement.setLong(13, chest.totalItemsSold());
+        statement.setDouble(14, chest.totalMoneyEarned());
+        statement.setLong(15, chest.lastSoldAt());
+        statement.setLong(16, chest.createdAt());
+        statement.setLong(17, chest.updatedAt());
         if (includeId) {
-            statement.setLong(16, chest.id());
+            statement.setLong(18, chest.id());
         }
     }
 }

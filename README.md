@@ -200,6 +200,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `/trade off`
 - `/asc`
 - `/asc list`
+- `/asc create`
 - `/asc give <spieler> [menge]`
 - `/asc toggle`
 - `/asc remove`
@@ -236,10 +237,16 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - AutoSellChest ist als Start von v0.2 integriert.
 - Admins geben Spezialkisten ueber `/asc give <spieler> [menge]` aus.
 - Spieler platzieren das Spezialitem, um eine AutoSellChest zu registrieren.
+- Spieler koennen mit `/asc create` eine angeschaut normale Kiste als AutoSellChest registrieren, wenn sie die Erstell-Permission haben.
 - AutoSellChests werden in SQLite gespeichert und beim Reload neu geladen.
+- Bestehende AutoSellChest-Datensaetze werden automatisch um Upgrade-Spalten erweitert.
 - Es werden nur bekannte Kisten verarbeitet; es gibt keinen Welt-Scan.
 - Hopper- und Inventar-Events markieren Kisten als dirty, damit Einfuegen gebuendelt verkauft wird.
 - Der Verkaufs-Takt, Dirty-Cooldown, maximale Kisten pro Durchlauf und maximale Items pro Scan sind in `config.yml` konfigurierbar.
+- Kisten koennen eigene Intervall-Upgrades kaufen; dadurch verkauft die Kiste schneller.
+- Kisten koennen eigene Multiplikator-Upgrades kaufen; dadurch zahlt der ServerShop-Verkauf mehr aus.
+- Upgrade-Level, Namen, Preise, Zielwerte und Permissions sind in `autoSellChest.upgrades` konfigurierbar.
+- Upgrade-Kosten werden erst nach Permission- und Geldpruefung ueber Vault abgezogen.
 - Items werden nur verkauft, wenn sie im CraftplayShop ServerShop ankaufbar sind.
 - Nicht ankaufbare Items bleiben in der Kiste.
 - Besitzer erhalten Vault-Geld, auch wenn sie offline sind.
@@ -248,8 +255,11 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Fremde Spieler koennen AutoSellChests nicht normal oeffnen, wenn der Schutz aktiv ist.
 - Hopper-Extraktion, Hopper-Insertion und Explosionsschutz sind konfigurierbar.
 - Shift-Rechtsklick auf eine AutoSellChest oeffnet das Info-GUI.
-- Das AutoSellChest-GUI zeigt eigene Kisten, Status, Koordinaten, verkaufte Items und verdientes Geld.
-- Linksklick im GUI oeffnet Details, Rechtsklick teleportiert zur Kiste, Shift-Linksklick loescht den Datenbankeintrag.
+- Das AutoSellChest-GUI zeigt eigene Kisten, Status, Koordinaten, Intervall, Multiplikator, verkaufte Items und verdientes Geld.
+- Das Info-GUI enthaelt Status-Toggle, Teleport, Upgrades und Loeschen.
+- Linksklick im GUI oeffnet Details, Rechtsklick teleportiert zur Kiste, Shift-Linksklick oeffnet die Loeschbestaetigung.
+- Die Loeschfunktion im GUI nutzt eine Bestaetigungs-GUI.
+- Regelmaessiger Cleanup entfernt AutoSellChests aus Cache und Datenbank, wenn die physische Kiste fehlt.
 
 ### DirectTrade Vorbereitung
 
@@ -301,7 +311,7 @@ adminShop:
 mvn clean package
 ```
 
-Die fertige Plugin-JAR liegt danach unter `target/CraftplayShop-0.1.0.jar`.
+Die fertige Plugin-JAR liegt danach unter `target/CraftplayShop-0.2.0-SNAPSHOT.jar`.
 
 ## Lizenz
 

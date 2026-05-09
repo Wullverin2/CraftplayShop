@@ -37,6 +37,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,26 +50,35 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
     private final NamespacedKey itemKey;
     private final AutoSellChestRegistry registry;
     private final AutoSellChestLogService logService;
+    private final AutoSellChestUpgradeService upgradeService;
     private final AutoSellChestProcessor processor;
     private final AutoSellChestGui gui;
+    private BukkitTask cleanupTask;
 
     public AutoSellChestService(CraftplayShopPlugin plugin) {
         this.plugin = plugin;
         this.itemKey = new NamespacedKey(plugin, "autosell_chest_item");
         this.registry = new AutoSellChestRegistry(plugin);
         this.logService = new AutoSellChestLogService(plugin);
-        this.processor = new AutoSellChestProcessor(plugin, registry, logService);
-        this.gui = new AutoSellChestGui(plugin, registry);
+        this.upgradeService = new AutoSellChestUpgradeService(plugin);
+        this.processor = new AutoSellChestProcessor(plugin, registry, logService, upgradeService);
+        this.gui = new AutoSellChestGui(plugin, registry, upgradeService);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     public void load() {
+        upgradeService.load();
         registry.load();
         processor.start();
+        startCleanupTask();
     }
 
     public void shutdown() {
         processor.stop();
+        if (cleanupTask != null && !cleanupTask.isCancelled()) {
+            cleanupTask.cancel();
+        }
+        cleanupTask = null;
     }
 
     public AutoSellChestRegistry registry() {
@@ -77,6 +87,10 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
 
     public AutoSellChestGui gui() {
         return gui;
+    }
+
+    public AutoSellChestUpgradeService upgradeService() {
+        return upgradeService;
     }
 
     @Override
@@ -92,6 +106,10 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
         }
         if ("list".equals(sub) || "liste".equals(sub)) {
             open(sender);
+            return true;
+        }
+        if ("create".equals(sub) || "erstellen".equals(sub)) {
+            createLookedAt(sender);
             return true;
         }
         if ("toggle".equals(sub)) {
@@ -149,6 +167,46 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
         target.getInventory().addItem(createChestItem(Math.max(1, amount))).values().forEach(leftover -> target.getWorld().dropItemNaturally(target.getLocation(), leftover));
         plugin.getLanguageService().send(sender, "autoSellChest.given", Map.of("player", target.getName(), "amount", Integer.toString(Math.max(1, amount))));
         plugin.getLanguageService().send(target, "autoSellChest.received", Map.of("amount", Integer.toString(Math.max(1, amount))));
+    }
+
+    private void createLookedAt(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            plugin.getLanguageService().send(sender, "general.playerOnly");
+            return;
+        }
+        if (!plugin.getConfigService().autoSellChestEnabled()) {
+            plugin.getLanguageService().send(player, "autoSellChest.disabledFeature");
+            return;
+        }
+        if (!player.hasPermission(PermissionNodes.AUTOSELL_CHEST_CREATE)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        Block block = player.getTargetBlockExact(5);
+        if (block == null || !(block.getState() instanceof Container)) {
+            plugin.getLanguageService().send(player, "autoSellChest.lookAtContainer");
+            return;
+        }
+        if (registry.find(block.getLocation()) != null) {
+            plugin.getLanguageService().send(player, "autoSellChest.alreadyExists");
+            return;
+        }
+        if (!plugin.getProtectionService().canCreateShop(player, block.getLocation())) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        int limit = maxChests(player);
+        if (limit >= 0 && registry.countOwned(player.getUniqueId()) >= limit) {
+            plugin.getLanguageService().send(player, "autoSellChest.limitReached", Map.of("limit", Integer.toString(limit)));
+            return;
+        }
+        AutoSellChest chest = registry.create(player, block);
+        if (chest == null) {
+            plugin.getLanguageService().send(player, "general.databaseError");
+            return;
+        }
+        playPlaceEffect(block.getLocation());
+        plugin.getLanguageService().send(player, "autoSellChest.created", Map.of("id", Long.toString(chest.id())));
     }
 
     private void toggleLookedAt(CommandSender sender) {
@@ -409,7 +467,11 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
                 ? List.<String>of()
                 : plugin.getConfig().getConfigurationSection("autoSellChest.maxChests.permissionOverrides").getKeys(false)) {
             if (player.hasPermission("craftplayshop.autosellchest.limit." + key)) {
-                value = Math.max(value, plugin.getConfig().getInt("autoSellChest.maxChests.permissionOverrides." + key, value));
+                int override = plugin.getConfig().getInt("autoSellChest.maxChests.permissionOverrides." + key, value);
+                if (override < 0) {
+                    return -1;
+                }
+                value = Math.max(value, override);
             }
         }
         return value;
@@ -435,7 +497,7 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(List.of("list", "give", "toggle", "remove", "reload"), args[0]);
+            return filter(List.of("list", "create", "give", "toggle", "remove", "reload"), args[0]);
         }
         if (args.length == 2 && "give".equalsIgnoreCase(args[0])) {
             return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter(name -> name.toLowerCase(Locale.ROOT).startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
@@ -446,5 +508,23 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
     private List<String> filter(List<String> values, String token) {
         String lower = token.toLowerCase(Locale.ROOT);
         return values.stream().filter(value -> value.startsWith(lower)).toList();
+    }
+
+    private void startCleanupTask() {
+        if (cleanupTask != null && !cleanupTask.isCancelled()) {
+            cleanupTask.cancel();
+        }
+        if (!plugin.getConfigService().autoSellChestEnabled()
+                || !plugin.getConfig().getBoolean("autoSellChest.cleanup.enabled", true)) {
+            cleanupTask = null;
+            return;
+        }
+        long interval = Math.max(10L, plugin.getConfig().getLong("autoSellChest.cleanup.intervalSeconds", 60L));
+        cleanupTask = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+            int removed = registry.cleanupMissingPhysicalChests();
+            if (removed > 0 && plugin.getConfigService().debug()) {
+                plugin.getPluginLogService().info("Cleaned up " + removed + " missing AutoSellChest(s).");
+            }
+        }, interval * 20L, interval * 20L);
     }
 }

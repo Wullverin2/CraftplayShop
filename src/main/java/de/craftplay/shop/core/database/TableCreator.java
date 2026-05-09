@@ -83,12 +83,16 @@ public class TableCreator {
                         "name TEXT, " +
                         "active BOOLEAN, " +
                         "notify_owner BOOLEAN, " +
+                        "interval_level INTEGER, " +
+                        "multiplier_level INTEGER, " +
                         "multiplier DOUBLE, " +
                         "total_items_sold INTEGER, " +
                         "total_money_earned DOUBLE, " +
                         "last_sold_at BIGINT, " +
                         "created_at BIGINT, " +
                         "updated_at BIGINT)");
+                addColumnIfMissing(statement, database.table("autosell_chests"), "interval_level", "INTEGER");
+                addColumnIfMissing(statement, database.table("autosell_chests"), "multiplier_level", "INTEGER");
 
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("autosell_logs") + " (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +

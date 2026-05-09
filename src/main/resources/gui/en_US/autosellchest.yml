@@ -17,6 +17,8 @@ list:
       - "&7Status: %status%"
       - "&7World: &f%world%"
       - "&7Position: &f%x% %y% %z%"
+      - "&7Interval: &f%interval_seconds%s &8(%interval_name%&8)"
+      - "&7Multiplier: &fx%multiplier% &8(%multiplier_name%&8)"
       - "&7Sold: &f%total_items% items"
       - "&7Earned: &f%total_money%"
       - ""
@@ -52,21 +54,33 @@ info:
         - "&7Status: %status%"
         - "&7Owner: &f%owner%"
         - "&7Position: &f%world% %x% %y% %z%"
+        - "&7Interval: &f%interval_seconds%s &8(%interval_name%&8)"
         - "&7Multiplier: &fx%multiplier%"
         - "&7Sold: &f%total_items% items"
         - "&7Earned: &f%total_money%"
       action: none
     toggle:
       enabled: true
-      slot: 13
+      slot: 12
       material: LEVER
       name: "&eToggle active"
       lore:
         - "&7Current status: %status%"
       action: toggle
+    upgrades:
+      enabled: true
+      slot: 14
+      material: ANVIL
+      name: "&bUpgrades"
+      lore:
+        - "&7Interval: &f%interval_name%"
+        - "&7Multiplier: &f%multiplier_name%"
+        - ""
+        - "&eClick to open"
+      action: upgrades
     teleport:
       enabled: true
-      slot: 15
+      slot: 16
       material: ENDER_PEARL
       name: "&aTeleport to chest"
       action: teleport
@@ -92,3 +106,92 @@ info:
       material: BARRIER
       name: "&cClose"
       action: close
+
+upgrades:
+  title: "&8AutoSellChest Upgrades"
+  size: 27
+
+  filler:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+    slots: [0,1,2,3,4,5,6,7,8,18,19,20,21,22,23,24,25,26]
+
+  items:
+    interval:
+      enabled: true
+      slot: 11
+      material: CLOCK
+      name: "&aInterval Upgrade"
+      lore:
+        - "&7Current: &f%interval_name%"
+        - "&7Current interval: &f%interval_seconds%s"
+        - ""
+        - "&7Next upgrade: &e%next_interval_name%"
+        - "&7New interval: &f%next_interval_seconds%s"
+        - "&7Cost: &e%next_interval_price%"
+        - ""
+        - "&eClick to buy"
+      action: upgrade_interval
+    multiplier:
+      enabled: true
+      slot: 15
+      material: GOLD_INGOT
+      name: "&6Multiplier Upgrade"
+      lore:
+        - "&7Current: &f%multiplier_name%"
+        - "&7Current multiplier: &fx%multiplier%"
+        - ""
+        - "&7Next upgrade: &e%next_multiplier_name%"
+        - "&7New multiplier: &fx%next_multiplier%"
+        - "&7Cost: &e%next_multiplier_price%"
+        - ""
+        - "&eClick to buy"
+      action: upgrade_multiplier
+
+  buttons:
+    back:
+      enabled: true
+      slot: 18
+      material: ARROW
+      name: "&eBack"
+      action: back
+    close:
+      enabled: true
+      slot: 26
+      material: BARRIER
+      name: "&cClose"
+      action: close
+
+deleteConfirm:
+  title: "&8Delete AutoSellChest?"
+  size: 27
+
+  filler:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+    slots: [0,1,2,3,4,5,6,7,8,18,19,20,21,22,23,24,25,26]
+
+  items:
+    info:
+      enabled: true
+      slot: 13
+      material: CHEST
+      name: "&cAutoSellChest #%id%"
+      lore:
+        - "&7Position: &f%world% %x% %y% %z%"
+        - "&7Earned: &f%total_money%"
+      action: none
+    confirm:
+      enabled: true
+      slot: 11
+      material: LIME_CONCRETE
+      name: "&aConfirm delete"
+      action: delete_execute
+    cancel:
+      enabled: true
+      slot: 15
+      material: RED_CONCRETE
+      name: "&cCancel"
+      action: cancel

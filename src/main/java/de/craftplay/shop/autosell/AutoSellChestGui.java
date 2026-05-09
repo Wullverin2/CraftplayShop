@@ -24,10 +24,12 @@ import java.util.Map;
 public class AutoSellChestGui {
     private final CraftplayShopPlugin plugin;
     private final AutoSellChestRegistry registry;
+    private final AutoSellChestUpgradeService upgradeService;
 
-    public AutoSellChestGui(CraftplayShopPlugin plugin, AutoSellChestRegistry registry) {
+    public AutoSellChestGui(CraftplayShopPlugin plugin, AutoSellChestRegistry registry, AutoSellChestUpgradeService upgradeService) {
         this.plugin = plugin;
         this.registry = registry;
+        this.upgradeService = upgradeService;
     }
 
     public void openList(Player player) {
@@ -61,10 +63,34 @@ public class AutoSellChestGui {
         fill(gui, inventory, "info.filler");
         item(gui, inventory, "info.items.status", placeholders(player, chest));
         item(gui, inventory, "info.items.toggle", placeholders(player, chest));
+        item(gui, inventory, "info.items.upgrades", placeholders(player, chest));
         item(gui, inventory, "info.items.teleport", placeholders(player, chest));
         item(gui, inventory, "info.items.delete", placeholders(player, chest));
         button(gui, inventory, "info.buttons.back");
         button(gui, inventory, "info.buttons.close");
+        player.openInventory(inventory);
+    }
+
+    public void openUpgrades(Player player, AutoSellChest chest) {
+        YamlConfiguration gui = gui(player);
+        AutoSellChestHolder holder = new AutoSellChestHolder(AutoSellChestView.UPGRADES, chest.id());
+        Inventory inventory = Bukkit.createInventory(holder, size(gui, "upgrades.size", 27), title(player, gui, "upgrades.title", "&8AutoSellChest Upgrades", chest));
+        fill(gui, inventory, "upgrades.filler");
+        item(gui, inventory, "upgrades.items.interval", placeholders(player, chest));
+        item(gui, inventory, "upgrades.items.multiplier", placeholders(player, chest));
+        button(gui, inventory, "upgrades.buttons.back");
+        button(gui, inventory, "upgrades.buttons.close");
+        player.openInventory(inventory);
+    }
+
+    public void openDeleteConfirm(Player player, AutoSellChest chest) {
+        YamlConfiguration gui = gui(player);
+        AutoSellChestHolder holder = new AutoSellChestHolder(AutoSellChestView.DELETE_CONFIRM, chest.id());
+        Inventory inventory = Bukkit.createInventory(holder, size(gui, "deleteConfirm.size", 27), title(player, gui, "deleteConfirm.title", "&8Delete AutoSellChest", chest));
+        fill(gui, inventory, "deleteConfirm.filler");
+        item(gui, inventory, "deleteConfirm.items.info", placeholders(player, chest));
+        item(gui, inventory, "deleteConfirm.items.confirm", placeholders(player, chest));
+        item(gui, inventory, "deleteConfirm.items.cancel", placeholders(player, chest));
         player.openInventory(inventory);
     }
 
@@ -87,7 +113,7 @@ public class AutoSellChestGui {
                 return;
             }
             if (clickType.isShiftClick() && clickType.isLeftClick()) {
-                delete(player, chest);
+                openDeleteConfirm(player, chest);
                 return;
             }
             openInfo(player, chest);
@@ -98,15 +124,33 @@ public class AutoSellChestGui {
             openList(player);
             return;
         }
-        String action = actionForSlot(gui(player), "info", rawSlot);
+        String section = switch (holder.view) {
+            case INFO -> "info";
+            case UPGRADES -> "upgrades";
+            case DELETE_CONFIRM -> "deleteConfirm";
+            case LIST -> "list";
+        };
+        String action = actionForSlot(gui(player), section, rawSlot);
         if ("toggle".equals(action)) {
             toggle(player, chest);
+        } else if ("upgrades".equals(action)) {
+            openUpgrades(player, chest);
+        } else if ("upgrade_interval".equals(action)) {
+            buyIntervalUpgrade(player, chest);
+        } else if ("upgrade_multiplier".equals(action)) {
+            buyMultiplierUpgrade(player, chest);
         } else if ("teleport".equals(action)) {
             teleport(player, chest);
         } else if ("delete".equals(action)) {
+            openDeleteConfirm(player, chest);
+        } else if ("delete_execute".equals(action)) {
             delete(player, chest);
-        } else if ("back".equals(action)) {
-            openList(player);
+        } else if ("back".equals(action) || "cancel".equals(action)) {
+            if (holder.view == AutoSellChestView.UPGRADES || holder.view == AutoSellChestView.DELETE_CONFIRM) {
+                openInfo(player, chest);
+            } else {
+                openList(player);
+            }
         } else if ("close".equals(action)) {
             player.closeInventory();
         }
@@ -122,6 +166,58 @@ public class AutoSellChestGui {
         plugin.getLanguageService().send(player, updated.active() ? "autoSellChest.enabled" : "autoSellChest.disabled",
                 Map.of("id", Long.toString(chest.id())));
         openInfo(player, updated);
+    }
+
+    private void buyIntervalUpgrade(Player player, AutoSellChest chest) {
+        if (!canManage(player, chest)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        AutoSellChestUpgrade upgrade = upgradeService.nextIntervalUpgrade(chest);
+        AutoSellChestUpgradeService.UpgradePurchaseResult result = upgradeService.buyIntervalUpgrade(player, chest);
+        if (handleUpgradeResult(player, result, upgrade)) {
+            AutoSellChest updated = chest.withIntervalLevel(upgrade.level());
+            registry.update(updated);
+            plugin.getLanguageService().send(player, "autoSellChest.upgradeBought", Map.of(
+                    "upgrade", upgrade.name(),
+                    "price", plugin.getEconomyService().format(upgrade.price()),
+                    "id", Long.toString(chest.id())
+            ));
+            openUpgrades(player, updated);
+        }
+    }
+
+    private void buyMultiplierUpgrade(Player player, AutoSellChest chest) {
+        if (!canManage(player, chest)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        AutoSellChestUpgrade upgrade = upgradeService.nextMultiplierUpgrade(chest);
+        AutoSellChestUpgradeService.UpgradePurchaseResult result = upgradeService.buyMultiplierUpgrade(player, chest);
+        if (handleUpgradeResult(player, result, upgrade)) {
+            AutoSellChest updated = chest.withMultiplierLevel(upgrade.level(), upgrade.multiplier());
+            registry.update(updated);
+            plugin.getLanguageService().send(player, "autoSellChest.upgradeBought", Map.of(
+                    "upgrade", upgrade.name(),
+                    "price", plugin.getEconomyService().format(upgrade.price()),
+                    "id", Long.toString(chest.id())
+            ));
+            openUpgrades(player, updated);
+        }
+    }
+
+    private boolean handleUpgradeResult(Player player, AutoSellChestUpgradeService.UpgradePurchaseResult result, AutoSellChestUpgrade upgrade) {
+        switch (result) {
+            case SUCCESS -> {
+                return true;
+            }
+            case MAX_LEVEL -> plugin.getLanguageService().send(player, "autoSellChest.upgradeMaxLevel");
+            case NO_PERMISSION -> plugin.getLanguageService().send(player, "autoSellChest.upgradeNoPermission");
+            case NOT_ENOUGH_MONEY -> plugin.getLanguageService().send(player, "autoSellChest.upgradeNotEnoughMoney",
+                    Map.of("price", plugin.getEconomyService().format(upgrade == null ? 0.0D : upgrade.price())));
+            case ECONOMY_FAILED -> plugin.getLanguageService().send(player, "autoSellChest.upgradeEconomyFailed");
+        }
+        return false;
     }
 
     private void teleport(Player player, AutoSellChest chest) {
@@ -204,7 +300,10 @@ public class AutoSellChestGui {
     }
 
     private String actionForSlot(YamlConfiguration gui, String section, int slot) {
-        for (String key : List.of("items.status", "items.toggle", "items.teleport", "items.delete", "buttons.back", "buttons.close")) {
+        for (String key : List.of(
+                "items.status", "items.toggle", "items.upgrades", "items.teleport", "items.delete",
+                "items.interval", "items.multiplier", "items.info", "items.confirm", "items.cancel",
+                "buttons.back", "buttons.close")) {
             String path = section + "." + key;
             if (gui.getInt(path + ".slot", -1) == slot) {
                 return gui.getString(path + ".action", key.substring(key.indexOf('.') + 1));
@@ -224,7 +323,22 @@ public class AutoSellChestGui {
         placeholders.put("status", chest.active() ? plugin.getLanguageService().get(player, "autoSellChest.statusActive", Map.of()) : plugin.getLanguageService().get(player, "autoSellChest.statusInactive", Map.of()));
         placeholders.put("total_items", Long.toString(chest.totalItemsSold()));
         placeholders.put("total_money", plugin.getEconomyService().format(chest.totalMoneyEarned()));
-        placeholders.put("multiplier", Double.toString(chest.multiplier()));
+        AutoSellChestUpgrade interval = upgradeService.intervalUpgrade(chest.intervalLevel());
+        AutoSellChestUpgrade multiplier = upgradeService.multiplierUpgrade(chest.multiplierLevel());
+        AutoSellChestUpgrade nextInterval = upgradeService.nextIntervalUpgrade(chest);
+        AutoSellChestUpgrade nextMultiplier = upgradeService.nextMultiplierUpgrade(chest);
+        placeholders.put("interval_level", Integer.toString(chest.intervalLevel()));
+        placeholders.put("interval_name", interval == null ? "-" : interval.name());
+        placeholders.put("interval_seconds", Long.toString(upgradeService.intervalSeconds(chest)));
+        placeholders.put("next_interval_name", nextInterval == null ? plugin.getLanguageService().get(player, "autoSellChest.upgradeNone", Map.of()) : nextInterval.name());
+        placeholders.put("next_interval_price", nextInterval == null ? "-" : plugin.getEconomyService().format(nextInterval.price()));
+        placeholders.put("next_interval_seconds", nextInterval == null ? "-" : Long.toString(nextInterval.intervalSeconds()));
+        placeholders.put("multiplier_level", Integer.toString(chest.multiplierLevel()));
+        placeholders.put("multiplier_name", multiplier == null ? "-" : multiplier.name());
+        placeholders.put("multiplier", Double.toString(upgradeService.multiplier(chest)));
+        placeholders.put("next_multiplier_name", nextMultiplier == null ? plugin.getLanguageService().get(player, "autoSellChest.upgradeNone", Map.of()) : nextMultiplier.name());
+        placeholders.put("next_multiplier_price", nextMultiplier == null ? "-" : plugin.getEconomyService().format(nextMultiplier.price()));
+        placeholders.put("next_multiplier", nextMultiplier == null ? "-" : Double.toString(nextMultiplier.multiplier()));
         return placeholders;
     }
 
@@ -282,6 +396,8 @@ public class AutoSellChestGui {
 
     public enum AutoSellChestView {
         LIST,
-        INFO
+        INFO,
+        UPGRADES,
+        DELETE_CONFIRM
     }
 }

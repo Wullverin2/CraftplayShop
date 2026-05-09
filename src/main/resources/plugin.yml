@@ -1,5 +1,5 @@
 name: CraftplayShop
-version: 0.1.0
+version: 0.2.0-SNAPSHOT
 main: de.craftplay.shop.CraftplayShopPlugin
 api-version: '1.21'
 author: Wullverin
@@ -81,4 +81,12 @@ permissions:
   craftplayshop.autosellchest.create:
     default: true
   craftplayshop.autosellchest.admin:
+    default: op
+  craftplayshop.autosellchest.upgrade.interval.2:
+    default: true
+  craftplayshop.autosellchest.upgrade.interval.3:
+    default: op
+  craftplayshop.autosellchest.upgrade.multiplier.2:
+    default: true
+  craftplayshop.autosellchest.upgrade.multiplier.3:
     default: op

@@ -24,12 +24,14 @@ public class AutoSellChestProcessor {
     private final CraftplayShopPlugin plugin;
     private final AutoSellChestRegistry registry;
     private final AutoSellChestLogService logService;
+    private final AutoSellChestUpgradeService upgradeService;
     private BukkitTask task;
 
-    public AutoSellChestProcessor(CraftplayShopPlugin plugin, AutoSellChestRegistry registry, AutoSellChestLogService logService) {
+    public AutoSellChestProcessor(CraftplayShopPlugin plugin, AutoSellChestRegistry registry, AutoSellChestLogService logService, AutoSellChestUpgradeService upgradeService) {
         this.plugin = plugin;
         this.registry = registry;
         this.logService = logService;
+        this.upgradeService = upgradeService;
     }
 
     public void start() {
@@ -53,11 +55,10 @@ public class AutoSellChestProcessor {
     }
 
     private void processTick() {
-        long intervalMillis = Math.max(1L, plugin.getConfig().getLong("autoSellChest.selling.intervalSeconds", 10L)) * 1000L;
         long dirtyCooldownMillis = Math.max(0L, plugin.getConfig().getLong("autoSellChest.performance.dirtyCooldownSeconds", 5L)) * 1000L;
         int maxChests = Math.max(1, plugin.getConfig().getInt("autoSellChest.performance.maxChestsPerTick", 5));
         boolean dirtyOnly = plugin.getConfig().getBoolean("autoSellChest.performance.processOnlyDirtyChests", false);
-        for (AutoSellChest chest : registry.nextProcessBatch(maxChests, intervalMillis, dirtyOnly, dirtyCooldownMillis)) {
+        for (AutoSellChest chest : registry.nextProcessBatch(maxChests, 0L, dirtyOnly, dirtyCooldownMillis, upgradeService)) {
             process(chest);
         }
     }
@@ -134,7 +135,7 @@ public class AutoSellChestProcessor {
             if (amount <= 0) {
                 continue;
             }
-            double priceEach = shopItem.sellPrice() * Math.max(0.0D, chest.multiplier());
+            double priceEach = shopItem.sellPrice() * Math.max(0.0D, upgradeService.multiplier(chest));
             double total = priceEach * amount;
             plan.originals.add(new SlotSnapshot(slot, stack.clone()));
             plan.removals.add(new SlotRemoval(slot, amount));
