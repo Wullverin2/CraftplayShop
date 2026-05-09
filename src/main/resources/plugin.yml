@@ -1,5 +1,5 @@
 name: CraftplayShop
-version: 0.5.0
+version: 0.7.0
 main: de.craftplay.shop.CraftplayShopPlugin
 api-version: '1.21'
 author: Wullverin
@@ -17,21 +17,24 @@ softdepend:
   - Citizens
 commands:
   shop:
-    description: Öffnet CraftplayShop.
+    description: Opens CraftplayShop.
     aliases: [craftplayshop]
   cshop:
-    description: Admin-Befehl für CraftplayShop.
+    description: Admin command for CraftplayShop.
   servershop:
-    description: Öffnet den ServerShop.
+    description: Opens the ServerShop.
   sellhand:
-    description: Verkauft das Item in deiner Hand.
+    description: Sells the item in your hand.
   sellall:
-    description: Verkauft alle ankaufbaren Items aus deinem Inventar.
+    description: Sells all sellable items from your inventory.
   sellgui:
-    description: Öffnet das Verkauf-GUI.
+    description: Opens the sell GUI.
     aliases: [sellinventory, sellinv]
   trade:
-    description: DirectTrade Einstellungen und später Handel.
+    description: DirectTrade settings and trading.
+  ah:
+    description: Opens the AuctionHouse.
+    aliases: [auctionhouse]
   asc:
     description: AutoSellChest.
     aliases: [autosellchest, sellchest, verkaufskiste]
@@ -76,6 +79,14 @@ permissions:
     default: true
   craftplayshop.trade.accept:
     default: true
+  craftplayshop.auctionhouse.use:
+    default: true
+  craftplayshop.auctionhouse.sell:
+    default: true
+  craftplayshop.auctionhouse.buy:
+    default: true
+  craftplayshop.auctionhouse.admin:
+    default: op
   craftplayshop.autosellchest.use:
     default: true
   craftplayshop.autosellchest.create:

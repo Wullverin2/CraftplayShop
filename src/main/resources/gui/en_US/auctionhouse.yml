@@ -1,0 +1,173 @@
+home:
+  title: "&8AuctionHouse"
+  size: 27
+  buttons:
+    browse:
+      enabled: true
+      slot: 11
+      material: CHEST
+      name: "&6Browse Listings"
+      lore:
+        - "&7Browse all active"
+        - "&7AuctionHouse offers."
+        - ""
+        - "&eClick to open"
+      leftClickActions:
+        - "AUCTIONHOUSE_BROWSE"
+    sell:
+      enabled: true
+      slot: 13
+      material: GOLD_INGOT
+      name: "&eList Held Item"
+      lore:
+        - "&7Use the item in your hand"
+        - "&7with the default config price."
+        - ""
+        - "&7Exact: &e/ah sell <price> [amount]"
+        - "&eClick to list"
+      leftClickActions:
+        - "AUCTIONHOUSE_SELL_HAND"
+    mine:
+      enabled: true
+      slot: 15
+      material: BOOK
+      name: "&bMy Listings"
+      lore:
+        - "&7Manage your active"
+        - "&7and cancelled offers."
+        - ""
+        - "&eClick to open"
+      leftClickActions:
+        - "AUCTIONHOUSE_MINE"
+    claims:
+      enabled: true
+      slot: 16
+      material: HOPPER
+      name: "&aClaims"
+      lore:
+        - "&7Claim cancelled or"
+        - "&7expired listings."
+        - ""
+        - "&eClick to open"
+      leftClickActions:
+        - "AUCTIONHOUSE_CLAIMS"
+    search:
+      enabled: true
+      slot: 10
+      material: COMPASS
+      name: "&dSearch"
+      lore:
+        - "&7Search by chat for"
+        - "&7material, item or seller."
+        - ""
+        - "&eClick to start"
+      leftClickActions:
+        - "AUCTIONHOUSE_SEARCH"
+
+browse:
+  title: "&8AuctionHouse &7| &fPage %page%"
+  size: 54
+  itemSlots: [10,11,12,13,14,15,16,19,20,21,22,23,24,25,28,29,30,31,32,33,34,37,38,39,40,41,42,43]
+  itemLore:
+    - "&7Seller: &f%seller%"
+    - "&7Amount: &f%amount%"
+    - "&7Price: &f%price%"
+    - "&7Time left: &f%expires_in%"
+    - ""
+    - "&eLeft click to buy"
+  buttons:
+    back:
+      enabled: true
+      slot: 45
+      material: ARROW
+      name: "&7Back"
+      leftClickActions: ["OPEN_GUI:main"]
+    prev:
+      enabled: true
+      slot: 48
+      material: ARROW
+      name: "&ePrevious page"
+      leftClickActions: ["AUCTIONHOUSE_PREVIOUS"]
+    next:
+      enabled: true
+      slot: 50
+      material: ARROW
+      name: "&eNext page"
+      leftClickActions: ["AUCTIONHOUSE_NEXT"]
+    search:
+      enabled: true
+      slot: 53
+      material: COMPASS
+      name: "&dSearch"
+      lore:
+        - "&7Current query: &f%query%"
+      leftClickActions: ["AUCTIONHOUSE_SEARCH"]
+
+mine:
+  title: "&8My Listings &7| &fPage %page%"
+  size: 54
+  itemSlots: [10,11,12,13,14,15,16,19,20,21,22,23,24,25,28,29,30,31,32,33,34,37,38,39,40,41,42,43]
+  itemLore:
+    - "&7Status: &f%status%"
+    - "&7Price: &f%price%"
+    - "&7Fee: &f%fee%"
+    - "&7Time left: &f%expires_in%"
+    - ""
+    - "&eLeft click to cancel"
+  buttons:
+    back:
+      enabled: true
+      slot: 45
+      material: ARROW
+      name: "&7Back"
+      leftClickActions: ["OPEN_GUI:auctionhouse"]
+    prev:
+      enabled: true
+      slot: 48
+      material: ARROW
+      name: "&ePrevious page"
+      leftClickActions: ["AUCTIONHOUSE_PREVIOUS"]
+    next:
+      enabled: true
+      slot: 50
+      material: ARROW
+      name: "&eNext page"
+      leftClickActions: ["AUCTIONHOUSE_NEXT"]
+
+claims:
+  title: "&8Claims &7| &fPage %page%"
+  size: 54
+  itemSlots: [10,11,12,13,14,15,16,19,20,21,22,23,24,25,28,29,30,31,32,33,34,37,38,39,40,41,42,43]
+  itemLore:
+    - "&7Status: &f%status%"
+    - "&7Price: &f%price%"
+    - ""
+    - "&eLeft click to claim"
+  buttons:
+    back:
+      enabled: true
+      slot: 45
+      material: ARROW
+      name: "&7Back"
+      leftClickActions: ["OPEN_GUI:auctionhouse"]
+    prev:
+      enabled: true
+      slot: 48
+      material: ARROW
+      name: "&ePrevious page"
+      leftClickActions: ["AUCTIONHOUSE_PREVIOUS"]
+    next:
+      enabled: true
+      slot: 50
+      material: ARROW
+      name: "&eNext page"
+      leftClickActions: ["AUCTIONHOUSE_NEXT"]
+
+listings:
+  itemName: "&e%item%"
+
+filler:
+  enabled: true
+  material: BLACK_STAINED_GLASS_PANE
+  name: " "
+  slots: [0,1,2,3,4,5,6,7,8,9,17,18,26,27,35,36,44,45,46,47,48,49,50,51,52,53]

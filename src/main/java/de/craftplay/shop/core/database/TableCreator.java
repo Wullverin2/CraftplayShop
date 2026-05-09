@@ -152,6 +152,24 @@ public class TableCreator {
                         shortTextColumn("target_type") + ", " +
                         shortTextColumn("target_id") + ", " +
                         textColumn("notes") + ")");
+
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("auction_house_listings") + " (" +
+                        idColumn() + ", " +
+                        uuidColumn("seller_uuid") + ", " +
+                        shortTextColumn("seller_name") + ", " +
+                        shortTextColumn("world") + ", " +
+                        largeTextColumn("item_data") + ", " +
+                        shortTextColumn("material") + ", " +
+                        "amount INTEGER, " +
+                        "price DOUBLE, " +
+                        "fee DOUBLE, " +
+                        shortTextColumn("status") + ", " +
+                        uuidColumn("buyer_uuid") + ", " +
+                        shortTextColumn("buyer_name") + ", " +
+                        "created_at BIGINT, " +
+                        "expires_at BIGINT, " +
+                        "sold_at BIGINT, " +
+                        "claimed_at BIGINT)");
             }
         }
     }

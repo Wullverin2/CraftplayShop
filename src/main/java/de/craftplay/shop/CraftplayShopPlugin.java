@@ -79,6 +79,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
     private ItemSerializer itemSerializer;
     private ItemMatcher itemMatcher;
     private DirectTradeService directTradeService;
+    private AuctionHouseService auctionHouseService;
     private HeadDatabaseHook headDatabaseHook;
     private PlaceholderApiHook placeholderApiHook;
     private ProtectionService protectionService;
@@ -126,10 +127,10 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
 
         playerShopService = new PlayerShopService(this);
         autoSellChestService = new AutoSellChestService(this);
+        auctionHouseService = new AuctionHouseService(this);
         new ReferralService(this);
         new RankShopService(this);
         new PermissionProductService(this);
-        new AuctionHouseService(this);
         new ImporterService(this);
 
         reloadAll();
@@ -195,6 +196,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         if (autoSellChestService != null) {
             autoSellChestService.load();
         }
+        if (auctionHouseService != null) {
+            auctionHouseService.load();
+        }
     }
 
     @EventHandler
@@ -252,6 +256,11 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         register("sellall", mainCommand);
         register("sellgui", mainCommand);
         register("trade", new TradeCommand(this));
+        register("ah", mainCommand);
+        PluginCommand ahCommand = getCommand("ah");
+        if (ahCommand != null) {
+            ahCommand.setTabCompleter(mainCommand);
+        }
         register("asc", autoSellChestService);
         PluginCommand ascCommand = getCommand("asc");
         if (ascCommand != null) {
@@ -384,5 +393,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
 
     public AutoSellChestService getAutoSellChestService() {
         return autoSellChestService;
+    }
+
+    public AuctionHouseService getAuctionHouseService() {
+        return auctionHouseService;
     }
 }

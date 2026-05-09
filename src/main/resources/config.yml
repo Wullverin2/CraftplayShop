@@ -607,7 +607,21 @@ referral:
   enabled: false
 
 auctionHouse:
-  enabled: false
+  enabled: true
+
+  fees:
+    # Feste Gebuehr pro Listing.
+    flat: 0.0
+
+    # Prozentuale Gebuehr pro Listing. 0.05 = 5 Prozent.
+    percentage: 0.05
+
+  defaults:
+    # Standardpreis fuer GUI-Listing-Aktionen mit der Hand.
+    price: 100.0
+
+    # Standardlaufzeit eines Listings.
+    durationHours: 48
 
 integrations:
   placeholderApi:

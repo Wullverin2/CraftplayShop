@@ -1,6 +1,7 @@
 package de.craftplay.shop.core.gui;
 
 import de.craftplay.shop.CraftplayShopPlugin;
+import de.craftplay.shop.auctionhouse.AuctionHouseHolder;
 import de.craftplay.shop.servershop.ServerShopAmountHolder;
 import de.craftplay.shop.servershop.ServerShopCategoryHolder;
 import de.craftplay.shop.servershop.ServerShopHolder;
@@ -72,6 +73,13 @@ public class GuiListener implements Listener {
             }
             return;
         }
+        if (holder instanceof AuctionHouseHolder auctionHouseHolder) {
+            event.setCancelled(true);
+            if (event.getWhoClicked() instanceof org.bukkit.entity.Player player) {
+                plugin.getAuctionHouseService().handleClick(player, auctionHouseHolder, event);
+            }
+            return;
+        }
         if (holder instanceof SellGuiHolder sellGuiHolder && event.getWhoClicked() instanceof org.bukkit.entity.Player player) {
             plugin.getSellCommandService().handleSellGuiClick(player, sellGuiHolder, event);
         }
@@ -80,7 +88,7 @@ public class GuiListener implements Listener {
     @EventHandler
     public void onDrag(InventoryDragEvent event) {
         InventoryHolder holder = event.getInventory().getHolder();
-        if (holder instanceof GuiHolder || holder instanceof ServerShopHolder || holder instanceof ServerShopCategoryHolder || holder instanceof ServerShopAmountHolder || holder instanceof ServerShopListHolder || holder instanceof ServerShopAdminHolder || holder instanceof SellGuiHolder) {
+        if (holder instanceof GuiHolder || holder instanceof ServerShopHolder || holder instanceof ServerShopCategoryHolder || holder instanceof ServerShopAmountHolder || holder instanceof ServerShopListHolder || holder instanceof ServerShopAdminHolder || holder instanceof AuctionHouseHolder || holder instanceof SellGuiHolder) {
             event.setCancelled(true);
             if (holder instanceof ServerShopAdminHolder adminHolder && event.getWhoClicked() instanceof org.bukkit.entity.Player player) {
                 plugin.getServerShopAdminEditor().handleDrag(player, adminHolder, event);
@@ -110,6 +118,11 @@ public class GuiListener implements Listener {
         if (plugin.getServerShopListGui().hasSearchInput(event.getPlayer())) {
             event.setCancelled(true);
             Bukkit.getScheduler().runTask(plugin, () -> plugin.getServerShopListGui().handleSearchInput(event.getPlayer(), event.getMessage()));
+            return;
+        }
+        if (plugin.getAuctionHouseService() != null && plugin.getAuctionHouseService().hasSearchInput(event.getPlayer())) {
+            event.setCancelled(true);
+            Bukkit.getScheduler().runTask(plugin, () -> plugin.getAuctionHouseService().handleSearchInput(event.getPlayer(), event.getMessage()));
             return;
         }
         if (!plugin.getServerShopAdminEditor().hasTextInput(event.getPlayer())) {

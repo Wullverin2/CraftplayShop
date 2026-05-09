@@ -51,6 +51,10 @@ public class GuiService {
             plugin.getPlayerShopService().openHome(player);
             return;
         }
+        if ("auctionhouse".equalsIgnoreCase(guiId)) {
+            plugin.getAuctionHouseService().openHome(player);
+            return;
+        }
         String language = plugin.getPlayerLanguageService().getLanguage(player);
         GuiDefinition definition = definition(language, guiId);
         if (definition == null) {

@@ -1,0 +1,173 @@
+home:
+  title: "&8Auktionshaus"
+  size: 27
+  buttons:
+    browse:
+      enabled: true
+      slot: 11
+      material: CHEST
+      name: "&6Alle Listings"
+      lore:
+        - "&7Durchsuche alle aktiven"
+        - "&7Angebote im Auktionshaus."
+        - ""
+        - "&eKlicken zum Oeffnen"
+      leftClickActions:
+        - "AUCTIONHOUSE_BROWSE"
+    sell:
+      enabled: true
+      slot: 13
+      material: GOLD_INGOT
+      name: "&eMit Hand listen"
+      lore:
+        - "&7Nutze das Item in deiner Hand"
+        - "&7mit dem Standardpreis aus der Config."
+        - ""
+        - "&7Genauer: &e/ah sell <preis> [menge]"
+        - "&eKlicken zum Listen"
+      leftClickActions:
+        - "AUCTIONHOUSE_SELL_HAND"
+    mine:
+      enabled: true
+      slot: 15
+      material: BOOK
+      name: "&bMeine Listings"
+      lore:
+        - "&7Verwalte deine aktiven"
+        - "&7und abgebrochenen Angebote."
+        - ""
+        - "&eKlicken zum Oeffnen"
+      leftClickActions:
+        - "AUCTIONHOUSE_MINE"
+    claims:
+      enabled: true
+      slot: 16
+      material: HOPPER
+      name: "&aAbholen"
+      lore:
+        - "&7Hole abgebrochene oder"
+        - "&7abgelaufene Listings ab."
+        - ""
+        - "&eKlicken zum Oeffnen"
+      leftClickActions:
+        - "AUCTIONHOUSE_CLAIMS"
+    search:
+      enabled: true
+      slot: 10
+      material: COMPASS
+      name: "&dSuche"
+      lore:
+        - "&7Suche per Chat nach"
+        - "&7Material, Item oder Verkaeufer."
+        - ""
+        - "&eKlicken zum Starten"
+      leftClickActions:
+        - "AUCTIONHOUSE_SEARCH"
+
+browse:
+  title: "&8Auktionshaus &7| &fSeite %page%"
+  size: 54
+  itemSlots: [10,11,12,13,14,15,16,19,20,21,22,23,24,25,28,29,30,31,32,33,34,37,38,39,40,41,42,43]
+  itemLore:
+    - "&7Verkaeufer: &f%seller%"
+    - "&7Menge: &f%amount%"
+    - "&7Preis: &f%price%"
+    - "&7Laufzeit: &f%expires_in%"
+    - ""
+    - "&eLinksklick zum Kaufen"
+  buttons:
+    back:
+      enabled: true
+      slot: 45
+      material: ARROW
+      name: "&7Zurueck"
+      leftClickActions: ["OPEN_GUI:main"]
+    prev:
+      enabled: true
+      slot: 48
+      material: ARROW
+      name: "&eVorherige Seite"
+      leftClickActions: ["AUCTIONHOUSE_PREVIOUS"]
+    next:
+      enabled: true
+      slot: 50
+      material: ARROW
+      name: "&eNaechste Seite"
+      leftClickActions: ["AUCTIONHOUSE_NEXT"]
+    search:
+      enabled: true
+      slot: 53
+      material: COMPASS
+      name: "&dSuche"
+      lore:
+        - "&7Aktuelle Suche: &f%query%"
+      leftClickActions: ["AUCTIONHOUSE_SEARCH"]
+
+mine:
+  title: "&8Meine Listings &7| &fSeite %page%"
+  size: 54
+  itemSlots: [10,11,12,13,14,15,16,19,20,21,22,23,24,25,28,29,30,31,32,33,34,37,38,39,40,41,42,43]
+  itemLore:
+    - "&7Status: &f%status%"
+    - "&7Preis: &f%price%"
+    - "&7Gebuehr: &f%fee%"
+    - "&7Laufzeit: &f%expires_in%"
+    - ""
+    - "&eLinksklick zum Abbrechen"
+  buttons:
+    back:
+      enabled: true
+      slot: 45
+      material: ARROW
+      name: "&7Zurueck"
+      leftClickActions: ["OPEN_GUI:auctionhouse"]
+    prev:
+      enabled: true
+      slot: 48
+      material: ARROW
+      name: "&eVorherige Seite"
+      leftClickActions: ["AUCTIONHOUSE_PREVIOUS"]
+    next:
+      enabled: true
+      slot: 50
+      material: ARROW
+      name: "&eNaechste Seite"
+      leftClickActions: ["AUCTIONHOUSE_NEXT"]
+
+claims:
+  title: "&8Abholen &7| &fSeite %page%"
+  size: 54
+  itemSlots: [10,11,12,13,14,15,16,19,20,21,22,23,24,25,28,29,30,31,32,33,34,37,38,39,40,41,42,43]
+  itemLore:
+    - "&7Status: &f%status%"
+    - "&7Preis: &f%price%"
+    - ""
+    - "&eLinksklick zum Abholen"
+  buttons:
+    back:
+      enabled: true
+      slot: 45
+      material: ARROW
+      name: "&7Zurueck"
+      leftClickActions: ["OPEN_GUI:auctionhouse"]
+    prev:
+      enabled: true
+      slot: 48
+      material: ARROW
+      name: "&eVorherige Seite"
+      leftClickActions: ["AUCTIONHOUSE_PREVIOUS"]
+    next:
+      enabled: true
+      slot: 50
+      material: ARROW
+      name: "&eNaechste Seite"
+      leftClickActions: ["AUCTIONHOUSE_NEXT"]
+
+listings:
+  itemName: "&e%item%"
+
+filler:
+  enabled: true
+  material: BLACK_STAINED_GLASS_PANE
+  name: " "
+  slots: [0,1,2,3,4,5,6,7,8,9,17,18,26,27,35,36,44,45,46,47,48,49,50,51,52,53]

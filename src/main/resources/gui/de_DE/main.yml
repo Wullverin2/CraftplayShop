@@ -64,6 +64,21 @@ items:
     leftClickActions:
       - "OPEN_GUI:playershop"
 
+  auctionHouse:
+    enabled: true
+    slot: 23
+    material: GOLD_INGOT
+    name: "&6Auktionshaus"
+    lore:
+      - "&7Globale Angebote durchsuchen,"
+      - "&7eigene Listings verwalten"
+      - "&7und abgelaufene Auktionen abholen."
+      - ""
+      - "&eKlicken zum Oeffnen"
+    permission: "craftplayshop.auctionhouse.use"
+    leftClickActions:
+      - "OPEN_GUI:auctionhouse"
+
   sellGui:
     enabled: true
     slot: 30

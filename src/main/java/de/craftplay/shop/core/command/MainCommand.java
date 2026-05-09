@@ -34,6 +34,10 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             sellGui(sender);
             return true;
         }
+        if ("ah".equals(commandName)) {
+            auctionHouse(sender, args);
+            return true;
+        }
         if (args.length == 0) {
             if (!(sender instanceof Player player)) {
                 plugin.getLanguageService().send(sender, "general.playerOnly");
@@ -86,6 +90,10 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         }
         if ("playershop".equals(sub) || "pshop".equals(sub) || "spielershop".equals(sub)) {
             playerShop(sender, args);
+            return true;
+        }
+        if ("auctionhouse".equals(sub) || "ah".equals(sub) || "auktion".equals(sub)) {
+            auctionHouse(sender, java.util.Arrays.copyOfRange(args, 1, args.length));
             return true;
         }
         plugin.getLanguageService().send(sender, "general.unknownCommand");
@@ -289,10 +297,68 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         plugin.getPlayerShopService().openHome(player);
     }
 
+    private void auctionHouse(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            plugin.getLanguageService().send(sender, "general.playerOnly");
+            return;
+        }
+        if (!player.hasPermission(PermissionNodes.AUCTION_HOUSE_USE)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        if (args.length == 0) {
+            plugin.getAuctionHouseService().openHome(player);
+            return;
+        }
+        String sub = args[0].toLowerCase();
+        switch (sub) {
+            case "browse", "search", "suche" -> {
+                if (args.length > 1) {
+                    plugin.getAuctionHouseService().openBrowse(player, 0, String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length)));
+                } else {
+                    plugin.getAuctionHouseService().requestSearch(player);
+                }
+            }
+            case "sell", "list", "verkaufen" -> {
+                if (args.length < 2) {
+                    plugin.getLanguageService().send(player, "auctionHouse.sellUsage");
+                    return;
+                }
+                double price;
+                int amount = player.getInventory().getItemInMainHand().getAmount();
+                try {
+                    price = Double.parseDouble(args[1].replace(',', '.'));
+                    if (args.length > 2) {
+                        amount = Integer.parseInt(args[2]);
+                    }
+                } catch (NumberFormatException exception) {
+                    plugin.getLanguageService().send(player, "auctionHouse.sellUsage");
+                    return;
+                }
+                plugin.getAuctionHouseService().createListing(player, price, amount);
+            }
+            case "mine", "my", "meine" -> plugin.getAuctionHouseService().openMine(player, 0);
+            case "claims", "claim", "abholen" -> plugin.getAuctionHouseService().openClaims(player, 0);
+            default -> plugin.getAuctionHouseService().openHome(player);
+        }
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall", "sellgui", "search", "favorites", "playershop", "pshop"), args[0]);
+            if ("ah".equalsIgnoreCase(command.getName())) {
+                return filter(List.of("browse", "search", "sell", "mine", "claims"), args[0]);
+            }
+            return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall", "sellgui", "search", "favorites", "playershop", "pshop", "auctionhouse", "ah"), args[0]);
+        }
+        if (args.length == 2 && ("auctionhouse".equalsIgnoreCase(args[0]) || "ah".equalsIgnoreCase(args[0]))) {
+            return filter(List.of("browse", "search", "sell", "mine", "claims"), args[1]);
+        }
+        if (args.length == 2 && "ah".equalsIgnoreCase(command.getName()) && "sell".equalsIgnoreCase(args[0])) {
+            return List.of("<price>");
+        }
+        if (args.length == 3 && "ah".equalsIgnoreCase(command.getName()) && "sell".equalsIgnoreCase(args[0])) {
+            return List.of("<amount>");
         }
         if (args.length == 2 && ("playershop".equalsIgnoreCase(args[0]) || "pshop".equalsIgnoreCase(args[0]))) {
             return filter(List.of("search", "mine", "own"), args[1]);

@@ -17,7 +17,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 ## Aktueller Stand
 
-**Version v0.5.0 ist abgeschlossen.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault/SQLite, ServerShop/AdminShop, AutoSellChest, PlayerShop mit SELL/BUY/BUY_SELL/TRADE_ITEM, Protection-Hooks und DirectTrade.
+**Version v0.7.0 ist der aktuelle Stand.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault, SQLite, MySQL/MariaDB, ServerShop/AdminShop, AutoSellChest, PlayerShop mit SELL/BUY/BUY_SELL/TRADE_ITEM, Protection-Hooks, DirectTrade und AuctionHouse.
 
 ### Core
 
@@ -299,12 +299,24 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Speicherung des DirectTrade-Toggles in `craftplay_shop_player_settings`.
 - Transaktionslogging fuer abgeschlossene Trades ist eingebunden.
 
+### AuctionHouse
+
+- Eigenes AuctionHouse-Modul mit globalen Listings.
+- `/ah`, `/ah browse`, `/ah search`, `/ah sell <preis> [menge]`, `/ah mine`, `/ah claims`.
+- GUI-Startseite, Browse-Ansicht, eigene Listings und Claim-Ansicht.
+- Listings werden aus dem Item in der Haupthand erstellt.
+- Konfigurierbare Listing-Gebuehr aus fester Gebuehr und Prozentanteil.
+- Konfigurierbare Standardlaufzeit fuer Listings.
+- Kauf prueft Verfuegbarkeit, Geld und Inventarplatz.
+- Verkaufserloes wird direkt per Vault an den Verkaeufer ausgezahlt.
+- Abgebrochene oder abgelaufene Listings koennen abgeholt werden.
+- AuctionHouse-Kaeufe und -Listings laufen ueber das vorhandene Transaktionslogging.
+
 ### Skeletons / vorbereitet
 
 Folgende Module sind strukturell vorbereitet, aber noch nicht vollstaendig umgesetzt:
 
 - PlayerShop-Trust, erweiterter Finder und erweiterte Verwaltungs-GUI
-- AuctionHouse
 - RankShop
 - PermissionShop
 - ReferralSystem

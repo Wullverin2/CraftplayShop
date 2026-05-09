@@ -7,5 +7,7 @@ public enum TransactionType {
     AUTOSELL_CHEST,
     PLAYER_SHOP_BUY,
     PLAYER_SHOP_SELL,
-    DIRECT_TRADE
+    DIRECT_TRADE,
+    AUCTION_HOUSE_BUY,
+    AUCTION_HOUSE_SELL
 }
