@@ -118,7 +118,7 @@ items:
   moveSelected:
     lore:
       - ""
-      - "&bZum Verschieben ausgewaehlt"
+      - "&bZum Verschieben ausgewählt"
       - "&7Klicke jetzt auf den Zielslot."
   material:
     lore:
@@ -323,13 +323,13 @@ items:
       - "&7Aktuelle Suche: &f%search%"
       - ""
       - "&eKlicken zum Suchen"
-      - "&7Schreibe &eclear &7zum Zuruecksetzen."
+      - "&7Schreibe &eclear &7zum Zurücksetzen."
   backup:
     material: PAPER
     name: "&e%file%"
     lore:
       - "&7Datum: &f%date%"
-      - "&7Groesse: &f%size%"
+      - "&7Größe: &f%size%"
       - ""
       - "&eLinksklick: Details"
       - "&cRechtsklick: Wiederherstellen"
@@ -348,17 +348,17 @@ items:
       - "&7Zeigt gespeicherte Backups"
       - "&7und erlaubt Wiederherstellung."
       - ""
-      - "&eKlicken zum Oeffnen"
+      - "&eKlicken zum Öffnen"
   restoreBackup:
     material: REDSTONE_TORCH
     name: "&cBackup wiederherstellen"
     lore:
       - "&7Backup: &f%file%"
       - ""
-      - "&eOeffnet die Sicherheitsabfrage."
+      - "&eÖffnet die Sicherheitsabfrage."
   confirmRestore:
     material: REDSTONE_BLOCK
-    name: "&cWiederherstellen bestaetigen"
+    name: "&cWiederherstellen bestätigen"
     lore:
       - "&7Die aktuelle server_shop.yml"
       - "&7wird vorher automatisch gesichert."

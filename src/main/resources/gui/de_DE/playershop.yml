@@ -10,7 +10,7 @@ home:
       lore:
         - "&7Zeigt alle aktiven Spielershops."
         - ""
-        - "&eKlicken zum Oeffnen"
+        - "&eKlicken zum Öffnen"
     ownShops:
       enabled: true
       slot: 13
@@ -19,7 +19,7 @@ home:
       lore:
         - "&7Verwalte deine eigenen Shops."
         - ""
-        - "&eKlicken zum Oeffnen"
+        - "&eKlicken zum Öffnen"
     search:
       enabled: true
       slot: 15
@@ -34,7 +34,7 @@ home:
       enabled: true
       slot: 26
       material: BARRIER
-      name: "&cSchliessen"
+      name: "&cSchließen"
       lore: []
 
 list:
@@ -48,7 +48,7 @@ list:
       enabled: true
       slot: 45
       material: ARROW
-      name: "&eZurueck"
+      name: "&eZurück"
       lore: []
     search:
       enabled: true
@@ -75,7 +75,7 @@ list:
       enabled: true
       slot: 50
       material: ARROW
-      name: "&eNaechste Seite"
+      name: "&eNächste Seite"
       lore:
         - "&7Seite &f%page%&7/&f%pages%"
   emptyItem:
@@ -97,10 +97,10 @@ list:
       - ""
       - "&eLinksklick &7Bearbeiten"
       - "&eRechtsklick &7Zum Schild teleportieren"
-      - "&eShift-Linksklick &7Loeschen bestaetigen"
+      - "&eShift-Linksklick &7Löschen bestätigen"
 
 deleteConfirm:
-  title: "&8Shop loeschen?"
+  title: "&8Shop löschen?"
   size: 27
   slots:
     confirm: 11
@@ -109,18 +109,18 @@ deleteConfirm:
   items:
     confirm:
       material: REDSTONE_BLOCK
-      name: "&cShop loeschen"
+      name: "&cShop löschen"
       lore:
         - "&7Item: &f%item%"
         - "&7Besitzer: &f%owner%"
         - "&7Koordinaten: &f%world% %x% %y% %z%"
         - ""
-        - "&cKlicken zum endgueltigen Loeschen"
+        - "&cKlicken zum endgültigen Löschen"
     cancel:
       material: EMERALD_BLOCK
       name: "&aAbbrechen"
       lore:
-        - "&7Zurueck zur Shopliste."
+        - "&7Zurück zur Shopliste."
 
 edit:
   title: "&8Kistenshop bearbeiten"
@@ -140,7 +140,7 @@ edit:
         - "&7Besitzer: &f%owner%"
         - ""
         - "&eKlicke mit einem Item am Cursor"
-        - "&eoder in der Hand, um das Shop-Item zu aendern."
+        - "&eoder in der Hand, um das Shop-Item zu ändern."
     amount:
       material: CLOCK
       name: "&eMenge"
@@ -170,5 +170,5 @@ edit:
         - "&eKlicken zum Wechseln"
     close:
       material: BARRIER
-      name: "&cSchliessen"
+      name: "&cSchließen"
       lore: []

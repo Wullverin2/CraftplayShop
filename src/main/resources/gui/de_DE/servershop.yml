@@ -10,9 +10,9 @@ search:
       enabled: true
       slot: 49
       material: ARROW
-      name: "&cZurueck"
+      name: "&cZurück"
       lore:
-        - "&7Zur Kategorienuebersicht."
+        - "&7Zur Kategorienübersicht."
       leftClickActions:
         - "OPEN_GUI:servershop"
     newSearch:
@@ -30,7 +30,7 @@ search:
       material: NETHER_STAR
       name: "&bFavoriten"
       lore:
-        - "&7Oeffnet deine Favoriten."
+        - "&7Öffnet deine Favoriten."
       leftClickActions:
         - "SERVER_SHOP_FAVORITES"
 
@@ -43,9 +43,9 @@ favorites:
       enabled: true
       slot: 49
       material: ARROW
-      name: "&cZurueck"
+      name: "&cZurück"
       lore:
-        - "&7Zur Kategorienuebersicht."
+        - "&7Zur Kategorienübersicht."
       leftClickActions:
         - "OPEN_GUI:servershop"
     search:
@@ -54,7 +54,7 @@ favorites:
       material: COMPASS
       name: "&eSuche"
       lore:
-        - "&7Oeffnet die ServerShop-Suche."
+        - "&7Öffnet die ServerShop-Suche."
       leftClickActions:
         - "SERVER_SHOP_SEARCH"
 
@@ -84,23 +84,23 @@ items:
     lore:
       - "&7Deine markierten Shop-Items."
       - ""
-      - "&eKlicken zum Oeffnen"
+      - "&eKlicken zum Öffnen"
     leftClickActions:
       - "SERVER_SHOP_FAVORITES"
   back:
     enabled: true
     slot: 49
     material: ARROW
-    name: "&cZurueck"
+    name: "&cZurück"
     lore:
-      - "&7Zur Hauptuebersicht."
+      - "&7Zur Hauptübersicht."
     leftClickActions:
       - "OPEN_GUI:main"
 
 categoryLore:
-  - "&7Klicke, um diese Kategorie zu oeffnen."
+  - "&7Klicke, um diese Kategorie zu öffnen."
   - ""
-  - "&eLinksklick: Oeffnen"
+  - "&eLinksklick: Öffnen"
 
 listItemLore:
   - "&7Kategorie: &f%category%"

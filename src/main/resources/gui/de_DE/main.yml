@@ -59,7 +59,7 @@ items:
       - "&7Suche Shops und verwalte"
       - "&7deine eigenen Kistenshops."
       - ""
-      - "&eKlicken zum Oeffnen"
+      - "&eKlicken zum Öffnen"
     permission: "craftplayshop.playershop.use"
     leftClickActions:
       - "OPEN_GUI:playershop"

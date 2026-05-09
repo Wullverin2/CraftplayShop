@@ -325,13 +325,13 @@ playerShops:
     deleteShopsOnPlotDelete: true
 
 autoSellChest:
-  # Aktiviert AutoSellChest. Bestehende Configs behalten ihren Wert und koennen hier auf true gesetzt werden.
+  # Aktiviert AutoSellChest. Bestehende Configs behalten ihren Wert und können hier auf true gesetzt werden.
   enabled: true
 
-  # Anzeigename fuer neu registrierte Verkaufskisten. %id% wird durch die Datenbank-ID ersetzt.
+  # Anzeigename für neu registrierte Verkaufskisten. %id% wird durch die Datenbank-ID ersetzt.
   defaultName: "&cAutoSellChest #%id%"
 
-  # Besitzer erhalten standardmaessig eine Nachricht, wenn ihre Kiste Items verkauft.
+  # Besitzer erhalten standardmäßig eine Nachricht, wenn ihre Kiste Items verkauft.
   notifyOwnerDefault: true
 
   # Spezial-Item, das per /asc give <spieler> [menge] ausgegeben und platziert wird.
@@ -350,17 +350,17 @@ autoSellChest:
     # Standardlimit pro Spieler. -1 bedeutet unbegrenzt.
     default: 5
 
-    # Spieler mit craftplayshop.autosellchest.limit.<key> nutzen den hoechsten passenden Wert.
+    # Spieler mit craftplayshop.autosellchest.limit.<key> nutzen den höchsten passenden Wert.
     permissionOverrides:
       vip: 10
       premium: 20
       admin: -1
 
   selling:
-    # BOTH ist fuer spaetere Modi vorbereitet. Aktuell verkauft AutoSellChest immer an den ServerShop.
+    # BOTH ist für spätere Modi vorbereitet. Aktuell verkauft AutoSellChest immer an den ServerShop.
     mode: "BOTH"
 
-    # Mindestabstand zwischen automatischen Verkaufsdurchlaeufen je Kiste.
+    # Mindestabstand zwischen automatischen Verkaufsdurchläufen je Kiste.
     intervalSeconds: 10
 
     # Wenn true, verkauft eine Kiste nur, solange der Besitzer online ist.
@@ -374,7 +374,7 @@ autoSellChest:
       # Aktiviert Intervall-Upgrades. Level 0 nutzt selling.intervalSeconds.
       enabled: true
 
-      # Name fuer Level 0.
+      # Name für Level 0.
       defaultName: "&7Standard"
 
       levels:
@@ -398,7 +398,7 @@ autoSellChest:
       # Aktiviert Preis-Multiplikator-Upgrades.
       enabled: true
 
-      # Name fuer Level 0.
+      # Name für Level 0.
       defaultName: "&7Standard"
 
       levels:
@@ -433,39 +433,39 @@ autoSellChest:
     # Maximale AutoSellChests pro Durchlauf.
     maxChestsPerTick: 5
 
-    # Maximale Item-Anzahl, die pro Kiste in einem Durchlauf geprueft wird.
+    # Maximale Item-Anzahl, die pro Kiste in einem Durchlauf geprüft wird.
     maxItemsPerScan: 2304
 
     # Wenn true, werden nur Kisten verarbeitet, die durch Hopper/Inventar-Events als dirty markiert wurden.
-    # Wenn false, werden zusaetzlich alle faelligen Kisten anhand von intervalSeconds verarbeitet.
+    # Wenn false, werden zusätzlich alle fälligen Kisten anhand von intervalSeconds verarbeitet.
     processOnlyDirtyChests: false
 
-    # Dirty-Kisten werden erst nach dieser Ruhezeit verkauft, damit Hopper-Bursts gebuendelt werden.
+    # Dirty-Kisten werden erst nach dieser Ruhezeit verkauft, damit Hopper-Bursts gebündelt werden.
     dirtyCooldownSeconds: 5
 
     # Schreibt AutoSellChest-Logs asynchron.
     asyncDatabaseLogging: true
 
   cleanup:
-    # Prueft regelmaessig, ob registrierte AutoSellChests physisch noch existieren.
-    # Es werden nur bereits bekannte und geladene Kisten geprueft, keine Welt-Scans.
+    # Prüft regelmäßig, ob registrierte AutoSellChests physisch noch existieren.
+    # Es werden nur bereits bekannte und geladene Kisten geprüft, keine Welt-Scans.
     enabled: true
     intervalSeconds: 60
 
   protection:
-    # Blockiert normales Oeffnen fremder AutoSellChests.
+    # Blockiert normales Öffnen fremder AutoSellChests.
     protectContainer: true
 
-    # Nur Besitzer oder Admins duerfen AutoSellChests abbauen.
+    # Nur Besitzer oder Admins dürfen AutoSellChests abbauen.
     blockBreakingByOthers: true
 
-    # Explosionen zerstoeren AutoSellChests nicht.
+    # Explosionen zerstören AutoSellChests nicht.
     blockExplosionDamage: true
 
-    # Hopper duerfen keine Items aus AutoSellChests ziehen.
+    # Hopper dürfen keine Items aus AutoSellChests ziehen.
     blockHopperExtraction: true
 
-    # Hopper duerfen Items in AutoSellChests einfuegen.
+    # Hopper dürfen Items in AutoSellChests einfügen.
     allowHopperInsertion: true
 
 directTrade:

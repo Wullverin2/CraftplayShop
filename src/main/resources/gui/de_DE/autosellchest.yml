@@ -24,14 +24,14 @@ list:
       - ""
       - "&eLinksklick: Details"
       - "&eRechtsklick: Teleport"
-      - "&cShift-Linksklick: Loeschen"
+      - "&cShift-Linksklick: Löschen"
 
   buttons:
     close:
       enabled: true
       slot: 49
       material: BARRIER
-      name: "&cSchliessen"
+      name: "&cSchließen"
       action: close
 
 info:
@@ -76,7 +76,7 @@ info:
         - "&7Intervall: &f%interval_name%"
         - "&7Multiplikator: &f%multiplier_name%"
         - ""
-        - "&eKlicken zum Oeffnen"
+        - "&eKlicken zum Öffnen"
       action: upgrades
     teleport:
       enabled: true
@@ -88,9 +88,9 @@ info:
       enabled: true
       slot: 22
       material: TNT
-      name: "&cAutoSellChest loeschen"
+      name: "&cAutoSellChest löschen"
       lore:
-        - "&7Loescht nur den Datenbankeintrag."
+        - "&7Löscht nur den Datenbankeintrag."
       action: delete
 
   buttons:
@@ -98,13 +98,13 @@ info:
       enabled: true
       slot: 18
       material: ARROW
-      name: "&eZurueck"
+      name: "&eZurück"
       action: back
     close:
       enabled: true
       slot: 26
       material: BARRIER
-      name: "&cSchliessen"
+      name: "&cSchließen"
       action: close
 
 upgrades:
@@ -127,7 +127,7 @@ upgrades:
         - "&7Aktuell: &f%interval_name%"
         - "&7Aktuelles Intervall: &f%interval_seconds%s"
         - ""
-        - "&7Naechstes Upgrade: &e%next_interval_name%"
+        - "&7Nächstes Upgrade: &e%next_interval_name%"
         - "&7Neues Intervall: &f%next_interval_seconds%s"
         - "&7Kosten: &e%next_interval_price%"
         - ""
@@ -142,7 +142,7 @@ upgrades:
         - "&7Aktuell: &f%multiplier_name%"
         - "&7Aktueller Multiplikator: &fx%multiplier%"
         - ""
-        - "&7Naechstes Upgrade: &e%next_multiplier_name%"
+        - "&7Nächstes Upgrade: &e%next_multiplier_name%"
         - "&7Neuer Multiplikator: &fx%next_multiplier%"
         - "&7Kosten: &e%next_multiplier_price%"
         - ""
@@ -154,17 +154,17 @@ upgrades:
       enabled: true
       slot: 18
       material: ARROW
-      name: "&eZurueck"
+      name: "&eZurück"
       action: back
     close:
       enabled: true
       slot: 26
       material: BARRIER
-      name: "&cSchliessen"
+      name: "&cSchließen"
       action: close
 
 deleteConfirm:
-  title: "&8AutoSellChest loeschen?"
+  title: "&8AutoSellChest löschen?"
   size: 27
 
   filler:
@@ -187,7 +187,7 @@ deleteConfirm:
       enabled: true
       slot: 11
       material: LIME_CONCRETE
-      name: "&aLoeschen bestaetigen"
+      name: "&aLöschen bestätigen"
       action: delete_execute
     cancel:
       enabled: true

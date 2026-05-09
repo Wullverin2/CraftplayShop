@@ -2,7 +2,7 @@ title: "&8%category%"
 size: 54
 
 amountSelection:
-  title: "&8Menge waehlen: %item%"
+  title: "&8Menge wählen: %item%"
   size: 54
   amounts:
     - 1
@@ -12,7 +12,7 @@ amountSelection:
     - 64
 
 buyConfirmation:
-  title: "&8Kauf bestaetigen"
+  title: "&8Kauf bestätigen"
   size: 54
 
 slots:
@@ -35,9 +35,9 @@ items:
     enabled: true
     slot: 49
     material: ARROW
-    name: "&cZurueck"
+    name: "&cZurück"
     lore:
-      - "&7Zur Kategorienuebersicht."
+      - "&7Zur Kategorienübersicht."
     leftClickActions:
       - "OPEN_GUI:servershop"
 
@@ -51,7 +51,7 @@ items:
       - "&7Aktion: &f%action%"
       - "&7Gesamtpreis: &e%price%"
       - ""
-      - "&eKlicken zum Ausfuehren"
+      - "&eKlicken zum Ausführen"
 
   customAmount:
     enabled: true
@@ -65,15 +65,15 @@ items:
     enabled: true
     material: ARROW
     amount: 1
-    name: "&cZurueck"
+    name: "&cZurück"
     lore:
-      - "&7Zurueck zur Kategorie."
+      - "&7Zurück zur Kategorie."
 
   confirmBuy:
     enabled: true
     material: EMERALD_BLOCK
     amount: 1
-    name: "&aKauf bestaetigen"
+    name: "&aKauf bestätigen"
     lore:
       - "&7Item: &f%item%"
       - "&7Menge: &f%amount%"
@@ -87,7 +87,7 @@ items:
     amount: 1
     name: "&cAbbrechen"
     lore:
-      - "&7Zurueck zur Mengenauswahl."
+      - "&7Zurück zur Mengenauswahl."
 
 shopItemLore:
   - "&7Kaufen: &e%buy_price%"
