@@ -78,6 +78,17 @@ info:
         - ""
         - "&eClick to open"
       action: upgrades
+    stats:
+      enabled: true
+      slot: 15
+      material: BOOK
+      name: "&eStatistics"
+      lore:
+        - "&7Debug: &f%debug%"
+        - "&7Today: &f%today_items% items"
+        - ""
+        - "&eClick to open"
+      action: stats
     teleport:
       enabled: true
       slot: 16
@@ -195,3 +206,128 @@ deleteConfirm:
       material: RED_CONCRETE
       name: "&cCancel"
       action: cancel
+
+admin:
+  title: "&8AutoSellChest Admin"
+  size: 54
+
+  filler:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+    slots: [0,1,2,3,4,5,6,7,8,45,46,47,48,49,50,51,52,53]
+
+  chestSlots: [10,11,12,13,14,15,16,19,20,21,22,23,24,25,28,29,30,31,32,33,34]
+
+  chestItem:
+    material: CHEST
+    name: "&cAutoSellChest #%id%"
+    lore:
+      - "&7Owner: &f%owner%"
+      - "&7Status: %status%"
+      - "&7Position: &f%world% %x% %y% %z%"
+      - "&7Next sell: &f%next_sell%"
+      - "&7Multiplier: &fx%multiplier%"
+      - "&7Earned: &f%total_money%"
+      - "&7Debug: &f%debug%"
+      - ""
+      - "&eLeft click: Details"
+      - "&eRight click: Teleport"
+      - "&cShift left click: Delete"
+
+  buttons:
+    previous:
+      enabled: true
+      slot: 45
+      material: ARROW
+      name: "&ePrevious Page"
+      lore:
+        - "&7Page &f%page%&7/&f%pages%"
+      action: previous_page
+    search:
+      enabled: true
+      slot: 49
+      material: COMPASS
+      name: "&eFilter: &f%query%"
+      lore:
+        - "&7Use &e/asc admin <search>&7."
+        - "&7Search by ID, owner or world."
+      action: none
+    next:
+      enabled: true
+      slot: 53
+      material: ARROW
+      name: "&eNext Page"
+      lore:
+        - "&7Page &f%page%&7/&f%pages%"
+      action: next_page
+    close:
+      enabled: true
+      slot: 50
+      material: BARRIER
+      name: "&cClose"
+      action: close
+
+stats:
+  title: "&8AutoSellChest Statistics"
+  size: 54
+
+  filler:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+    slots: [0,1,2,3,4,5,6,7,8,45,46,47,48,49,50,51,52,53]
+
+  recentSlots: [19,20,21,22,23,24,25,28]
+  materialSlots: [30,31,32,33,34,37,38,39]
+
+  items:
+    loading:
+      enabled: true
+      slot: 22
+      material: CLOCK
+      name: "&eLoading statistics..."
+      lore: []
+      action: none
+    summary:
+      enabled: true
+      slot: 13
+      material: BOOK
+      name: "&eSummary"
+      lore:
+        - "&7Today sold: &f%today_items% items"
+        - "&7Today earned: &f%today_money%"
+        - "&7Total sold: &f%total_items% items"
+        - "&7Total earned: &f%total_money%"
+        - "&7Debug: &f%debug%"
+      action: none
+
+  recentItem:
+    material: PAPER
+    name: "&e%material%"
+    lore:
+      - "&7Amount: &f%amount%"
+      - "&7Price each: &f%price_each%"
+      - "&7Total: &f%total_price%"
+      - "&7Time: &f%time%"
+
+  materialItem:
+    material: CHEST
+    name: "&e%material%"
+    lore:
+      - "&7Sold: &f%amount% items"
+      - "&7Earned: &f%total_price%"
+
+  buttons:
+    back:
+      enabled: true
+      slot: 45
+      material: ARROW
+      name: "&eBack"
+      action: back
+    close:
+      enabled: true
+      slot: 53
+      material: BARRIER
+      name: "&cClose"
+      action: close

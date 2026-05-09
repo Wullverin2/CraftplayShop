@@ -422,6 +422,42 @@ autoSellChest:
     # Sendet dem Besitzer eine kurze Nachricht, wenn online und seine Kiste verkauft hat.
     notifyOwnerOnSell: true
 
+  display:
+    # Zeigt ein TextDisplay über jeder geladenen AutoSellChest.
+    enabled: true
+
+    # Position relativ zum AutoSellChest-Block.
+    offset:
+      x: 0.5
+      y: 1.45
+      z: 0.5
+
+    # Aktualisierungsintervall in Ticks.
+    refreshIntervalTicks: 40
+
+    # Wenn true, ist der Text durch Blöcke sichtbar.
+    seeThrough: false
+
+    # Aktiviert Text-Schatten.
+    shadow: true
+
+    # Verfügbare Platzhalter:
+    # %id%, %name%, %owner%, %status%, %world%, %x%, %y%, %z%,
+    # %interval%, %next_sell%, %multiplier%, %total_items%, %total_money%, %debug%
+    lines:
+      - "&c%name%"
+      - "&7Besitzer: &f%owner%"
+      - "&7Status: %status%"
+      - "&7Nächster Verkauf: &f%next_sell%"
+      - "&7Multiplikator: &fx%multiplier%"
+
+  statistics:
+    # Anzahl letzter Verkäufe im Statistik-GUI.
+    recentLimit: 8
+
+    # Anzahl Material-Zusammenfassungen im Statistik-GUI.
+    materialLimit: 8
+
   effects:
     placeParticles: true
     placeSound: true
@@ -467,6 +503,11 @@ autoSellChest:
 
     # Hopper dürfen Items in AutoSellChests einfügen.
     allowHopperInsertion: true
+
+  plotsquared:
+    # Wenn PlotSquared vorhanden ist, werden AutoSellChests innerhalb eines gelöschten Plots
+    # automatisch aus Cache und Datenbank entfernt.
+    deleteChestsOnPlotDelete: true
 
 directTrade:
   enabled: false

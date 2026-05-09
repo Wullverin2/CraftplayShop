@@ -52,6 +52,7 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
     private final AutoSellChestLogService logService;
     private final AutoSellChestUpgradeService upgradeService;
     private final AutoSellChestProcessor processor;
+    private final AutoSellChestDisplayService displayService;
     private final AutoSellChestGui gui;
     private BukkitTask cleanupTask;
 
@@ -62,7 +63,8 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
         this.logService = new AutoSellChestLogService(plugin);
         this.upgradeService = new AutoSellChestUpgradeService(plugin);
         this.processor = new AutoSellChestProcessor(plugin, registry, logService, upgradeService);
-        this.gui = new AutoSellChestGui(plugin, registry, upgradeService);
+        this.displayService = new AutoSellChestDisplayService(plugin, registry, upgradeService, processor);
+        this.gui = new AutoSellChestGui(plugin, registry, upgradeService, processor, logService);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -70,11 +72,13 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
         upgradeService.load();
         registry.load();
         processor.start();
+        displayService.start();
         startCleanupTask();
     }
 
     public void shutdown() {
         processor.stop();
+        displayService.stop();
         if (cleanupTask != null && !cleanupTask.isCancelled()) {
             cleanupTask.cancel();
         }
@@ -106,6 +110,10 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
         }
         if ("list".equals(sub) || "liste".equals(sub)) {
             open(sender);
+            return true;
+        }
+        if ("admin".equals(sub)) {
+            admin(sender, args);
             return true;
         }
         if ("create".equals(sub) || "erstellen".equals(sub)) {
@@ -233,7 +241,21 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
             return;
         }
         registry.delete(chest);
+        displayService.remove(chest);
         plugin.getLanguageService().send(sender, "autoSellChest.deleted", Map.of("id", Long.toString(chest.id())));
+    }
+
+    private void admin(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            plugin.getLanguageService().send(sender, "general.playerOnly");
+            return;
+        }
+        if (!player.hasPermission(PermissionNodes.AUTOSELL_CHEST_ADMIN)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        String query = args.length > 1 ? String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length)) : "";
+        gui.openAdmin(player, query, 0);
     }
 
     private AutoSellChest lookedAtChest(CommandSender sender) {
@@ -338,6 +360,7 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
             return;
         }
         registry.delete(chest);
+        displayService.remove(chest);
         if (plugin.getConfig().getBoolean("autoSellChest.item.dropItemOnBreak", true)) {
             event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation().add(0.5D, 0.5D, 0.5D), createChestItem(1));
         }
@@ -497,7 +520,7 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(List.of("list", "create", "give", "toggle", "remove", "reload"), args[0]);
+            return filter(List.of("list", "admin", "create", "give", "toggle", "remove", "reload"), args[0]);
         }
         if (args.length == 2 && "give".equalsIgnoreCase(args[0])) {
             return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter(name -> name.toLowerCase(Locale.ROOT).startsWith(args[1].toLowerCase(Locale.ROOT))).toList();

@@ -180,6 +180,31 @@ public class AutoSellChestRegistry {
         return missing.size();
     }
 
+    public int deleteChestsInRegion(String world, int minX, int maxX, int minZ, int maxZ) {
+        List<AutoSellChest> removed = new ArrayList<>();
+        synchronized (byLocation) {
+            for (AutoSellChest chest : byId.values()) {
+                if (chest.world().equals(world)
+                        && chest.x() >= minX
+                        && chest.x() <= maxX
+                        && chest.z() >= minZ
+                        && chest.z() <= maxZ) {
+                    removed.add(chest);
+                }
+            }
+            for (AutoSellChest chest : removed) {
+                byLocation.remove(chest.locationKey());
+                byId.remove(chest.id());
+                dirty.remove(chest.locationKey());
+                dirtyTimestamps.remove(chest.locationKey());
+            }
+        }
+        if (!removed.isEmpty()) {
+            plugin.getTaskService().runAsync(() -> deleteMany(removed));
+        }
+        return removed.size();
+    }
+
     public void markDirty(AutoSellChest chest) {
         markDirty(chest.locationKey());
     }

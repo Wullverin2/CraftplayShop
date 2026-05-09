@@ -16,20 +16,34 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class AutoSellChestGui {
     private final CraftplayShopPlugin plugin;
     private final AutoSellChestRegistry registry;
     private final AutoSellChestUpgradeService upgradeService;
+    private final AutoSellChestProcessor processor;
+    private final AutoSellChestLogService logService;
 
-    public AutoSellChestGui(CraftplayShopPlugin plugin, AutoSellChestRegistry registry, AutoSellChestUpgradeService upgradeService) {
+    public AutoSellChestGui(CraftplayShopPlugin plugin,
+                            AutoSellChestRegistry registry,
+                            AutoSellChestUpgradeService upgradeService,
+                            AutoSellChestProcessor processor,
+                            AutoSellChestLogService logService) {
         this.plugin = plugin;
         this.registry = registry;
         this.upgradeService = upgradeService;
+        this.processor = processor;
+        this.logService = logService;
     }
 
     public void openList(Player player) {
@@ -56,6 +70,45 @@ public class AutoSellChestGui {
         player.openInventory(inventory);
     }
 
+    public void openAdmin(Player player, String query, int page) {
+        YamlConfiguration gui = gui(player);
+        int size = size(gui, "admin.size", 54);
+        AutoSellChestHolder holder = new AutoSellChestHolder(AutoSellChestView.ADMIN_LIST, 0L);
+        holder.page = Math.max(0, page);
+        holder.query = query == null ? "" : query.trim();
+        Inventory inventory = Bukkit.createInventory(holder, size, title(player, gui, "admin.title", "&8AutoSellChest Admin"));
+        fill(gui, inventory, "admin.filler");
+        List<Integer> slots = gui.getIntegerList("admin.chestSlots");
+        if (slots.isEmpty()) {
+            slots = List.of(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34);
+        }
+        List<AutoSellChest> chests = registry.all().stream()
+                .filter(chest -> matches(chest, holder.query))
+                .sorted(Comparator.comparingLong(AutoSellChest::id))
+                .toList();
+        int maxPage = Math.max(0, (chests.size() - 1) / Math.max(1, slots.size()));
+        holder.page = Math.min(holder.page, maxPage);
+        int start = holder.page * slots.size();
+        for (int index = 0; index < slots.size() && start + index < chests.size(); index++) {
+            AutoSellChest chest = chests.get(start + index);
+            int slot = slots.get(index);
+            if (slot < 0 || slot >= inventory.getSize()) {
+                continue;
+            }
+            holder.chests.put(slot, chest.id());
+            inventory.setItem(slot, chestItem(player, gui, chest, "admin.chestItem"));
+        }
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("page", Integer.toString(holder.page + 1));
+        placeholders.put("pages", Integer.toString(maxPage + 1));
+        placeholders.put("query", holder.query.isBlank() ? "-" : holder.query);
+        item(gui, inventory, "admin.buttons.previous", placeholders);
+        item(gui, inventory, "admin.buttons.next", placeholders);
+        item(gui, inventory, "admin.buttons.search", placeholders);
+        item(gui, inventory, "admin.buttons.close", placeholders);
+        player.openInventory(inventory);
+    }
+
     public void openInfo(Player player, AutoSellChest chest) {
         YamlConfiguration gui = gui(player);
         AutoSellChestHolder holder = new AutoSellChestHolder(AutoSellChestView.INFO, chest.id());
@@ -64,10 +117,42 @@ public class AutoSellChestGui {
         item(gui, inventory, "info.items.status", placeholders(player, chest));
         item(gui, inventory, "info.items.toggle", placeholders(player, chest));
         item(gui, inventory, "info.items.upgrades", placeholders(player, chest));
+        item(gui, inventory, "info.items.stats", placeholders(player, chest));
         item(gui, inventory, "info.items.teleport", placeholders(player, chest));
         item(gui, inventory, "info.items.delete", placeholders(player, chest));
         button(gui, inventory, "info.buttons.back");
         button(gui, inventory, "info.buttons.close");
+        player.openInventory(inventory);
+    }
+
+    public void openStats(Player player, AutoSellChest chest) {
+        YamlConfiguration gui = gui(player);
+        AutoSellChestHolder holder = new AutoSellChestHolder(AutoSellChestView.STATS, chest.id());
+        Inventory inventory = Bukkit.createInventory(holder, size(gui, "stats.size", 54), title(player, gui, "stats.title", "&8AutoSellChest Stats", chest));
+        fill(gui, inventory, "stats.filler");
+        item(gui, inventory, "stats.items.loading", placeholders(player, chest));
+        player.openInventory(inventory);
+        plugin.getTaskService().runAsync(() -> {
+            long todayStart = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            StatsSnapshot snapshot = new StatsSnapshot(
+                    logService.recentLogs(chest.id(), plugin.getConfig().getInt("autoSellChest.statistics.recentLimit", 8)),
+                    logService.materialStats(chest.id(), plugin.getConfig().getInt("autoSellChest.statistics.materialLimit", 8)),
+                    logService.stats(chest.id(), todayStart)
+            );
+            plugin.getTaskService().runSync(() -> openStatsLoaded(player, chest, snapshot));
+        });
+    }
+
+    private void openStatsLoaded(Player player, AutoSellChest chest, StatsSnapshot snapshot) {
+        YamlConfiguration gui = gui(player);
+        AutoSellChestHolder holder = new AutoSellChestHolder(AutoSellChestView.STATS, chest.id());
+        Inventory inventory = Bukkit.createInventory(holder, size(gui, "stats.size", 54), title(player, gui, "stats.title", "&8AutoSellChest Stats", chest));
+        fill(gui, inventory, "stats.filler");
+        item(gui, inventory, "stats.items.summary", statsPlaceholders(player, chest, snapshot));
+        addRecentLogs(player, gui, inventory, chest, snapshot);
+        addMaterialStats(player, gui, inventory, chest, snapshot);
+        button(gui, inventory, "stats.buttons.back");
+        button(gui, inventory, "stats.buttons.close");
         player.openInventory(inventory);
     }
 
@@ -98,8 +183,19 @@ public class AutoSellChestGui {
         if (!(inventory.getHolder() instanceof AutoSellChestHolder holder)) {
             return;
         }
-        if (holder.view == AutoSellChestView.LIST) {
+        if (holder.view == AutoSellChestView.LIST || holder.view == AutoSellChestView.ADMIN_LIST) {
             Long id = holder.chests.get(rawSlot);
+            if (id == null && holder.view == AutoSellChestView.ADMIN_LIST) {
+                String action = actionForSlot(gui(player), "admin", rawSlot);
+                if ("next_page".equals(action)) {
+                    openAdmin(player, holder.query, holder.page + 1);
+                } else if ("previous_page".equals(action)) {
+                    openAdmin(player, holder.query, Math.max(0, holder.page - 1));
+                } else if ("close".equals(action)) {
+                    player.closeInventory();
+                }
+                return;
+            }
             if (id == null) {
                 return;
             }
@@ -128,6 +224,8 @@ public class AutoSellChestGui {
             case INFO -> "info";
             case UPGRADES -> "upgrades";
             case DELETE_CONFIRM -> "deleteConfirm";
+            case STATS -> "stats";
+            case ADMIN_LIST -> "admin";
             case LIST -> "list";
         };
         String action = actionForSlot(gui(player), section, rawSlot);
@@ -135,6 +233,8 @@ public class AutoSellChestGui {
             toggle(player, chest);
         } else if ("upgrades".equals(action)) {
             openUpgrades(player, chest);
+        } else if ("stats".equals(action)) {
+            openStats(player, chest);
         } else if ("upgrade_interval".equals(action)) {
             buyIntervalUpgrade(player, chest);
         } else if ("upgrade_multiplier".equals(action)) {
@@ -146,7 +246,7 @@ public class AutoSellChestGui {
         } else if ("delete_execute".equals(action)) {
             delete(player, chest);
         } else if ("back".equals(action) || "cancel".equals(action)) {
-            if (holder.view == AutoSellChestView.UPGRADES || holder.view == AutoSellChestView.DELETE_CONFIRM) {
+            if (holder.view == AutoSellChestView.UPGRADES || holder.view == AutoSellChestView.DELETE_CONFIRM || holder.view == AutoSellChestView.STATS) {
                 openInfo(player, chest);
             } else {
                 openList(player);
@@ -246,7 +346,11 @@ public class AutoSellChestGui {
     }
 
     private ItemStack chestItem(Player player, YamlConfiguration gui, AutoSellChest chest) {
-        ConfigurationSection section = gui.getConfigurationSection("list.chestItem");
+        return chestItem(player, gui, chest, "list.chestItem");
+    }
+
+    private ItemStack chestItem(Player player, YamlConfiguration gui, AutoSellChest chest, String path) {
+        ConfigurationSection section = gui.getConfigurationSection(path);
         ItemStack itemStack = new ItemStack(material(section == null ? "CHEST" : section.getString("material", "CHEST")));
         ItemMeta meta = itemStack.getItemMeta();
         if (meta != null) {
@@ -301,9 +405,9 @@ public class AutoSellChestGui {
 
     private String actionForSlot(YamlConfiguration gui, String section, int slot) {
         for (String key : List.of(
-                "items.status", "items.toggle", "items.upgrades", "items.teleport", "items.delete",
-                "items.interval", "items.multiplier", "items.info", "items.confirm", "items.cancel",
-                "buttons.back", "buttons.close")) {
+                "items.status", "items.toggle", "items.upgrades", "items.stats", "items.teleport", "items.delete",
+                "items.interval", "items.multiplier", "items.info", "items.confirm", "items.cancel", "items.summary", "items.loading",
+                "buttons.previous", "buttons.next", "buttons.search", "buttons.back", "buttons.close")) {
             String path = section + "." + key;
             if (gui.getInt(path + ".slot", -1) == slot) {
                 return gui.getString(path + ".action", key.substring(key.indexOf('.') + 1));
@@ -336,10 +440,88 @@ public class AutoSellChestGui {
         placeholders.put("multiplier_level", Integer.toString(chest.multiplierLevel()));
         placeholders.put("multiplier_name", multiplier == null ? "-" : multiplier.name());
         placeholders.put("multiplier", Double.toString(upgradeService.multiplier(chest)));
+        placeholders.put("next_sell", nextSell(chest));
+        placeholders.put("debug", processor.lastDebugReason(chest));
+        placeholders.put("today_items", "-");
+        placeholders.put("today_money", "-");
+        placeholders.put("recent_count", "-");
+        placeholders.put("material_count", "-");
         placeholders.put("next_multiplier_name", nextMultiplier == null ? plugin.getLanguageService().get(player, "autoSellChest.upgradeNone", Map.of()) : nextMultiplier.name());
         placeholders.put("next_multiplier_price", nextMultiplier == null ? "-" : plugin.getEconomyService().format(nextMultiplier.price()));
         placeholders.put("next_multiplier", nextMultiplier == null ? "-" : Double.toString(nextMultiplier.multiplier()));
         return placeholders;
+    }
+
+    private Map<String, String> statsPlaceholders(Player player, AutoSellChest chest, StatsSnapshot snapshot) {
+        Map<String, String> placeholders = placeholders(player, chest);
+        placeholders.put("today_items", Long.toString(snapshot.today.amount()));
+        placeholders.put("today_money", plugin.getEconomyService().format(snapshot.today.totalPrice()));
+        placeholders.put("recent_count", Integer.toString(snapshot.recent.size()));
+        placeholders.put("material_count", Integer.toString(snapshot.materials.size()));
+        return placeholders;
+    }
+
+    private void addRecentLogs(Player player, YamlConfiguration gui, Inventory inventory, AutoSellChest chest, StatsSnapshot snapshot) {
+        List<Integer> slots = gui.getIntegerList("stats.recentSlots");
+        for (int index = 0; index < slots.size() && index < snapshot.recent.size(); index++) {
+            AutoSellChestLogService.LogEntry entry = snapshot.recent.get(index);
+            Map<String, String> placeholders = placeholders(player, chest);
+            placeholders.put("material", entry.material());
+            placeholders.put("amount", Integer.toString(entry.amount()));
+            placeholders.put("price_each", plugin.getEconomyService().format(entry.priceEach()));
+            placeholders.put("total_price", plugin.getEconomyService().format(entry.totalPrice()));
+            placeholders.put("time", DateTimeFormatter.ofPattern("dd.MM HH:mm").withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(entry.createdAt())));
+            int slot = slots.get(index);
+            if (slot >= 0 && slot < inventory.getSize()) {
+                inventory.setItem(slot, named(gui.getString("stats.recentItem.material", "PAPER"),
+                        gui.getString("stats.recentItem.name", "&e%material%"),
+                        gui.getStringList("stats.recentItem.lore"),
+                        placeholders));
+            }
+        }
+    }
+
+    private void addMaterialStats(Player player, YamlConfiguration gui, Inventory inventory, AutoSellChest chest, StatsSnapshot snapshot) {
+        List<Integer> slots = gui.getIntegerList("stats.materialSlots");
+        for (int index = 0; index < slots.size() && index < snapshot.materials.size(); index++) {
+            AutoSellChestLogService.MaterialStats entry = snapshot.materials.get(index);
+            Map<String, String> placeholders = placeholders(player, chest);
+            placeholders.put("material", entry.material());
+            placeholders.put("amount", Long.toString(entry.amount()));
+            placeholders.put("total_price", plugin.getEconomyService().format(entry.totalPrice()));
+            int slot = slots.get(index);
+            if (slot >= 0 && slot < inventory.getSize()) {
+                inventory.setItem(slot, named(gui.getString("stats.materialItem.material", "CHEST"),
+                        gui.getString("stats.materialItem.name", "&e%material%"),
+                        gui.getStringList("stats.materialItem.lore"),
+                        placeholders));
+            }
+        }
+    }
+
+    private boolean matches(AutoSellChest chest, String query) {
+        if (query == null || query.isBlank()) {
+            return true;
+        }
+        String lower = query.toLowerCase(Locale.ROOT);
+        return Long.toString(chest.id()).equals(lower)
+                || chest.ownerName().toLowerCase(Locale.ROOT).contains(lower)
+                || chest.ownerUuid().toString().toLowerCase(Locale.ROOT).contains(lower)
+                || chest.world().toLowerCase(Locale.ROOT).contains(lower);
+    }
+
+    private String nextSell(AutoSellChest chest) {
+        if (!chest.active()) {
+            return "-";
+        }
+        long remaining = Math.max(0L, (chest.lastSoldAt() + (upgradeService.intervalSeconds(chest) * 1000L)) - System.currentTimeMillis());
+        long seconds = (remaining + 999L) / 1000L;
+        if (seconds <= 0L) {
+            return plugin.getLanguageService().get(plugin.getConfigService().defaultLanguage(), "autoSellChest.nextSellNow", Map.of());
+        }
+        long minutes = seconds / 60L;
+        long rest = seconds % 60L;
+        return minutes <= 0L ? seconds + "s" : minutes + "m " + rest + "s";
     }
 
     private String apply(String text, Map<String, String> placeholders) {
@@ -382,6 +564,8 @@ public class AutoSellChestGui {
         private final AutoSellChestView view;
         private final long chestId;
         private final Map<Integer, Long> chests = new HashMap<>();
+        private int page;
+        private String query = "";
 
         private AutoSellChestHolder(AutoSellChestView view, long chestId) {
             this.view = view;
@@ -398,6 +582,13 @@ public class AutoSellChestGui {
         LIST,
         INFO,
         UPGRADES,
-        DELETE_CONFIRM
+        DELETE_CONFIRM,
+        STATS,
+        ADMIN_LIST
+    }
+
+    private record StatsSnapshot(List<AutoSellChestLogService.LogEntry> recent,
+                                 List<AutoSellChestLogService.MaterialStats> materials,
+                                 AutoSellChestLogService.Stats today) {
     }
 }

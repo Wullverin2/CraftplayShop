@@ -19,12 +19,14 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AutoSellChestProcessor {
     private final CraftplayShopPlugin plugin;
     private final AutoSellChestRegistry registry;
     private final AutoSellChestLogService logService;
     private final AutoSellChestUpgradeService upgradeService;
+    private final Map<Long, String> lastDebugReasons = new ConcurrentHashMap<>();
     private BukkitTask task;
 
     public AutoSellChestProcessor(CraftplayShopPlugin plugin, AutoSellChestRegistry registry, AutoSellChestLogService logService, AutoSellChestUpgradeService upgradeService) {
@@ -54,6 +56,10 @@ public class AutoSellChestProcessor {
         process(chest);
     }
 
+    public String lastDebugReason(AutoSellChest chest) {
+        return lastDebugReasons.getOrDefault(chest.id(), "Warte auf nächsten Verkauf.");
+    }
+
     private void processTick() {
         long dirtyCooldownMillis = Math.max(0L, plugin.getConfig().getLong("autoSellChest.performance.dirtyCooldownSeconds", 5L)) * 1000L;
         int maxChests = Math.max(1, plugin.getConfig().getInt("autoSellChest.performance.maxChestsPerTick", 5));
@@ -65,28 +71,34 @@ public class AutoSellChestProcessor {
 
     private void process(AutoSellChest chest) {
         if (!plugin.getServerShopService().allowSell()) {
+            setReason(chest, "ServerShop-Ankauf ist deaktiviert.");
             return;
         }
         if (plugin.getConfig().getBoolean("autoSellChest.selling.sellOnlyWhenOwnerOnline", false)
                 && Bukkit.getPlayer(chest.ownerUuid()) == null) {
+            setReason(chest, "Besitzer ist offline.");
             return;
         }
         Location location = chest.location();
         if (location == null || location.getWorld() == null) {
+            setReason(chest, "Welt ist nicht geladen.");
             return;
         }
         World world = location.getWorld();
         if (!world.isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
+            setReason(chest, "Chunk ist nicht geladen.");
             return;
         }
         Block block = location.getBlock();
         BlockState state = block.getState();
         if (!(state instanceof Container container)) {
+            setReason(chest, "Physische Kiste fehlt.");
             registry.delete(chest);
             return;
         }
         SellPlan plan = createPlan(container.getInventory(), chest);
         if (plan.totalAmount <= 0 || plan.totalPrice <= 0.0D) {
+            setReason(chest, "Keine ankaufbaren Items gefunden.");
             registry.update(chest.withSale(0L, 0.0D));
             return;
         }
@@ -94,8 +106,10 @@ public class AutoSellChestProcessor {
         OfflinePlayer owner = Bukkit.getOfflinePlayer(chest.ownerUuid());
         if (!plugin.getEconomyService().deposit(owner, plan.totalPrice)) {
             restore(container.getInventory(), plan.originals);
+            setReason(chest, "Vault-Auszahlung fehlgeschlagen.");
             return;
         }
+        setReason(chest, "Letzter Verkauf: " + plan.totalAmount + " Items für " + plugin.getEconomyService().format(plan.totalPrice) + ".");
         AutoSellChest updated = chest.withSale(plan.totalAmount, plan.totalPrice);
         registry.update(updated);
         for (SaleLine line : plan.lines.values()) {
@@ -180,6 +194,10 @@ public class AutoSellChestProcessor {
         private final Map<String, SaleLine> lines = new LinkedHashMap<>();
         private int totalAmount;
         private double totalPrice;
+    }
+
+    private void setReason(AutoSellChest chest, String reason) {
+        lastDebugReasons.put(chest.id(), reason);
     }
 
     private record SlotSnapshot(int slot, ItemStack itemStack) {

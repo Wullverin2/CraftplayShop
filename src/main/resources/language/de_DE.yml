@@ -127,6 +127,7 @@ autoSellChest:
   notAutoSellChest: "%prefix%&cDas ist keine AutoSellChest."
   teleported: "%prefix%&aDu wurdest zu AutoSellChest &e#%id% &ateleportiert."
   missingPhysicalChest: "%prefix%&cDie physische AutoSellChest wurde nicht gefunden."
+  nextSellNow: "jetzt"
   upgradeBought: "%prefix%&aUpgrade &e%upgrade% &afür AutoSellChest &e#%id% &agekauft. Kosten: &e%price%"
   upgradeMaxLevel: "%prefix%&cDiese AutoSellChest hat bereits das höchste Upgrade-Level."
   upgradeNoPermission: "%prefix%&cDir fehlt die Permission für dieses Upgrade."

@@ -204,6 +204,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `/asc give <spieler> [menge]`
 - `/asc toggle`
 - `/asc remove`
+- `/asc admin [suche]`
 
 ### Permissions
 
@@ -256,10 +257,15 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Hopper-Extraktion, Hopper-Insertion und Explosionsschutz sind konfigurierbar.
 - Shift-Rechtsklick auf eine AutoSellChest oeffnet das Info-GUI.
 - Das AutoSellChest-GUI zeigt eigene Kisten, Status, Koordinaten, Intervall, Multiplikator, verkaufte Items und verdientes Geld.
-- Das Info-GUI enthaelt Status-Toggle, Teleport, Upgrades und Loeschen.
+- Ueber AutoSellChests wird optional eine TextDisplay-Anzeige mit Name, Besitzer, Status, naechstem Verkauf und Multiplikator dargestellt.
+- Das Info-GUI enthaelt Status-Toggle, Teleport, Upgrades, Statistiken und Loeschen.
+- Das Statistik-GUI zeigt Tageswerte, Gesamtwerte, letzte Verkaeufe und Material-Auswertung direkt aus den AutoSellChest-Logs.
+- Admins koennen mit `/asc admin [suche]` eine globale AutoSellChest-Uebersicht oeffnen, filtern, Details anzeigen, zur Kiste teleportieren und Kisten per Bestaetigung loeschen.
 - Linksklick im GUI oeffnet Details, Rechtsklick teleportiert zur Kiste, Shift-Linksklick oeffnet die Loeschbestaetigung.
 - Die Loeschfunktion im GUI nutzt eine Bestaetigungs-GUI.
 - Regelmaessiger Cleanup entfernt AutoSellChests aus Cache und Datenbank, wenn die physische Kiste fehlt.
+- Optionaler PlotSquared-Hook entfernt AutoSellChests aus Cache und Datenbank, wenn ein Plot geloescht wird.
+- PlotSquared-Pruefungen fuer Erstellen, Bearbeiten und Abbauen sind vorbereitet; Shop-Nutzung bleibt ohne PlotSquared-`use`-Flag erlaubt.
 
 ### DirectTrade Vorbereitung
 
@@ -278,7 +284,7 @@ Folgende Module sind strukturell vorbereitet, aber noch nicht vollstaendig umges
 - RankShop
 - PermissionShop
 - ReferralSystem
-- Protection Hooks
+- weitere Protection-Hooks neben PlotSquared-Plot-Cleanup und den vorbereiteten Basispruefungen
 - PlaceholderAPI, HeadDatabase, Floodgate, Citizens, Discord
 - EconomyShopGUI Importer
 - Shop Intuitive Importer
