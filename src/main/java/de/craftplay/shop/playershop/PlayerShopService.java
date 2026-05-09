@@ -230,6 +230,26 @@ public class PlayerShopService implements Listener {
         ));
     }
 
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onPlayerShopUseBeforeProtection(PlayerInteractEvent event) {
+        if (!plugin.getConfigService().playerShopsEnabled()
+                || event.getClickedBlock() == null
+                || event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+        PlayerShop shop = findByLocation(event.getClickedBlock().getLocation());
+        if (shop == null || !shop.active()) {
+            return;
+        }
+        Player player = event.getPlayer();
+        event.setCancelled(true);
+        if (player.isSneaking() && canManage(player, shop)) {
+            openEditGui(player, shop);
+            return;
+        }
+        useShop(player, shop);
+    }
+
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInteract(PlayerInteractEvent event) {
         if (!plugin.getConfigService().playerShopsEnabled()
@@ -257,6 +277,10 @@ public class PlayerShopService implements Listener {
         }
         Player player = event.getPlayer();
         event.setCancelled(true);
+        useShop(player, shop);
+    }
+
+    private void useShop(Player player, PlayerShop shop) {
         if (shop.type() == PlayerShopType.SELL) {
             buyFromShop(player, shop);
         } else if (shop.type() == PlayerShopType.BUY) {

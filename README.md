@@ -139,6 +139,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Das verkaufte Item wird beim Erstellen aus dem Item in der Hand uebernommen.
 - Rechtsklick auf SELL-Shop-Schild oder Kiste kauft die konfigurierte Menge aus dem Kistenbestand.
 - Rechtsklick auf BUY-Shop-Schild oder Kiste verkauft die konfigurierte Menge an den Shop und legt die Items in die Shop-Kiste.
+- PlayerShop-Nutzung auf PlotSquared-Plots benoetigt keine separate `use`-Flag; aktive Shop-Klicks werden vom Plugin vor dem normalen Plot-Use abgefangen.
 - Vor dem Kauf werden Permission, Geld, Lagerbestand und Inventarplatz geprueft.
 - Bei Fehlern versucht der Kauf ein Rollback von Geld und Items.
 - Besitzer erhalten das Geld ueber Vault, auch wenn sie offline sind.
