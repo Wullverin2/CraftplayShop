@@ -251,25 +251,14 @@ public class ServerShopAdminEditor {
         int toggleBuySlot = slot(gui, "slots.itemEditor.toggleBuy", 10);
         inventory.setItem(toggleBuySlot, toggleItem(gui, "toggleBuy", shopItem.buyEnabled()));
         keys.put(toggleBuySlot, "toggle_buy");
-        int toggleStockSlot = slot(gui, "slots.itemEditor.toggleStock", 11);
-        inventory.setItem(toggleStockSlot, toggleItem(gui, "toggleStock", shopItem.stockEnabled()));
-        keys.put(toggleStockSlot, "toggle_stock");
-        integerButton(player, inventory, keys, gui, "slots.itemEditor.minBuyAmount", 12, "minBuyAmount", "min_buy_amount", shopItem.minBuyAmount());
         priceButton(player, inventory, keys, gui, "slots.itemEditor.buyPrice", 13, "buyPrice", "buy_price", shopItem.buyPrice());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.setBuyPrice", 14, "setBuyPrice", "set_buy_price", Map.of("price", money(shopItem.buyPrice())));
-        integerButton(player, inventory, keys, gui, "slots.itemEditor.stock", 15, "stock", "stock", shopItem.stock());
-        putConfigured(player, inventory, keys, gui, "slots.itemEditor.setStock", 16, "setStock", "set_stock", Map.of("amount", Integer.toString(shopItem.stock())));
-        integerButton(player, inventory, keys, gui, "slots.itemEditor.maxStock", 17, "maxStock", "max_stock", shopItem.maxStock());
 
         int toggleSellSlot = slot(gui, "slots.itemEditor.toggleSell", 28);
         inventory.setItem(toggleSellSlot, toggleItem(gui, "toggleSell", shopItem.sellEnabled()));
         keys.put(toggleSellSlot, "toggle_sell");
-        integerButton(player, inventory, keys, gui, "slots.itemEditor.maxBuyAmount", 21, "maxBuyAmount", "max_buy_amount", shopItem.maxBuyAmount());
-        integerButton(player, inventory, keys, gui, "slots.itemEditor.minSellAmount", 29, "minSellAmount", "min_sell_amount", shopItem.minSellAmount());
-        integerButton(player, inventory, keys, gui, "slots.itemEditor.maxSellAmount", 30, "maxSellAmount", "max_sell_amount", shopItem.maxSellAmount());
         priceButton(player, inventory, keys, gui, "slots.itemEditor.sellPrice", 31, "sellPrice", "sell_price", shopItem.sellPrice());
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.setSellPrice", 32, "setSellPrice", "set_sell_price", Map.of("price", money(shopItem.sellPrice())));
-        putConfigured(player, inventory, keys, gui, "slots.itemEditor.setMaxStock", 33, "setMaxStock", "set_max_stock", Map.of("amount", Integer.toString(shopItem.maxStock())));
 
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.editId", 18, "editId", "edit_id", Map.of("id", shopItem.id()));
         putConfigured(player, inventory, keys, gui, "slots.itemEditor.editName", 20, "editName", "edit_name", Map.of());
@@ -462,11 +451,6 @@ public class ServerShopAdminEditor {
             saved(player, categoryId, itemId);
             return;
         }
-        if ("toggle_stock".equals(key)) {
-            toggle(categoryId, itemId, "stockEnabled");
-            saved(player, categoryId, itemId);
-            return;
-        }
         if ("set_from_hand".equals(key)) {
             setFromHand(player, categoryId, itemId);
             openItemEditor(player, categoryId, itemId);
@@ -492,14 +476,6 @@ public class ServerShopAdminEditor {
             startTextEdit(player, TextEditType.ITEM_SELL_PRICE, categoryId, itemId);
             return;
         }
-        if ("set_stock".equals(key)) {
-            startTextEdit(player, TextEditType.ITEM_STOCK, categoryId, itemId);
-            return;
-        }
-        if ("set_max_stock".equals(key)) {
-            startTextEdit(player, TextEditType.ITEM_MAX_STOCK, categoryId, itemId);
-            return;
-        }
         if ("duplicate_item".equals(key)) {
             duplicateItem(categoryId, itemId);
             plugin.getLanguageService().send(player, "adminShop.itemDuplicated");
@@ -516,37 +492,6 @@ public class ServerShopAdminEditor {
         }
         if ("buy_price".equals(key)) {
             adjustPrice(categoryId, itemId, "buyPrice", priceDelta(event));
-            saved(player, categoryId, itemId);
-            return;
-        }
-        if ("min_buy_amount".equals(key)) {
-            adjustInteger(categoryId, itemId, "minBuyAmount", amountDelta(event), 1);
-            saved(player, categoryId, itemId);
-            return;
-        }
-        if ("max_buy_amount".equals(key)) {
-            adjustInteger(categoryId, itemId, "maxBuyAmount", amountDelta(event), 0);
-            saved(player, categoryId, itemId);
-            return;
-        }
-        if ("min_sell_amount".equals(key)) {
-            adjustInteger(categoryId, itemId, "minSellAmount", amountDelta(event), 1);
-            saved(player, categoryId, itemId);
-            return;
-        }
-        if ("max_sell_amount".equals(key)) {
-            adjustInteger(categoryId, itemId, "maxSellAmount", amountDelta(event), 0);
-            saved(player, categoryId, itemId);
-            return;
-        }
-        if ("stock".equals(key)) {
-            adjustStock(categoryId, itemId, amountDelta(event));
-            saved(player, categoryId, itemId);
-            return;
-        }
-        if ("max_stock".equals(key)) {
-            adjustInteger(categoryId, itemId, "maxStock", amountDelta(event), 0);
-            clampStockToMax(categoryId, itemId);
             saved(player, categoryId, itemId);
             return;
         }
@@ -901,8 +846,6 @@ public class ServerShopAdminEditor {
             }
             case ITEM_BUY_PRICE -> handlePriceInput(player, session, "buyPrice", message);
             case ITEM_SELL_PRICE -> handlePriceInput(player, session, "sellPrice", message);
-            case ITEM_STOCK -> handleStockInput(player, session, message);
-            case ITEM_MAX_STOCK -> handleIntegerInput(player, session, "maxStock", message, 0, true);
             case MATERIAL_SEARCH -> {
                 handleMaterialSearchInput(player, session, message);
                 return;
@@ -917,7 +860,6 @@ public class ServerShopAdminEditor {
         String key = switch (type) {
             case CATEGORY_LORE, ITEM_LORE -> "adminShop.inputLore";
             case ITEM_BUY_PRICE, ITEM_SELL_PRICE -> "adminShop.inputPrice";
-            case ITEM_STOCK, ITEM_MAX_STOCK -> "adminShop.inputAmount";
             case MATERIAL_SEARCH -> "adminShop.inputMaterialSearch";
             case CATEGORY_ID, ITEM_ID -> "adminShop.inputId";
             default -> "adminShop.inputName";
@@ -1058,32 +1000,6 @@ public class ServerShopAdminEditor {
         }
     }
 
-    private void handleIntegerInput(Player player, TextEditSession session, String key, String message, int minimum, boolean clampStock) {
-        try {
-            int amount = Integer.parseInt(message.trim());
-            setItemInteger(session.categoryId(), session.itemId(), key, Math.max(minimum, amount));
-            if (clampStock) {
-                clampStockToMax(session.categoryId(), session.itemId());
-            }
-            plugin.getLanguageService().send(player, "adminShop.itemUpdated");
-        } catch (NumberFormatException exception) {
-            plugin.getLanguageService().send(player, "adminShop.invalidAmount");
-        }
-    }
-
-    private void handleStockInput(Player player, TextEditSession session, String message) {
-        try {
-            int amount = Math.max(0, Integer.parseInt(message.trim()));
-            if (plugin.getServerShopRegistry().setStock(session.categoryId(), session.itemId(), amount)) {
-                plugin.getLanguageService().send(player, "adminShop.itemUpdated");
-                return;
-            }
-            plugin.getLanguageService().send(player, "general.databaseError");
-        } catch (NumberFormatException exception) {
-            plugin.getLanguageService().send(player, "adminShop.invalidAmount");
-        }
-    }
-
     private void handleMaterialSearchInput(Player player, TextEditSession session, String message) {
         String trimmed = message.trim();
         if (trimmed.isBlank() || "clear".equalsIgnoreCase(trimmed) || "-".equals(trimmed)) {
@@ -1197,13 +1113,6 @@ public class ServerShopAdminEditor {
         configuration.set(path + ".sellPrice", 0.0D);
         configuration.set(path + ".buyEnabled", false);
         configuration.set(path + ".sellEnabled", false);
-        configuration.set(path + ".minBuyAmount", 1);
-        configuration.set(path + ".maxBuyAmount", 64);
-        configuration.set(path + ".minSellAmount", 1);
-        configuration.set(path + ".maxSellAmount", 0);
-        configuration.set(path + ".stockEnabled", false);
-        configuration.set(path + ".stock", 0);
-        configuration.set(path + ".maxStock", 0);
         configuration.set(path + ".slot", slot);
         save(configuration);
         return id;
@@ -1220,13 +1129,6 @@ public class ServerShopAdminEditor {
         configuration.set(path + ".sellPrice", 0.0D);
         configuration.set(path + ".buyEnabled", false);
         configuration.set(path + ".sellEnabled", false);
-        configuration.set(path + ".minBuyAmount", 1);
-        configuration.set(path + ".maxBuyAmount", 64);
-        configuration.set(path + ".minSellAmount", 1);
-        configuration.set(path + ".maxSellAmount", 0);
-        configuration.set(path + ".stockEnabled", false);
-        configuration.set(path + ".stock", 0);
-        configuration.set(path + ".maxStock", 0);
         configuration.set(path + ".slot", slot);
         save(configuration);
         return id;
@@ -1278,20 +1180,6 @@ public class ServerShopAdminEditor {
         int current = configuration.getInt(path, minimum);
         configuration.set(path, Math.max(minimum, current + delta));
         save(configuration);
-    }
-
-    private void adjustStock(String categoryId, String itemId, int delta) {
-        ServerShopCategory category = plugin.getServerShopRegistry().category(categoryId);
-        ServerShopItem shopItem = category == null ? null : category.item(itemId);
-        if (shopItem == null) {
-            return;
-        }
-        int current = shopItem.stockEnabled() ? plugin.getServerShopRegistry().availableStock(shopItem) : shopItem.stock();
-        plugin.getServerShopRegistry().setStock(categoryId, itemId, Math.max(0, current + delta));
-    }
-
-    private void clampStockToMax(String categoryId, String itemId) {
-        plugin.getServerShopRegistry().clampStockToMax(categoryId, itemId);
     }
 
     private void setFromHand(Player player, String categoryId, String itemId) {
@@ -1755,13 +1643,14 @@ public class ServerShopAdminEditor {
         placeholders.put("slot", Integer.toString(shopItem.slot()));
         placeholders.put("buy_price", money(shopItem.buyPrice()));
         placeholders.put("sell_price", money(shopItem.sellPrice()));
-        placeholders.put("min_buy_amount", Integer.toString(shopItem.minBuyAmount()));
-        placeholders.put("max_buy_amount", amountLimit(shopItem.maxBuyAmount()));
-        placeholders.put("min_sell_amount", Integer.toString(shopItem.minSellAmount()));
-        placeholders.put("max_sell_amount", amountLimit(shopItem.maxSellAmount()));
-        placeholders.put("stock_status", status(gui, shopItem.stockEnabled()));
-        placeholders.put("stock", Integer.toString(shopItem.stockEnabled() ? plugin.getServerShopRegistry().availableStock(shopItem) : shopItem.stock()));
-        placeholders.put("max_stock", amountLimit(shopItem.maxStock()));
+        String unlimited = amountLimit(0);
+        placeholders.put("min_buy_amount", "1");
+        placeholders.put("max_buy_amount", unlimited);
+        placeholders.put("min_sell_amount", "1");
+        placeholders.put("max_sell_amount", unlimited);
+        placeholders.put("stock_status", unlimited);
+        placeholders.put("stock", unlimited);
+        placeholders.put("max_stock", unlimited);
         placeholders.put("buy_status", status(gui, shopItem.buyEnabled()));
         placeholders.put("sell_status", status(gui, shopItem.sellEnabled()));
         return item(shopItem.material(), shopItem.displayName(), lore(gui, "items.shopItem.lore", placeholders));
@@ -1959,8 +1848,6 @@ public class ServerShopAdminEditor {
         ITEM_ID,
         ITEM_BUY_PRICE,
         ITEM_SELL_PRICE,
-        ITEM_STOCK,
-        ITEM_MAX_STOCK,
         MATERIAL_SEARCH
     }
 }

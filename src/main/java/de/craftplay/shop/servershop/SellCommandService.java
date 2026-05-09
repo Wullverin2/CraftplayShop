@@ -137,18 +137,6 @@ public class SellCommandService {
             plugin.getLanguageService().send(player, "serverShop.sellGuiNothing");
             return;
         }
-        for (Map.Entry<ServerShopItem, Integer> entry : amounts.entrySet()) {
-            TransactionResult limitResult = plugin.getServerShopTransactionService().validateSellAmount(entry.getKey(), entry.getValue());
-            if (!limitResult.success()) {
-                plugin.getLanguageService().send(player, limitResult.messageKey(), limitResult.placeholders());
-                return;
-            }
-            TransactionResult stockResult = plugin.getServerShopTransactionService().validateSellStock(entry.getKey(), entry.getValue());
-            if (!stockResult.success()) {
-                plugin.getLanguageService().send(player, stockResult.messageKey(), stockResult.placeholders());
-                return;
-            }
-        }
         double total = 0.0D;
         for (Map.Entry<ServerShopItem, Integer> entry : amounts.entrySet()) {
             total += entry.getKey().sellPrice() * entry.getValue();
@@ -156,24 +144,7 @@ public class SellCommandService {
         for (int slot : originals.keySet()) {
             holder.getInventory().setItem(slot, null);
         }
-        java.util.List<Map.Entry<ServerShopItem, Integer>> stockUpdates = new java.util.ArrayList<>();
-        for (Map.Entry<ServerShopItem, Integer> entry : amounts.entrySet()) {
-            if (!plugin.getServerShopRegistry().increaseStock(entry.getKey(), entry.getValue())) {
-                for (Map.Entry<ServerShopItem, Integer> rollback : stockUpdates) {
-                    plugin.getServerShopRegistry().decreaseStock(rollback.getKey(), rollback.getValue());
-                }
-                for (Map.Entry<Integer, ItemStack> original : originals.entrySet()) {
-                    holder.getInventory().setItem(original.getKey(), original.getValue());
-                }
-                plugin.getLanguageService().send(player, "serverShop.stockFull", Map.of("space", Integer.toString(plugin.getServerShopRegistry().availableStockCapacity(entry.getKey()))));
-                return;
-            }
-            stockUpdates.add(entry);
-        }
         if (!plugin.getEconomyService().deposit(player, total)) {
-            for (Map.Entry<ServerShopItem, Integer> entry : stockUpdates) {
-                plugin.getServerShopRegistry().decreaseStock(entry.getKey(), entry.getValue());
-            }
             for (Map.Entry<Integer, ItemStack> entry : originals.entrySet()) {
                 holder.getInventory().setItem(entry.getKey(), entry.getValue());
             }

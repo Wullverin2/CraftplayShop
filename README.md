@@ -47,7 +47,6 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Sauberes Deaktivieren, wenn Vault benoetigt wird und fehlt.
 - SQLite-Datenbankbasis.
 - Tabellen fuer Transaktionen, Spieler-Einstellungen, Imports und Import-Mappings.
-- Tabelle fuer laufenden ServerShop-Stock.
 - Tabelle fuer Spieler-Favoriten im ServerShop.
 - Tabelle fuer PlayerShop-Kistenshops.
 - Async Transaktionslogging.
@@ -63,17 +62,10 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - EconomyShopGUI-aehnliches Klicksystem fuer Spieler: Linksklick kauft 1, Shift-Linksklick kauft einen Stack.
 - Rechtsklick verkauft 1, Shift-Rechtsklick verkauft einen Stack.
 - Vorbereitete Mengenauswahl mit Mengenbuttons und Chat-Eingabe, aktuell nicht als Standard-Spielerklick belegt.
-- Mindest- und Maximalmengen pro Shop-Item fuer Kaufen und Verkaufen.
-- Sell-All respektiert Verkaufs-Mindestmengen und deckelt konfigurierte Maximalmengen.
+- Kaufen und Verkaufen sind unbegrenzt, wenn die jeweilige Funktion am Item aktiviert ist.
+- Sell-All verkauft alle ankaufbaren Items ohne ServerShop-Stock- oder Mengenlimit.
 - Konfigurierbare Bestaetigungs-GUI fuer teure Kaeufe.
 - Creative- und Spectator-Verkaufsschutz gegen ServerShop-, Sell-Hand-, Sell-All- und Sell-GUI-Verkaeufe.
-- DB-basiertes Stock-System pro ServerShop-Item.
-- Geaenderter Stock wird im Speicher gehalten und gebuendelt in die Datenbank geschrieben.
-- Kaufen reduziert den Bestand, Verkaufen erhoeht ihn.
-- Zu wenig Bestand blockiert Kaeufe, voller Bestand blockiert oder begrenzt Verkaeufe.
-- Stock-Anzeige in ServerShop-GUI und AdminShop-Lore.
-- `server_shop.yml` liefert nur den Startbestand fuer neue Stock-Zeilen; laufender Bestand wird in der Datenbank gespeichert.
-- AdminShop-Editor kann Kauf-/Verkaufslimits, Stock, Max-Stock und Stock-Aktivierung bearbeiten.
 - Konfigurierbare ServerShop-Schutzregeln fuer Welten und GameModes.
 - Verkauf beschaedigter Items kann blockiert werden.
 - ServerShop-Suche nach Item-Name, Item-ID, Material, Kategorie-ID und Kategorie-Name.
@@ -94,6 +86,8 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Ingame ServerShop-Editor ueber Admin-GUI.
 - Kategorien anzeigen und bearbeiten.
 - Items anzeigen und bearbeiten.
+- Item-Kaufen und Item-Verkaufen aktivieren/deaktivieren.
+- Kauf- und Verkaufspreise per GUI setzen.
 - Neue Kategorien per Materialauswahl oder Drag-and-Drop erstellen.
 - Neue Items per Materialauswahl oder Drag-and-Drop erstellen.
 - Kategorie-Icon ueber Materialauswahl oder Item-Drop setzen.

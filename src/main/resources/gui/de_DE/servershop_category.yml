@@ -50,9 +50,8 @@ items:
       - "&7Item: &f%item%"
       - "&7Aktion: &f%action%"
       - "&7Gesamtpreis: &e%price%"
-      - "&7Kauflimit: &f%min_buy_amount% &7- &f%max_buy_amount%"
-      - "&7Verkaufslimit: &f%min_sell_amount% &7- &f%max_sell_amount%"
-      - "&7Bestand: &f%stock% &7/ &f%max_stock% &8(%stock_status%)"
+      - "&7Serverbestand: &funbegrenzt"
+      - "&7Serverankauf: &funbegrenzt"
       - ""
       - "&eKlicken zum Ausfuehren"
 
@@ -95,9 +94,8 @@ items:
 shopItemLore:
   - "&7Kaufen: &e%buy_price%"
   - "&7Verkaufen: &e%sell_price%"
-  - "&7Kauflimit: &f%min_buy_amount% &7- &f%max_buy_amount%"
-  - "&7Verkaufslimit: &f%min_sell_amount% &7- &f%max_sell_amount%"
-  - "&7Bestand: &f%stock% &7/ &f%max_stock% &8(%stock_status%)"
+  - "&7Serverbestand: &funbegrenzt"
+  - "&7Serverankauf: &funbegrenzt"
   - ""
   - "&eLinksklick: 1 kaufen"
   - "&eShift-Linksklick: Stack kaufen"

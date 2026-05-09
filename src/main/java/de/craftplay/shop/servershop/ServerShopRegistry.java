@@ -29,7 +29,6 @@ public class ServerShopRegistry {
     }
 
     public void load() {
-        flushStockSync();
         categories.clear();
         stockCache.clear();
         dirtyStock.clear();
@@ -72,19 +71,18 @@ public class ServerShopRegistry {
                             itemSection.getBoolean("buyEnabled", false),
                             itemSection.getBoolean("sellEnabled", false),
                             itemSection.getInt("slot", 0),
-                            Math.max(1, itemSection.getInt("minBuyAmount", 1)),
-                            itemSection.getInt("maxBuyAmount", 0),
-                            Math.max(1, itemSection.getInt("minSellAmount", 1)),
-                            itemSection.getInt("maxSellAmount", 0),
-                            itemSection.getBoolean("stockEnabled", false),
-                            Math.max(0, itemSection.getInt("stock", 0)),
-                            Math.max(0, itemSection.getInt("maxStock", 0))
+                            1,
+                            0,
+                            1,
+                            0,
+                            false,
+                            0,
+                            0
                     ));
                 }
             }
             categories.put(category.id(), category);
         }
-        initializeStockRows();
     }
 
     public Collection<ServerShopCategory> categories() {

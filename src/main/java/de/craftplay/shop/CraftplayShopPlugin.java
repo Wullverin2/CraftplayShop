@@ -155,7 +155,6 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         }
         if (serverShopRegistry != null) {
             serverShopRegistry.cancelStockFlushTask();
-            serverShopRegistry.flushStockSync();
         }
         if (playerShopService != null) {
             playerShopService.shutdown();
@@ -177,7 +176,6 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         }
         if (serverShopRegistry != null) {
             serverShopRegistry.load();
-            serverShopRegistry.startStockFlushTask();
         }
         if (headDatabaseHook != null) {
             headDatabaseHook.load();

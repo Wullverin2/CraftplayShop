@@ -202,8 +202,9 @@ public class ServerShopListGui {
         placeholders.put("sell_price", plugin.getEconomyService().format(item.sellPrice()));
         placeholders.put("favorite_status", plugin.getLanguageService().get(player,
                 plugin.getServerShopFavoriteService().isFavorite(player, item) ? "serverShop.favoriteYes" : "serverShop.favoriteNo"));
-        placeholders.put("stock", item.stockEnabled() ? Integer.toString(plugin.getServerShopRegistry().availableStock(item)) : plugin.getLanguageService().get(player, "serverShop.limitUnlimited"));
-        placeholders.put("max_stock", item.maxStock() <= 0 ? plugin.getLanguageService().get(player, "serverShop.limitUnlimited") : Integer.toString(item.maxStock()));
+        String unlimited = plugin.getLanguageService().get(player, "serverShop.limitUnlimited");
+        placeholders.put("stock", unlimited);
+        placeholders.put("max_stock", unlimited);
         return placeholders;
     }
 
