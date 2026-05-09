@@ -53,6 +53,7 @@ info:
       lore:
         - "&7Status: %status%"
         - "&7Owner: &f%owner%"
+        - "&7Owner online: %owner_online%"
         - "&7Position: &f%world% %x% %y% %z%"
         - "&7Interval: &f%interval_seconds%s &8(%interval_name%&8)"
         - "&7Multiplier: &fx%multiplier%"
@@ -67,6 +68,16 @@ info:
       lore:
         - "&7Current status: %status%"
       action: toggle
+    notify:
+      enabled: true
+      slot: 21
+      material: BELL
+      name: "&eOwner notifications"
+      lore:
+        - "&7Status: %notify_status%"
+        - "&7Mode: &f%notify_mode%"
+        - "&7Processor: &f%notify_processor_status%"
+      action: notify
     upgrades:
       enabled: true
       slot: 14
@@ -179,9 +190,18 @@ adminManage:
       lore:
         - "&7Current: %status%"
       action: toggle
+    notify:
+      enabled: true
+      slot: 13
+      material: BELL
+      name: "&eNotifications"
+      lore:
+        - "&7Status: %notify_status%"
+        - "&7Mode: &f%notify_mode%"
+      action: notify
     intervalDown:
       enabled: true
-      slot: 14
+      slot: 15
       material: REDSTONE
       name: "&cInterval level -1"
       lore:
@@ -189,7 +209,7 @@ adminManage:
       action: admin_interval_down
     intervalUp:
       enabled: true
-      slot: 15
+      slot: 16
       material: CLOCK
       name: "&aInterval level +1"
       lore:
@@ -197,7 +217,7 @@ adminManage:
       action: admin_interval_up
     multiplierDown:
       enabled: true
-      slot: 16
+      slot: 17
       material: REDSTONE
       name: "&cMultiplier level -1"
       lore:
@@ -205,7 +225,7 @@ adminManage:
       action: admin_multiplier_down
     multiplierUp:
       enabled: true
-      slot: 17
+      slot: 18
       material: GOLD_INGOT
       name: "&aMultiplier level +1"
       lore:
@@ -309,7 +329,22 @@ trust:
       - "&7Upgrades: %trust_upgrade%"
       - "&7Delete: %trust_delete%"
       - ""
-      - "&eClick to edit"
+      - "&eLeft click: Edit"
+      - "&cRight click: Remove"
+
+  items:
+    summary:
+      enabled: true
+      slot: 4
+      material: BOOK
+      name: "&eTrust Summary"
+      lore:
+        - "&7Entries: &f%trust_count%"
+        - "&7Trust system: %trust_enabled%"
+        - "&7Owner: &f%owner%"
+        - ""
+        - "&7Right click on a player"
+        - "&7removes them directly."
 
   buttons:
     add:
@@ -472,7 +507,12 @@ admin:
       name: "&eFilter: &f%query%"
       lore:
         - "&7Use &e/asc admin <search>&7."
-        - "&7Search by ID, owner or world."
+        - "&7Examples:"
+        - "&fowner:wullverin"
+        - "&fworld:spawn"
+        - "&fstatus:active"
+        - "&fnotify:on"
+        - "&ftrust:2"
       action: none
     next:
       enabled: true
@@ -518,6 +558,8 @@ stats:
       lore:
         - "&7Today sold: &f%today_items% items"
         - "&7Today earned: &f%today_money%"
+        - "&7Recent logs: &f%recent_total_items% items"
+        - "&7Recent value: &f%recent_total_money%"
         - "&7Total sold: &f%total_items% items"
         - "&7Total earned: &f%total_money%"
         - "&7Debug: &f%debug%"

@@ -27,6 +27,7 @@ public class AutoSellChestProcessor {
     private final AutoSellChestLogService logService;
     private final AutoSellChestUpgradeService upgradeService;
     private final Map<Long, String> lastDebugReasons = new ConcurrentHashMap<>();
+    private final Map<Long, Long> lastNotifyAt = new ConcurrentHashMap<>();
     private BukkitTask task;
 
     public AutoSellChestProcessor(CraftplayShopPlugin plugin, AutoSellChestRegistry registry, AutoSellChestLogService logService, AutoSellChestUpgradeService upgradeService) {
@@ -57,7 +58,29 @@ public class AutoSellChestProcessor {
     }
 
     public String lastDebugReason(AutoSellChest chest) {
-        return lastDebugReasons.getOrDefault(chest.id(), "Warte auf nächsten Verkauf.");
+        return lastDebugReasons.getOrDefault(chest.id(), "Warte auf den naechsten Verkauf.");
+    }
+
+    public long secondsUntilNextSale(AutoSellChest chest) {
+        if (!chest.active()) {
+            return -1L;
+        }
+        long intervalMillis = Math.max(1L, upgradeService.intervalSeconds(chest)) * 1000L;
+        long remaining = Math.max(0L, (chest.lastSoldAt() + intervalMillis) - System.currentTimeMillis());
+        return (remaining + 999L) / 1000L;
+    }
+
+    public String ownerNotifyStatus(AutoSellChest chest) {
+        if (!plugin.getConfig().getBoolean("autoSellChest.messages.notifyOwnerOnSell", true)) {
+            return "global_off";
+        }
+        if (!chest.notifyOwner()) {
+            return "chest_off";
+        }
+        if (!canNotifyByCooldown(chest)) {
+            return "cooldown";
+        }
+        return "ready";
     }
 
     private void processTick() {
@@ -109,7 +132,7 @@ public class AutoSellChestProcessor {
             setReason(chest, "Vault-Auszahlung fehlgeschlagen.");
             return;
         }
-        setReason(chest, "Letzter Verkauf: " + plan.totalAmount + " Items für " + plugin.getEconomyService().format(plan.totalPrice) + ".");
+        setReason(chest, "Letzter Verkauf: " + plan.totalAmount + " Items fuer " + plugin.getEconomyService().format(plan.totalPrice) + ".");
         AutoSellChest updated = chest.withSale(plan.totalAmount, plan.totalPrice);
         registry.update(updated);
         for (SaleLine line : plan.lines.values()) {
@@ -120,13 +143,7 @@ public class AutoSellChestProcessor {
             ItemStack representative = plan.lines.values().stream().findFirst().map(line -> line.itemStack).orElse(null);
             plugin.getTransactionService().logAsync(TransactionType.AUTOSELL_CHEST, onlineOwner,
                     "AutoSellChest #" + chest.id(), representative, plan.totalAmount, 0.0D, plan.totalPrice);
-            if (chest.notifyOwner() && plugin.getConfig().getBoolean("autoSellChest.messages.notifyOwnerOnSell", true)) {
-                plugin.getLanguageService().send(onlineOwner, "autoSellChest.sold", Map.of(
-                        "amount", Integer.toString(plan.totalAmount),
-                        "price", plugin.getEconomyService().format(plan.totalPrice),
-                        "id", Long.toString(chest.id())
-                ));
-            }
+            notifyOwner(updated, onlineOwner, plan);
         }
     }
 
@@ -186,6 +203,45 @@ public class AutoSellChestProcessor {
             contents[snapshot.slot] = snapshot.itemStack.clone();
         }
         inventory.setContents(contents);
+    }
+
+    private void notifyOwner(AutoSellChest chest, Player owner, SellPlan plan) {
+        if (!plugin.getConfig().getBoolean("autoSellChest.messages.notifyOwnerOnSell", true)
+                || !chest.notifyOwner()
+                || plan.totalPrice < Math.max(0.0D, plugin.getConfig().getDouble("autoSellChest.messages.minimumTotalPrice", 0.0D))
+                || !canNotifyByCooldown(chest)) {
+            return;
+        }
+        String mode = plugin.getConfig().getString("autoSellChest.messages.notifyMode", "SUMMARY");
+        if ("PER_ITEM".equalsIgnoreCase(mode)) {
+            for (SaleLine line : plan.lines.values()) {
+                plugin.getLanguageService().send(owner, "autoSellChest.soldLine", Map.of(
+                        "amount", Integer.toString(line.amount),
+                        "price", plugin.getEconomyService().format(line.totalPrice),
+                        "price_each", plugin.getEconomyService().format(line.priceEach),
+                        "item", line.material,
+                        "material", line.material,
+                        "id", Long.toString(chest.id())
+                ));
+            }
+        } else {
+            plugin.getLanguageService().send(owner, "autoSellChest.sold", Map.of(
+                    "amount", Integer.toString(plan.totalAmount),
+                    "price", plugin.getEconomyService().format(plan.totalPrice),
+                    "line_count", Integer.toString(plan.lines.size()),
+                    "id", Long.toString(chest.id())
+            ));
+        }
+        lastNotifyAt.put(chest.id(), System.currentTimeMillis());
+    }
+
+    private boolean canNotifyByCooldown(AutoSellChest chest) {
+        long cooldownMillis = Math.max(0L, plugin.getConfig().getLong("autoSellChest.messages.cooldownSeconds", 0L)) * 1000L;
+        if (cooldownMillis <= 0L) {
+            return true;
+        }
+        Long last = lastNotifyAt.get(chest.id());
+        return last == null || System.currentTimeMillis() - last >= cooldownMillis;
     }
 
     private static final class SellPlan {

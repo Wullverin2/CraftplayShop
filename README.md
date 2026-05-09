@@ -262,10 +262,13 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Das AutoSellChest-GUI zeigt eigene Kisten, Status, Koordinaten, Intervall, Multiplikator, verkaufte Items und verdientes Geld.
 - Ueber AutoSellChests wird optional eine TextDisplay-Anzeige mit Name, Besitzer, Status, naechstem Verkauf und Multiplikator dargestellt.
 - Das Info-GUI enthaelt Status-Toggle, Teleport, Upgrades, Statistiken und Loeschen.
+- Besitzer-Benachrichtigungen sind pro Kiste schaltbar; Config unterstuetzt Modus, Mindestwert und Cooldown.
 - Das Statistik-GUI zeigt Tageswerte, Gesamtwerte, letzte Verkaeufe und Material-Auswertung direkt aus den AutoSellChest-Logs.
 - Admins koennen mit `/asc admin [suche]` eine globale AutoSellChest-Uebersicht oeffnen, filtern, Details anzeigen, zur Kiste teleportieren und Kisten per Bestaetigung loeschen.
+- Die Admin-Suche versteht gezielte Filter wie `owner:`, `world:`, `status:`, `notify:` und `trust:`.
 - Admins koennen Name, Besitzer, Aktivstatus sowie Intervall- und Multiplikator-Level direkt im Admin-GUI bearbeiten.
 - AutoSellChest-Trust ist integriert: Besitzer koennen Spieler hinzufuegen und Rechte fuer Oeffnen, Verwalten, Upgrades und Loeschen getrennt schalten.
+- Trust-Eintraege lassen sich direkt im GUI per Rechtsklick schnell entfernen.
 - Linksklick im GUI oeffnet Details, Rechtsklick teleportiert zur Kiste, Shift-Linksklick oeffnet die Loeschbestaetigung.
 - Die Loeschfunktion im GUI nutzt eine Bestaetigungs-GUI.
 - Regelmaessiger Cleanup entfernt AutoSellChests aus Cache und Datenbank, wenn die physische Kiste fehlt.

@@ -116,8 +116,11 @@ autoSellChest:
   enabled: "%prefix%&aAutoSellChest &e#%id% &awurde aktiviert."
   disabled: "%prefix%&cAutoSellChest &e#%id% &cwurde deaktiviert."
   sold: "%prefix%&aAutoSellChest &e#%id% &ahat &e%amount% Items &afür &e%price% &averkauft."
+  soldLine: "%prefix%&aAutoSellChest &e#%id% &ahat &e%amount%x %item% &afür &e%price% &averkauft."
   statusActive: "&aaktiv"
   statusInactive: "&cinaktiv"
+  notifyStatusOn: "&aan"
+  notifyStatusOff: "&caus"
   limitReached: "%prefix%&cDu hast dein AutoSellChest-Limit erreicht: &e%limit%"
   mustBeContainer: "%prefix%&cAutoSellChest muss als Kiste oder Container platziert werden."
   lookAtContainer: "%prefix%&cSchaue eine Kiste oder einen Container an."
@@ -146,6 +149,8 @@ autoSellChest:
   trustUpdated: "%prefix%&aTrust-Rechte für &e%player% &awurden aktualisiert."
   trustRemoved: "%prefix%&c%player% wurde aus AutoSellChest &e#%id% &centfernt."
   trustOwnerBlocked: "%prefix%&cDer Besitzer muss nicht als Trust-Spieler hinzugefügt werden."
+  notifyEnabled: "%prefix%&aBesitzer-Benachrichtigungen für AutoSellChest &e#%id% &awurden aktiviert."
+  notifyDisabled: "%prefix%&cBesitzer-Benachrichtigungen für AutoSellChest &e#%id% &cwurden deaktiviert."
 
 gui:
   missingFile: "%prefix%&cGUI-Datei fehlt: %file%"

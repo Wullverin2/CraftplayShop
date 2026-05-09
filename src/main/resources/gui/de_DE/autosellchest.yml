@@ -53,6 +53,7 @@ info:
       lore:
         - "&7Status: %status%"
         - "&7Besitzer: &f%owner%"
+        - "&7Owner online: %owner_online%"
         - "&7Position: &f%world% %x% %y% %z%"
         - "&7Intervall: &f%interval_seconds%s &8(%interval_name%&8)"
         - "&7Multiplikator: &fx%multiplier%"
@@ -67,6 +68,16 @@ info:
       lore:
         - "&7Aktueller Status: %status%"
       action: toggle
+    notify:
+      enabled: true
+      slot: 21
+      material: BELL
+      name: "&eBesitzer-Benachrichtigung"
+      lore:
+        - "&7Status: %notify_status%"
+        - "&7Modus: &f%notify_mode%"
+        - "&7Processor: &f%notify_processor_status%"
+      action: notify
     upgrades:
       enabled: true
       slot: 14
@@ -179,9 +190,18 @@ adminManage:
       lore:
         - "&7Aktuell: %status%"
       action: toggle
+    notify:
+      enabled: true
+      slot: 13
+      material: BELL
+      name: "&eBenachrichtigung"
+      lore:
+        - "&7Status: %notify_status%"
+        - "&7Modus: &f%notify_mode%"
+      action: notify
     intervalDown:
       enabled: true
-      slot: 14
+      slot: 15
       material: REDSTONE
       name: "&cIntervall-Level -1"
       lore:
@@ -189,7 +209,7 @@ adminManage:
       action: admin_interval_down
     intervalUp:
       enabled: true
-      slot: 15
+      slot: 16
       material: CLOCK
       name: "&aIntervall-Level +1"
       lore:
@@ -197,7 +217,7 @@ adminManage:
       action: admin_interval_up
     multiplierDown:
       enabled: true
-      slot: 16
+      slot: 17
       material: REDSTONE
       name: "&cMultiplikator-Level -1"
       lore:
@@ -205,7 +225,7 @@ adminManage:
       action: admin_multiplier_down
     multiplierUp:
       enabled: true
-      slot: 17
+      slot: 18
       material: GOLD_INGOT
       name: "&aMultiplikator-Level +1"
       lore:
@@ -309,7 +329,22 @@ trust:
       - "&7Upgrades: %trust_upgrade%"
       - "&7Löschen: %trust_delete%"
       - ""
-      - "&eKlicken zum Bearbeiten"
+      - "&eLinksklick: Bearbeiten"
+      - "&cRechtsklick: Entfernen"
+
+  items:
+    summary:
+      enabled: true
+      slot: 4
+      material: BOOK
+      name: "&eTrust-Übersicht"
+      lore:
+        - "&7Einträge: &f%trust_count%"
+        - "&7Trust-System: %trust_enabled%"
+        - "&7Besitzer: &f%owner%"
+        - ""
+        - "&7Rechtsklick auf einen Spieler"
+        - "&7entfernt ihn direkt."
 
   buttons:
     add:
@@ -472,7 +507,12 @@ admin:
       name: "&eFilter: &f%query%"
       lore:
         - "&7Nutze &e/asc admin <Suche>&7."
-        - "&7Suche nach ID, Besitzer oder Welt."
+        - "&7Beispiele:"
+        - "&fowner:wullverin"
+        - "&fworld:spawn"
+        - "&fstatus:aktiv"
+        - "&fnotify:an"
+        - "&ftrust:2"
       action: none
     next:
       enabled: true
@@ -518,6 +558,8 @@ stats:
       lore:
         - "&7Heute verkauft: &f%today_items% Items"
         - "&7Heute verdient: &f%today_money%"
+        - "&7Letzte Logs: &f%recent_total_items% Items"
+        - "&7Letzte Logs Wert: &f%recent_total_money%"
         - "&7Gesamt verkauft: &f%total_items% Items"
         - "&7Gesamt verdient: &f%total_money%"
         - "&7Debug: &f%debug%"

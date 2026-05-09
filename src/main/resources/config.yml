@@ -442,6 +442,15 @@ autoSellChest:
     # Sendet dem Besitzer eine kurze Nachricht, wenn online und seine Kiste verkauft hat.
     notifyOwnerOnSell: true
 
+    # SUMMARY sendet eine Sammelmeldung pro Verkauf, PER_ITEM eine Zeile je Material.
+    notifyMode: "SUMMARY"
+
+    # Mindestwert eines Verkaufs, bevor eine Besitzer-Nachricht gesendet wird.
+    minimumTotalPrice: 0.0
+
+    # Mindestabstand zwischen zwei Besitzer-Nachrichten derselben AutoSellChest.
+    cooldownSeconds: 0
+
   display:
     # Zeigt ein TextDisplay über jeder geladenen AutoSellChest.
     enabled: true
@@ -463,7 +472,8 @@ autoSellChest:
 
     # Verfügbare Platzhalter:
     # %id%, %name%, %owner%, %status%, %world%, %x%, %y%, %z%,
-    # %interval%, %next_sell%, %multiplier%, %total_items%, %total_money%, %debug%
+    # %interval%, %next_sell%, %next_sell_seconds%, %multiplier%, %total_items%, %total_money%, %debug%,
+    # %owner_uuid%, %location%, %notify_status%, %notify_processor_status%, %owner_online%
     lines:
       - "&c%name%"
       - "&7Besitzer: &f%owner%"

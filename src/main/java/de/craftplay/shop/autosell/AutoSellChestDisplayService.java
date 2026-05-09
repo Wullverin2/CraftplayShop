@@ -190,27 +190,31 @@ public class AutoSellChestDisplayService {
         placeholders.put("id", Long.toString(chest.id()));
         placeholders.put("name", chest.name());
         placeholders.put("owner", chest.ownerName());
+        placeholders.put("owner_uuid", chest.ownerUuid().toString());
         placeholders.put("status", chest.active() ? "&aaktiv" : "&cinaktiv");
         placeholders.put("world", chest.world());
         placeholders.put("x", Integer.toString(chest.x()));
         placeholders.put("y", Integer.toString(chest.y()));
         placeholders.put("z", Integer.toString(chest.z()));
+        placeholders.put("location", chest.world() + " " + chest.x() + " " + chest.y() + " " + chest.z());
         placeholders.put("interval", Long.toString(upgradeService.intervalSeconds(chest)));
         placeholders.put("next_sell", nextSell(chest));
+        placeholders.put("next_sell_seconds", Long.toString(Math.max(0L, processor.secondsUntilNextSale(chest))));
         placeholders.put("multiplier", Double.toString(upgradeService.multiplier(chest)));
         placeholders.put("total_items", Long.toString(chest.totalItemsSold()));
         placeholders.put("total_money", plugin.getEconomyService().format(chest.totalMoneyEarned()));
         placeholders.put("debug", processor.lastDebugReason(chest));
+        placeholders.put("notify_status", chest.notifyOwner() ? "&aaktiv" : "&cinaktiv");
+        placeholders.put("notify_processor_status", processor.ownerNotifyStatus(chest));
+        placeholders.put("owner_online", org.bukkit.Bukkit.getPlayer(chest.ownerUuid()) != null ? "&aonline" : "&coffline");
         return placeholders;
     }
 
     private String nextSell(AutoSellChest chest) {
-        if (!chest.active()) {
+        long seconds = processor.secondsUntilNextSale(chest);
+        if (seconds < 0L) {
             return "inaktiv";
         }
-        long intervalMillis = Math.max(1L, upgradeService.intervalSeconds(chest)) * 1000L;
-        long remaining = Math.max(0L, (chest.lastSoldAt() + intervalMillis) - System.currentTimeMillis());
-        long seconds = (remaining + 999L) / 1000L;
         if (seconds <= 0L) {
             return "jetzt";
         }
