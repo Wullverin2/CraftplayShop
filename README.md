@@ -17,7 +17,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 ## Aktueller Stand
 
-**Version v0.2.0 ist abgeschlossen.** Der aktuelle Entwicklungsstand geht bereits darueber hinaus und umfasst Core, Config, Sprache, GUI-System, Vault/SQLite, ServerShop/AdminShop, AutoSellChest, PlayerShop mit SELL/BUY/BUY_SELL/TRADE_ITEM sowie DirectTrade.
+**Version v0.5.0 ist abgeschlossen.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault/SQLite, ServerShop/AdminShop, AutoSellChest, PlayerShop mit SELL/BUY/BUY_SELL/TRADE_ITEM, Protection-Hooks und DirectTrade.
 
 ### Core
 
@@ -341,7 +341,7 @@ adminShop:
 mvn clean package
 ```
 
-Die fertige Plugin-JAR liegt danach unter `target/CraftplayShop-0.2.0.jar`.
+Die fertige Plugin-JAR liegt danach unter `target/CraftplayShop-0.5.0.jar`.
 
 ## Lizenz
 

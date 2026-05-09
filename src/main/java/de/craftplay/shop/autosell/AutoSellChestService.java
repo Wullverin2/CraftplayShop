@@ -476,7 +476,7 @@ public class AutoSellChestService implements Listener, CommandExecutor, TabCompl
         }
         Player player = event.getPlayer();
         if (plugin.getConfig().getBoolean("autoSellChest.protection.blockBreakingByOthers", true)
-                && !trustService.canDelete(player, chest)) {
+                && (!trustService.canDelete(player, chest) || !plugin.getProtectionService().canBreakShop(player, event.getBlock().getLocation()))) {
             event.setCancelled(true);
             plugin.getLanguageService().send(player, "autoSellChest.breakProtected");
             return;

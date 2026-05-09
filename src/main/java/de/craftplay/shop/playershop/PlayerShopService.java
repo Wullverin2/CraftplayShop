@@ -523,7 +523,7 @@ public class PlayerShopService implements Listener {
             return;
         }
         Player player = event.getPlayer();
-        if (!canManage(player, shop)) {
+        if (!canManage(player, shop) || !plugin.getProtectionService().canBreakShop(player, shop.containerLocation())) {
             event.setCancelled(true);
             plugin.getLanguageService().send(player, "playerShop.breakProtected");
             return;
@@ -1530,7 +1530,8 @@ public class PlayerShopService implements Listener {
     }
 
     private boolean canManage(Player player, PlayerShop shop) {
-        return player.getUniqueId().equals(shop.ownerUuid()) || player.hasPermission(PermissionNodes.PLAYER_SHOP_ADMIN);
+        boolean ownerOrAdmin = player.getUniqueId().equals(shop.ownerUuid()) || player.hasPermission(PermissionNodes.PLAYER_SHOP_ADMIN);
+        return ownerOrAdmin && plugin.getProtectionService().canEditShop(player, shop.containerLocation());
     }
 
     private Block findAdjacentContainer(Block signBlock) {
