@@ -17,6 +17,8 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 ## Aktueller Stand
 
+**Version v0.1.0 ist abgeschlossen.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault/SQLite, ServerShop/AdminShop, Sell-Befehle, PlayerShop-MVP, DirectTrade-Toggle und die vorbereiteten Module fuer die naechsten Versionen.
+
 ### Core
 
 - Maven-Projekt mit Java 21.
