@@ -54,7 +54,6 @@ public class ServerShopGui {
         }
         addConfiguredButtons(player, inventory, gui);
         player.openInventory(inventory);
-        plugin.getLanguageService().send(player, "serverShop.opened");
     }
 
     public void handleClick(Player player, ServerShopHolder holder, InventoryClickEvent event) {
