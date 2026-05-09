@@ -24,6 +24,22 @@ debug:
     # Name der Debug-Datei. %date% wird z. B. zu 2026-05-09.
     fileNamePattern: "debug-%date%.txt"
 
+  modules:
+    # Diese Module duerfen zusaetzliche Debug-Zeilen schreiben, wenn Debug aktiv ist.
+    enabled:
+      - "general"
+      - "importer"
+      - "playershop"
+      - "autosellchest"
+      - "servershop"
+      - "protection"
+      - "trade"
+      - "auctionhouse"
+      - "referral"
+      - "rankshop"
+      - "permissionshop"
+      - "gui"
+
 commands:
   # Hauptbefehl, den du für CraftplayShop verwenden möchtest.
   # In Phase 1 können die in plugin.yml registrierten Befehle genutzt werden:

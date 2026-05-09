@@ -142,6 +142,7 @@ public class EconomyShopGuiImporter {
             errors.add("EconomyShopGUI source directory not found.");
             return new ParseResult(categories, new ImportReport(0, warnings.size(), errors.size(), summary, warnings, errors));
         }
+        plugin.getPluginLogService().debug("importer", "Parsing EconomyShopGUI source directory " + directory.getAbsolutePath());
 
         File[] files = directory.listFiles((dir, name) -> name.toLowerCase(Locale.ROOT).endsWith(".yml"));
         if (files == null || files.length == 0) {
@@ -157,6 +158,7 @@ public class EconomyShopGuiImporter {
             ConfigurationSection pages = yaml.getConfigurationSection("pages");
             if (pages == null) {
                 warnings.add("Skipped " + file.getName() + " because it has no pages section.");
+                plugin.getPluginLogService().debug("importer", "Skipped ESG file without pages: " + file.getName());
                 continue;
             }
             String categoryId = uniqueCategoryId(categories, sanitizeId(stripExtension(file.getName())));
@@ -180,6 +182,7 @@ public class EconomyShopGuiImporter {
                     Material material = material(itemSection.getString("material", ""));
                     if (material == null || material.isAir()) {
                         warnings.add("Skipped " + file.getName() + " item " + itemKey + " because material is invalid.");
+                        plugin.getPluginLogService().debug("importer", "Skipped ESG item with invalid material in " + file.getName() + "#" + itemKey);
                         continue;
                     }
                     if (category.items().isEmpty()) {
@@ -192,6 +195,7 @@ public class EconomyShopGuiImporter {
                     boolean sellEnabled = sell >= 0.0D;
                     if (!buyEnabled && !sellEnabled) {
                         warnings.add("Skipped " + file.getName() + " item " + itemKey + " because buy and sell are disabled.");
+                        plugin.getPluginLogService().debug("importer", "Skipped ESG item because buy/sell disabled in " + file.getName() + "#" + itemKey);
                         continue;
                     }
                     category.items().put(itemId, new ImportedItem(

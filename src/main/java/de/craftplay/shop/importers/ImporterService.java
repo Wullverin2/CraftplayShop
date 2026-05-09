@@ -117,6 +117,7 @@ public class ImporterService {
                 "mode", mode.name(),
                 "path", source.getAbsolutePath()
         ));
+        plugin.getPluginLogService().debug("importer", "Starting importer " + importerName + " in mode " + mode.name() + " from " + source.getAbsolutePath());
         long importId = createImport(importerName, sourcePlugin, source, mode, player);
         plugin.getTaskService().runAsync(() -> {
             try {
@@ -124,6 +125,9 @@ public class ImporterService {
                 String reportPath = writeReport(importId, importerName, mode, execution.report());
                 finishImport(importId, execution.report(), execution.success() ? "SUCCESS" : "FAILED", execution.backupPath(), reportPath);
                 saveMappings(importId, execution.mappings());
+                plugin.getPluginLogService().debug("importer", "Finished importer #" + importId + " with imported="
+                        + execution.report().importedCount() + ", warnings=" + execution.report().warningCount()
+                        + ", errors=" + execution.report().errorCount());
                 plugin.getServer().getScheduler().runTask(plugin, () -> sendReport(player, importId, mode, execution.report(), reportPath));
             } catch (Exception exception) {
                 plugin.getPluginLogService().error("Importer failed: " + importerName, exception);
@@ -159,6 +163,7 @@ public class ImporterService {
             return;
         }
         plugin.getLanguageService().send(player, "importer.rollbackStarted", Map.of("id", Long.toString(importId)));
+        plugin.getPluginLogService().debug("importer", "Rolling back import #" + importId + " from backup " + row.backupPath());
         plugin.getTaskService().runAsync(() -> {
             boolean success;
             if ("EconomyShopGUI-Premium".equalsIgnoreCase(row.sourcePlugin())) {

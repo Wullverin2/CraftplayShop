@@ -150,6 +150,7 @@ public class ShopIntuitiveImporter {
             errors.add("Shop intuitive data folder not found.");
             return new ParseResult(shops, warnings, errors, new ImportReport(0, warnings.size(), errors.size(), summary, warnings, errors));
         }
+        plugin.getPluginLogService().debug("importer", "Parsing Shop intuitive source directory " + dataFolder.getAbsolutePath());
         File[] files = dataFolder.listFiles((dir, name) -> name.toLowerCase(Locale.ROOT).endsWith(".yml")
                 && !"gambledisplayitem.yml".equalsIgnoreCase(name)
                 && !"itemcurrency.yml".equalsIgnoreCase(name));
@@ -191,6 +192,7 @@ public class ShopIntuitiveImporter {
         String typeValue = shopSection.getString("type", "sell").toLowerCase(Locale.ROOT);
         if ("gamble".equals(typeValue)) {
             warnings.add(sourceFileName + "#" + shopId + " was skipped because gamble shops are not imported.");
+            plugin.getPluginLogService().debug("importer", "Skipped gamble shop " + sourceFileName + "#" + shopId);
             return null;
         }
         PlayerShopType type = switch (typeValue) {
@@ -202,22 +204,26 @@ public class ShopIntuitiveImporter {
         };
         if (type == null) {
             warnings.add(sourceFileName + "#" + shopId + " was skipped because type " + typeValue + " is unsupported.");
+            plugin.getPluginLogService().debug("importer", "Skipped unsupported shop type " + typeValue + " in " + sourceFileName + "#" + shopId);
             return null;
         }
 
         Location signLocation = location(shopSection.getString("location", ""));
         if (signLocation == null) {
             warnings.add(sourceFileName + "#" + shopId + " was skipped because location is invalid.");
+            plugin.getPluginLogService().debug("importer", "Skipped shop with invalid location " + sourceFileName + "#" + shopId);
             return null;
         }
         Block signBlock = signLocation.getBlock();
         if (validatePhysical && !(signBlock.getState() instanceof Sign)) {
             warnings.add(sourceFileName + "#" + shopId + " was skipped because the sign no longer exists.");
+            plugin.getPluginLogService().debug("importer", "Skipped shop without sign " + sourceFileName + "#" + shopId);
             return null;
         }
         Block containerBlock = resolveContainer(signBlock);
         if (validatePhysical && (containerBlock == null || !(containerBlock.getState() instanceof Container))) {
             warnings.add(sourceFileName + "#" + shopId + " was skipped because the attached container no longer exists.");
+            plugin.getPluginLogService().debug("importer", "Skipped shop without container " + sourceFileName + "#" + shopId);
             return null;
         }
         if (containerBlock == null) {

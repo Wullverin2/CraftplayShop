@@ -201,6 +201,9 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `/cshop admin debug enable`
 - `/cshop admin debug disable`
 - `/cshop admin debug status`
+- `/cshop admin debug enable <modul>`
+- `/cshop admin debug disable <modul>`
+- `/cshop admin debug status <modul>`
 - `/trade toggle`
 - `/trade on`
 - `/trade off`
@@ -370,10 +373,14 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 - Dateibasiertes Debuglogging nach `plugins/CraftplayShop/debuglogs/`.
 - Status bleibt erhalten, wenn `debug.fileLogging.enabled` in der Config aktiv ist.
+- Modulfilter fuer zusaetzliche Debug-Zeilen ueber `debug.modules.enabled`.
 - Laufzeitsteuerung ueber:
   - `/cshop admin debug enable`
   - `/cshop admin debug disable`
   - `/cshop admin debug status`
+  - `/cshop admin debug enable <modul>`
+  - `/cshop admin debug disable <modul>`
+  - `/cshop admin debug status <modul>`
 
 ### Skeletons / vorbereitet
 

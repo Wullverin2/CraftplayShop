@@ -45,10 +45,17 @@ public class PluginLogService {
     }
 
     public void debug(String message) {
-        if (plugin.getConfigService() != null && plugin.getConfigService().debug()) {
-            plugin.getLogger().info("[Debug] " + message);
+        debug("general", message);
+    }
+
+    public void debug(String module, String message) {
+        String normalized = normalizeModule(module);
+        if (plugin.getConfigService() != null && plugin.getConfigService().debug() && plugin.getConfigService().debugModuleEnabled(normalized)) {
+            plugin.getLogger().info("[Debug][" + normalized + "] " + message);
         }
-        writeDebugFileLine("DEBUG", message);
+        if (plugin.getConfigService() != null && plugin.getConfigService().debugModuleEnabled(normalized)) {
+            writeDebugFileLine("DEBUG/" + normalized.toUpperCase(java.util.Locale.ROOT), message);
+        }
     }
 
     public boolean isFileDebugEnabled() {
@@ -104,5 +111,12 @@ public class PluginLogService {
         StringWriter writer = new StringWriter();
         throwable.printStackTrace(new PrintWriter(writer));
         return writer.toString();
+    }
+
+    private String normalizeModule(String module) {
+        if (module == null || module.isBlank()) {
+            return "general";
+        }
+        return module.toLowerCase(java.util.Locale.ROOT).replace(" ", "").replace("-", "").replace("_", "");
     }
 }

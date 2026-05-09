@@ -223,20 +223,43 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             return;
         }
         String mode = args[2].toLowerCase();
+        String module = args.length > 3 ? normalizeDebugModule(args[3]) : "";
         switch (mode) {
             case "enable", "on" -> {
+                if (!module.isBlank()) {
+                    plugin.getConfigService().setDebugModuleEnabled(module, true);
+                    plugin.getLanguageService().send(sender, "debug.moduleEnabled", Map.of("module", module));
+                    return;
+                }
                 plugin.getPluginLogService().setFileDebugEnabled(true);
                 plugin.getLanguageService().send(sender, "debug.enabled");
             }
             case "disable", "off" -> {
+                if (!module.isBlank()) {
+                    plugin.getConfigService().setDebugModuleEnabled(module, false);
+                    plugin.getLanguageService().send(sender, "debug.moduleDisabled", Map.of("module", module));
+                    return;
+                }
                 plugin.getPluginLogService().setFileDebugEnabled(false);
                 plugin.getLanguageService().send(sender, "debug.disabled");
             }
-            case "status" -> plugin.getLanguageService().send(sender, "debug.status", Map.of(
-                    "status", plugin.getPluginLogService().isFileDebugEnabled()
-                            ? plugin.getLanguageService().get(sender, "debug.statusEnabled")
-                            : plugin.getLanguageService().get(sender, "debug.statusDisabled")
-            ));
+            case "status" -> {
+                if (!module.isBlank()) {
+                    plugin.getLanguageService().send(sender, "debug.moduleStatus", Map.of(
+                            "module", module,
+                            "status", plugin.getConfigService().debugModuleEnabled(module)
+                                    ? plugin.getLanguageService().get(sender, "debug.statusEnabled")
+                                    : plugin.getLanguageService().get(sender, "debug.statusDisabled")
+                    ));
+                    return;
+                }
+                plugin.getLanguageService().send(sender, "debug.status", Map.of(
+                        "status", plugin.getPluginLogService().isFileDebugEnabled()
+                                ? plugin.getLanguageService().get(sender, "debug.statusEnabled")
+                                : plugin.getLanguageService().get(sender, "debug.statusDisabled"),
+                        "modules", String.join(", ", plugin.getConfigService().configuredDebugModules())
+                ));
+            }
             default -> plugin.getLanguageService().send(sender, "debug.usage");
         }
     }
@@ -477,6 +500,9 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         if (args.length == 3 && "admin".equalsIgnoreCase(args[0]) && "debug".equalsIgnoreCase(args[1])) {
             return filter(List.of("enable", "disable", "status"), args[2]);
         }
+        if (args.length == 4 && "admin".equalsIgnoreCase(args[0]) && "debug".equalsIgnoreCase(args[1])) {
+            return filter(List.of("general", "importer", "playershop", "autosellchest", "servershop", "protection", "trade", "auctionhouse", "referral", "rankshop", "permissionshop", "gui"), args[3]);
+        }
         if (args.length == 3 && "admin".equalsIgnoreCase(args[0]) && "import".equalsIgnoreCase(args[1])) {
             return filter(List.of("economyshopgui", "shopintuitive"), args[2]);
         }
@@ -500,6 +526,10 @@ public class MainCommand implements CommandExecutor, TabCompleter {
 
     private List<String> filter(List<String> values, String token) {
         return values.stream().filter(value -> value.toLowerCase().startsWith(token.toLowerCase())).toList();
+    }
+
+    private String normalizeDebugModule(String value) {
+        return value.toLowerCase().replace(" ", "").replace("-", "").replace("_", "");
     }
 
     private boolean matchesConfiguredCommand(String label) {

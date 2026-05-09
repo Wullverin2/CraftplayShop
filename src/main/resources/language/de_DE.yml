@@ -17,12 +17,15 @@ language:
   invalid: "%prefix%&cDiese Sprache ist nicht verfügbar."
 
 debug:
-  usage: "%prefix%&cNutze: /cshop admin debug <enable|disable|status>"
+  usage: "%prefix%&cNutze: /cshop admin debug <enable|disable|status> [modul]"
   enabled: "%prefix%&aDebug-Dateilogging wurde aktiviert."
   disabled: "%prefix%&cDebug-Dateilogging wurde deaktiviert."
-  status: "%prefix%&7Debug-Dateilogging ist aktuell: %status%"
+  status: "%prefix%&7Debug-Dateilogging ist aktuell: %status% &7| Module: &e%modules%"
   statusEnabled: "&aaktiv"
   statusDisabled: "&caus"
+  moduleEnabled: "%prefix%&aDebug-Modul &e%module% &awurde aktiviert."
+  moduleDisabled: "%prefix%&cDebug-Modul &e%module% &cwurde deaktiviert."
+  moduleStatus: "%prefix%&7Debug-Modul &e%module% &7ist aktuell: %status%"
 
 serverShop:
   opened: "%prefix%&aServerShop geöffnet."

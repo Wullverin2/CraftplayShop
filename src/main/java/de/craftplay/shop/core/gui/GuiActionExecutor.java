@@ -73,7 +73,7 @@ public class GuiActionExecutor {
                     plugin.getSellCommandService().openSellGui(player);
                 }
             }
-            default -> plugin.getPluginLogService().debug("Unknown GUI action: " + action);
+            default -> plugin.getPluginLogService().debug("gui", "Unknown GUI action: " + action);
         }
     }
 

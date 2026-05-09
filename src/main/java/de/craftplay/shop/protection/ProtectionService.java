@@ -42,7 +42,7 @@ public class ProtectionService {
                 && plugin.getServer().getPluginManager().getPlugin("BentoBox") != null) {
             hooks.add(new BentoBoxHook());
         }
-        plugin.getPluginLogService().debug("Loaded " + hooks.size() + " protection hooks.");
+        plugin.getPluginLogService().debug("protection", "Loaded " + hooks.size() + " protection hooks.");
     }
 
     public boolean canCreateShop(Player player, Location location) {

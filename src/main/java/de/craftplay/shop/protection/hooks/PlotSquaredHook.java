@@ -99,7 +99,7 @@ public class PlotSquaredHook implements ProtectionHook {
             UUID playerId = player.getUniqueId();
             return invokeBoolean(plot, "isOwner", playerId) || invokeBoolean(plot, "isAdded", playerId);
         } catch (ReflectiveOperationException | RuntimeException exception) {
-            plugin.getPluginLogService().debug("PlotSquared permission check failed: " + exception.getMessage());
+            plugin.getPluginLogService().debug("protection", "PlotSquared permission check failed: " + exception.getMessage());
             return true;
         }
     }

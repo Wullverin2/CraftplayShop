@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Locale;
 
 public class ConfigService {
@@ -155,6 +156,41 @@ public class ConfigService {
 
     public String debugFileNamePattern() {
         return config().getString("debug.fileLogging.fileNamePattern", "debug-%date%.txt");
+    }
+
+    public boolean debugModuleEnabled(String module) {
+        String normalized = normalizeModule(module);
+        List<String> enabled = config().getStringList("debug.modules.enabled");
+        if (enabled.isEmpty()) {
+            return true;
+        }
+        return enabled.stream().map(this::normalizeModule).anyMatch(value -> value.equals(normalized));
+    }
+
+    public void setDebugModuleEnabled(String module, boolean enabled) {
+        String normalized = normalizeModule(module);
+        List<String> values = new java.util.ArrayList<>(config().getStringList("debug.modules.enabled"));
+        values.replaceAll(this::normalizeModule);
+        values.removeIf(value -> value.equals(normalized));
+        if (enabled) {
+            values.add(normalized);
+        }
+        config().set("debug.modules.enabled", values);
+        plugin.saveConfig();
+    }
+
+    public List<String> configuredDebugModules() {
+        List<String> values = new java.util.ArrayList<>(config().getStringList("debug.modules.enabled"));
+        values.replaceAll(this::normalizeModule);
+        values.removeIf(String::isBlank);
+        return values;
+    }
+
+    private String normalizeModule(String module) {
+        if (module == null || module.isBlank()) {
+            return "general";
+        }
+        return module.toLowerCase(Locale.ROOT).replace(" ", "").replace("-", "").replace("_", "");
     }
 
     public String pluginCommand() {
