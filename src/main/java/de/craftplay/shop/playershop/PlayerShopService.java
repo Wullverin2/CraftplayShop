@@ -69,6 +69,7 @@ public class PlayerShopService implements Listener {
     private final Map<UUID, ChatCreation> chatCreations = new HashMap<>();
     private final Map<UUID, Boolean> searchInputs = new HashMap<>();
     private BukkitTask cleanupTask;
+    private BukkitTask displayAnimationTask;
 
     public PlayerShopService(CraftplayShopPlugin plugin) {
         this.plugin = plugin;
@@ -82,10 +83,12 @@ public class PlayerShopService implements Listener {
             byId.clear();
             for (PlayerShop shop : loadShops()) {
                 cache(shop);
+                updateSign(shop);
                 spawnDisplay(shop);
             }
         }
         startCleanupTask();
+        startDisplayAnimationTask();
     }
 
     public void shutdown() {
@@ -93,6 +96,10 @@ public class PlayerShopService implements Listener {
             cleanupTask.cancel();
         }
         cleanupTask = null;
+        if (displayAnimationTask != null && !displayAnimationTask.isCancelled()) {
+            displayAnimationTask.cancel();
+        }
+        displayAnimationTask = null;
     }
 
     public int deleteShopsInRegion(String world, int minX, int maxX, int minZ, int maxZ) {
@@ -1501,10 +1508,10 @@ public class PlayerShopService implements Listener {
     private List<String> signLines(PlayerShop shop) {
         String path = shop.type() == PlayerShopType.BUY ? "playerShops.sign.buy.lines" : "playerShops.sign.sell.lines";
         List<String> configured = plugin.getConfig().getStringList(path);
-        if (configured.size() < 4) {
+        if (configured.size() < 4 || isLegacyDefaultSign(shop.type(), configured)) {
             configured = shop.type() == PlayerShopType.BUY
-                    ? List.of("%stock_color%&l[shop]", "Buying; &l%amount%", "&a%price%", "%owner%")
-                    : List.of("%stock_color%&l[shop]", "Selling; &l%amount%", "&a%price%", "%owner%");
+                    ? List.of("%status_color%&l%action%", "&f%amount%x %item%", "&a%price%", "&8%owner%")
+                    : List.of("%status_color%&l%action%", "&f%amount%x %item%", "&a%price%", "&8%owner%");
         }
         List<String> lines = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
@@ -1513,35 +1520,78 @@ public class PlayerShopService implements Listener {
         return lines;
     }
 
+    private boolean isLegacyDefaultSign(PlayerShopType type, List<String> configured) {
+        if (configured.size() < 4) {
+            return false;
+        }
+        List<String> legacy = type == PlayerShopType.BUY
+                ? List.of("%stock_color%&l[shop]", "Buying; &l%amount%", "&a%price%", "%owner%")
+                : List.of("%stock_color%&l[shop]", "Selling; &l%amount%", "&a%price%", "%owner%");
+        return configured.subList(0, 4).equals(legacy);
+    }
+
     private String applySignPlaceholders(String line, PendingCreation pending, PlayerShop shop) {
         String owner = shop != null ? shop.ownerName() : pending.ownerName();
         int amount = shop != null ? shop.amount() : pending.amount();
         double price = shop != null ? shop.price() : pending.price();
         String item = shop != null ? displayItem(shop.itemStack()) : "";
-        String stockColor = "&4";
-        if (shop != null) {
-            BlockState state = shop.containerLocation().getBlock().getState();
-            if (state instanceof Container container) {
-                if (shop.type() == PlayerShopType.SELL && countMatching(container.getInventory(), shop.itemStack()) >= shop.amount()) {
-                    stockColor = "&a";
-                } else if (shop.type() == PlayerShopType.BUY
-                        && hasSpace(container.getInventory(), shop.itemStack(), shop.amount())
-                        && plugin.getEconomyService().has(Bukkit.getOfflinePlayer(shop.ownerUuid()), shop.price())) {
-                    stockColor = "&a";
-                }
-            }
-        }
+        PlayerShopType type = shop != null ? shop.type() : pending.type();
+        SignStatus status = signStatus(shop);
+        String action = type == PlayerShopType.BUY ? "Ankaufen" : "Verkaufen";
+        String actionEnglish = type == PlayerShopType.BUY ? "Buying" : "Selling";
+        String formattedPrice = plugin.getEconomyService().format(price);
         return line
                 .replace("%owner%", owner)
                 .replace("%amount%", Integer.toString(amount))
                 .replace("%item%", item)
-                .replace("%price%", plugin.getEconomyService().format(price))
-                .replace("%stock_color%", stockColor)
+                .replace("%price%", formattedPrice)
+                .replace("%type%", type.name())
+                .replace("%action%", action)
+                .replace("%action_en%", actionEnglish)
+                .replace("%status%", status.text())
+                .replace("%available%", Boolean.toString(status.available()))
+                .replace("%stock%", Integer.toString(status.stock()))
+                .replace("%space%", Integer.toString(status.space()))
+                .replace("%status_color%", status.color())
+                .replace("%stock_color%", status.color())
                 .replace("[owner]", owner)
                 .replace("[amount]", Integer.toString(amount))
                 .replace("[item]", item)
-                .replace("[price]", plugin.getEconomyService().format(price))
-                .replace("[stock color]", stockColor);
+                .replace("[price]", formattedPrice)
+                .replace("[type]", type.name())
+                .replace("[action]", action)
+                .replace("[status]", status.text())
+                .replace("[available]", Boolean.toString(status.available()))
+                .replace("[stock]", Integer.toString(status.stock()))
+                .replace("[space]", Integer.toString(status.space()))
+                .replace("[status color]", status.color())
+                .replace("[stock color]", status.color());
+    }
+
+    private SignStatus signStatus(PlayerShop shop) {
+        boolean available = false;
+        int stock = 0;
+        int space = 0;
+        if (shop != null) {
+            BlockState state = shop.containerLocation().getBlock().getState();
+            if (state instanceof Container container) {
+                stock = countMatching(container.getInventory(), shop.itemStack());
+                space = availableSpace(container.getInventory(), shop.itemStack());
+                if (shop.type() == PlayerShopType.SELL) {
+                    available = stock >= shop.amount();
+                } else if (shop.type() == PlayerShopType.BUY) {
+                    available = space >= shop.amount()
+                            && plugin.getEconomyService().has(Bukkit.getOfflinePlayer(shop.ownerUuid()), shop.price());
+                }
+            }
+        }
+        String color = plugin.getConfig().getString(available
+                ? "playerShops.sign.status.availableColor"
+                : "playerShops.sign.status.unavailableColor", available ? "&a" : "&c");
+        String text = plugin.getConfig().getString(available
+                ? "playerShops.sign.status.availableText"
+                : "playerShops.sign.status.unavailableText", available ? "Verfuegbar" : "Nicht verfuegbar");
+        return new SignStatus(available, color == null ? "" : color, text == null ? "" : text, stock, space);
     }
 
     private PlayerShopType typeFromLine(String line) {
@@ -1630,19 +1680,20 @@ public class PlayerShopService implements Listener {
     }
 
     private boolean hasSpace(Inventory inventory, ItemStack itemStack, int amount) {
-        int remaining = amount;
+        return availableSpace(inventory, itemStack) >= amount;
+    }
+
+    private int availableSpace(Inventory inventory, ItemStack itemStack) {
+        int available = 0;
         int maxStackSize = Math.min(itemStack.getMaxStackSize(), inventory.getMaxStackSize());
         for (ItemStack content : inventory.getStorageContents()) {
             if (content == null || content.getType().isAir()) {
-                remaining -= maxStackSize;
+                available += maxStackSize;
             } else if (content.isSimilar(itemStack)) {
-                remaining -= Math.max(0, maxStackSize - content.getAmount());
-            }
-            if (remaining <= 0) {
-                return true;
+                available += Math.max(0, maxStackSize - content.getAmount());
             }
         }
-        return false;
+        return available;
     }
 
     private ItemStack createStack(ItemStack template, int amount) {
@@ -1656,13 +1707,13 @@ public class PlayerShopService implements Listener {
         if (shop.displayType() == PlayerShopDisplayType.NONE || Bukkit.getWorld(shop.world()) == null) {
             return;
         }
-        Block anchor = displayAnchorBlock(shop);
-        Location base = anchor.getLocation().add(0.5D, 1.35D, 0.5D);
+        Location base = displayBaseLocation(shop);
         String tag = displayTag(shop);
         ItemStack displayItem = shop.itemStack().clone();
         displayItem.setAmount(1);
         try {
             if (shop.displayType() == PlayerShopDisplayType.GLASS_CASE) {
+                Block anchor = displayAnchorBlock(shop);
                 Location glassOrigin = anchor.getLocation().add(0.0D, 1.05D, 0.0D);
                 Location itemCenter = glassOrigin.clone().add(0.5D, 0.5D, 0.5D);
                 BlockDisplay glass = glassOrigin.getWorld().spawn(glassOrigin, BlockDisplay.class);
@@ -1683,6 +1734,65 @@ public class PlayerShopService implements Listener {
         } catch (RuntimeException exception) {
             plugin.getPluginLogService().warn("Could not spawn player shop display for shop " + shop.id() + ": " + exception.getMessage());
         }
+    }
+
+    private void startDisplayAnimationTask() {
+        if (displayAnimationTask != null && !displayAnimationTask.isCancelled()) {
+            displayAnimationTask.cancel();
+        }
+        displayAnimationTask = null;
+        if (!plugin.getConfig().getBoolean("playerShops.display.animation.item.enabled", true)) {
+            return;
+        }
+        long interval = Math.max(1L, plugin.getConfig().getLong("playerShops.display.animation.item.intervalTicks", 2L));
+        displayAnimationTask = plugin.getServer().getScheduler().runTaskTimer(plugin, this::animateItemDisplays, interval, interval);
+    }
+
+    private void animateItemDisplays() {
+        double amplitude = Math.max(0.0D, plugin.getConfig().getDouble("playerShops.display.animation.item.hoverAmplitude", 0.12D));
+        double hoverSpeed = Math.max(0.0D, plugin.getConfig().getDouble("playerShops.display.animation.item.hoverSpeed", 2.0D));
+        double rotationDegreesPerTick = plugin.getConfig().getDouble("playerShops.display.animation.item.rotationDegreesPerTick", 3.0D);
+        int maxAnimated = Math.max(1, plugin.getConfig().getInt("playerShops.display.animation.item.maxAnimatedDisplaysPerTick", 150));
+        double elapsedTicks = System.currentTimeMillis() / 50.0D;
+        int animated = 0;
+        for (PlayerShop shop : snapshotShops()) {
+            if (shop.displayType() != PlayerShopDisplayType.ITEM) {
+                continue;
+            }
+            ItemDisplay itemDisplay = findItemDisplay(shop);
+            if (itemDisplay == null) {
+                continue;
+            }
+            Location base = displayBaseLocation(shop);
+            double phase = (elapsedTicks / 20.0D * hoverSpeed) + (shop.id() * 0.73D);
+            double offset = Math.sin(phase) * amplitude;
+            float yaw = (float) ((elapsedTicks * rotationDegreesPerTick + shop.id() * 37.0D) % 360.0D);
+            Location animatedLocation = base.add(0.0D, offset, 0.0D);
+            animatedLocation.setYaw(yaw);
+            itemDisplay.teleport(animatedLocation);
+            animated++;
+            if (animated >= maxAnimated) {
+                return;
+            }
+        }
+    }
+
+    private ItemDisplay findItemDisplay(PlayerShop shop) {
+        if (Bukkit.getWorld(shop.world()) == null) {
+            return null;
+        }
+        String tag = displayTag(shop);
+        Location center = displayBaseLocation(shop);
+        for (Entity entity : center.getWorld().getNearbyEntities(center, 1.0D, 1.0D, 1.0D)) {
+            if (entity instanceof ItemDisplay itemDisplay && entity.getScoreboardTags().contains(tag)) {
+                return itemDisplay;
+            }
+        }
+        return null;
+    }
+
+    private Location displayBaseLocation(PlayerShop shop) {
+        return displayAnchorBlock(shop).getLocation().add(0.5D, 1.35D, 0.5D);
     }
 
     private void removeDisplay(PlayerShop shop) {
@@ -1755,5 +1865,8 @@ public class PlayerShopService implements Listener {
     }
 
     private record PendingCreation(UUID ownerUuid, String ownerName, PlayerShopType type, Location containerLocation, Location signLocation, int amount, double price) {
+    }
+
+    private record SignStatus(boolean available, String color, String text, int stock, int space) {
     }
 }

@@ -140,12 +140,18 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Rechtsklick auf SELL-Shop-Schild oder Kiste kauft die konfigurierte Menge aus dem Kistenbestand.
 - Rechtsklick auf BUY-Shop-Schild oder Kiste verkauft die konfigurierte Menge an den Shop und legt die Items in die Shop-Kiste.
 - PlayerShop-Nutzung auf PlotSquared-Plots benoetigt keine separate `use`-Flag; aktive Shop-Klicks werden vom Plugin vor dem normalen Plot-Use abgefangen.
+- PlayerShop-Schilder erkennen automatisch, ob ein SELL-Shop genug passende Items in der Kiste hat.
+- PlayerShop-Schilder erkennen automatisch, ob ein BUY-Shop genug Kistenplatz hat und der Besitzer genug Geld besitzt.
+- Die erste Schildzeile kann mit `%status_color%`, `%action%` und weiteren Platzhaltern gruen oder rot formatiert werden.
+- Schildfarben, Statustexte und alle vier Schildzeilen sind unter `playerShops.sign` in der `config.yml` frei anpassbar.
+- Die `config.yml` dokumentiert die Schild-Platzhalter wie `%action%`, `%amount%`, `%price%`, `%stock%`, `%space%`, `%status%`, `%available%`, `%status_color%` und `%stock_color%`.
 - Vor dem Kauf werden Permission, Geld, Lagerbestand und Inventarplatz geprueft.
 - Bei Fehlern versucht der Kauf ein Rollback von Geld und Items.
 - Besitzer erhalten das Geld ueber Vault, auch wenn sie offline sind.
 - BUY-Shops ziehen dem Besitzer die Kosten per Vault ab und zahlen sie dem verkaufenden Spieler aus.
 - Ueber Kistenshops schwebt eine konfigurierbare Item-Anzeige.
 - Verfuegbare Display-Typen: `NONE`, `ITEM`, `GLASS_CASE`, `LARGE_ITEM`, `ITEM_FRAME`.
+- Der Display-Typ `ITEM` schwebt leicht auf und ab und dreht sich; die Animation ist unter `playerShops.display.animation.item` konfigurierbar.
 - Besitzer oder Admins oeffnen per Shift-Rechtsklick eine Bearbeitungs-GUI fuer Item, Menge, Preis und Display-Typ.
 - PlayerShop-Hauptmenue mit allen Shops, eigener Shopliste und Suche.
 - Suche per Chat nach Item, Material, Besitzer oder Shop-Typ, mit deutschen und englischen Suchbegriffen.

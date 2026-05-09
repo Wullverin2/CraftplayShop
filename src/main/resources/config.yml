@@ -221,21 +221,43 @@ playerShops:
       - "ankaufen"
 
   sign:
+    # Statusfarben und Statustexte fuer PlayerShop-Schilder.
+    # Bei SELL-Shops ist ein Shop verfuegbar, wenn genug passende Items in der Kiste liegen.
+    # Bei BUY-Shops ist ein Shop verfuegbar, wenn genug Platz in der Kiste ist und der Besitzer genug Geld hat.
+    status:
+      availableColor: "&a"
+      unavailableColor: "&c"
+      availableText: "Verfuegbar"
+      unavailableText: "Nicht verfuegbar"
+
+    # Verfuegbare Schild-Platzhalter:
+    # %action% = Verkaufen oder Ankaufen
+    # %action_en% = Selling oder Buying
+    # %type% = SELL oder BUY
+    # %owner% = Shopbesitzer
+    # %amount% = Menge pro Handel
+    # %item% = Itemname oder Material
+    # %price% = formatierter Preis
+    # %stock% = vorhandene passende Items in der Kiste
+    # %space% = freier Platz fuer passende Items in der Kiste
+    # %status% = verfuegbarer oder nicht verfuegbarer Statustext
+    # %available% = true oder false
+    # %status_color% und %stock_color% = configured Statusfarbe
+    # Alte [owner], [amount], [item], [price], [stock color] Platzhalter funktionieren weiterhin.
     sell:
       # Schildtext fuer SELL-Shops nach dem Erstellen.
-      # Platzhalter: %amount%, %item%, %price%, %owner%, %stock_color%
       lines:
-        - "%stock_color%&l[shop]"
-        - "Selling; &l%amount%"
+        - "%status_color%&l%action%"
+        - "&f%amount%x %item%"
         - "&a%price%"
-        - "%owner%"
+        - "&8%owner%"
     buy:
       # Schildtext fuer BUY-Shops, die Items von Spielern ankaufen.
       lines:
-        - "%stock_color%&l[shop]"
-        - "Buying; &l%amount%"
+        - "%status_color%&l%action%"
+        - "&f%amount%x %item%"
         - "&a%price%"
-        - "%owner%"
+        - "&8%owner%"
     pending:
       # Schildtext, wenn der Spieler das Item nicht in der Hand hatte.
       lines:
@@ -248,6 +270,26 @@ playerShops:
     # Standard-Anzeige ueber neu erstellten Kistenshops.
     # NONE, ITEM, GLASS_CASE, LARGE_ITEM oder ITEM_FRAME.
     defaultType: ITEM
+
+    animation:
+      item:
+        # Wenn true, schweben ITEM-Displays leicht auf und ab und drehen sich.
+        enabled: true
+
+        # Wie oft die Animation aktualisiert wird.
+        intervalTicks: 2
+
+        # Maximale Hoehe der Auf-/Ab-Bewegung in Bloecken.
+        hoverAmplitude: 0.12
+
+        # Geschwindigkeit der Auf-/Ab-Bewegung.
+        hoverSpeed: 2.0
+
+        # Drehgeschwindigkeit in Grad pro Tick.
+        rotationDegreesPerTick: 3.0
+
+        # Schutzwert, damit bei sehr vielen Shops nicht alle Displays in einem Tick bewegt werden.
+        maxAnimatedDisplaysPerTick: 150
 
   cleanup:
     # Prueft regelmaessig, ob Kiste und Schild noch existieren.
