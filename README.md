@@ -17,7 +17,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 ## Aktueller Stand
 
-**Version v0.9.0 ist der aktuelle Stand.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault, SQLite, MySQL/MariaDB, ServerShop/AdminShop, AutoSellChest, PlayerShop mit SELL/BUY/BUY_SELL/TRADE_ITEM, Protection-Hooks, DirectTrade, AuctionHouse, PermissionShop, RankShop und ReferralSystem.
+**Version v1.0.0 ist der aktuelle Stand.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault, SQLite, MySQL/MariaDB, ServerShop/AdminShop, AutoSellChest, PlayerShop mit SELL/BUY/BUY_SELL/TRADE_ITEM, Protection-Hooks, DirectTrade, AuctionHouse, PermissionShop, RankShop, ReferralSystem und Importer.
 
 ### Core
 
@@ -211,6 +211,12 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `/asc toggle`
 - `/asc remove`
 - `/asc admin [suche]`
+- `/cshop admin import economyshopgui preview`
+- `/cshop admin import economyshopgui apply [merge|replace]`
+- `/cshop admin import economyshopgui rollback <importId>`
+- `/cshop admin import shopintuitive preview`
+- `/cshop admin import shopintuitive apply [merge|replace]`
+- `/cshop admin import shopintuitive rollback <importId>`
 
 ### Permissions
 
@@ -342,6 +348,19 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Mindestspielzeit und Selbst-Einloesungsschutz gegen einfachen Missbrauch.
 - Top-Werber werden aus erfolgreichen Einloesungen berechnet.
 
+### Importer
+
+- EconomyShopGUI-Premium Importer mit Preview, Apply und Rollback.
+- Importiert `shops/*.yml` aus EconomyShopGUI-Premium in die `server_shop.yml` von CraftplayShop.
+- `merge` behaelt bestehende CraftplayShop-Kategorien und ersetzt nur gleichnamige importierte Kategorien.
+- `replace` ersetzt den kompletten ServerShop nach einem automatischen Backup.
+- Shop-Importer fuer `Shop - the intuitive shop plugin` mit Preview, Apply und Rollback.
+- Liest die alten `Shop/Data/*.yml` Dateien pro Besitzer ein.
+- Importiert `SELL`, `BUY`, `COMBO` und `BARTER` in `SELL`, `BUY`, `BUY_SELL` und `TRADE_ITEM`.
+- Gamble-Shops werden bewusst uebersprungen.
+- Shops ohne vorhandenes Schild oder ohne vorhandene Kiste werden beim echten Apply uebersprungen.
+- Jeder Import schreibt einen Bericht nach `plugins/CraftplayShop/imports/reports/` und legt Backups unter `plugins/CraftplayShop/imports/backups/` an.
+
 ### Skeletons / vorbereitet
 
 Folgende Module sind strukturell vorbereitet, aber noch nicht vollstaendig umgesetzt:
@@ -349,8 +368,6 @@ Folgende Module sind strukturell vorbereitet, aber noch nicht vollstaendig umges
 - PlayerShop-Trust, erweiterter Finder und erweiterte Verwaltungs-GUI
 - weitergehende Protection-Logik fuer WorldGuard, Lands und BentoBox ueber die aktuelle Hook-Erkennung hinaus
 - PlaceholderAPI, HeadDatabase, Floodgate, Citizens, Discord
-- EconomyShopGUI Importer
-- Shop Intuitive Importer
 
 ### Datenbank
 
@@ -386,7 +403,7 @@ adminShop:
 mvn clean package
 ```
 
-Die fertige Plugin-JAR liegt danach unter `target/CraftplayShop-0.9.0.jar`.
+Die fertige Plugin-JAR liegt danach unter `target/CraftplayShop-1.0.0.jar`.
 
 ## Lizenz
 

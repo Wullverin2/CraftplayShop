@@ -88,6 +88,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
     private PermissionProductService permissionProductService;
     private RankShopService rankShopService;
     private ReferralService referralService;
+    private ImporterService importerService;
 
     @Override
     public void onEnable() {
@@ -134,7 +135,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         referralService = new ReferralService(this);
         rankShopService = new RankShopService(this);
         permissionProductService = new PermissionProductService(this);
-        new ImporterService(this);
+        importerService = new ImporterService(this);
 
         reloadAll();
         registerCommands();
@@ -427,5 +428,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
 
     public ReferralService getReferralService() {
         return referralService;
+    }
+
+    public ImporterService getImporterService() {
+        return importerService;
     }
 }

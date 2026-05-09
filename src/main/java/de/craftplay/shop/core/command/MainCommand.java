@@ -174,6 +174,11 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             plugin.getServerShopAdminEditor().createManualBackup(player);
             return;
         }
+        if ("import".equals(sub)) {
+            if (plugin.getImporterService().handleCommand(sender, args)) {
+                return;
+            }
+        }
         if ("backups".equals(sub)) {
             if (!(sender instanceof Player player)) {
                 plugin.getLanguageService().send(sender, "general.playerOnly");
@@ -432,10 +437,19 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             return filter(List.of("search", "mine", "own"), args[1]);
         }
         if (args.length == 2 && "admin".equalsIgnoreCase(args[0])) {
-            return filter(List.of("editor", "reload", "servershop", "adminshop", "backup", "backups"), args[1]);
+            return filter(List.of("editor", "reload", "servershop", "adminshop", "backup", "backups", "import"), args[1]);
         }
         if (args.length == 3 && "admin".equalsIgnoreCase(args[0]) && "backup".equalsIgnoreCase(args[1])) {
             return filter(List.of("list", "restore", "confirm", "cancel"), args[2]);
+        }
+        if (args.length == 3 && "admin".equalsIgnoreCase(args[0]) && "import".equalsIgnoreCase(args[1])) {
+            return filter(List.of("economyshopgui", "shopintuitive"), args[2]);
+        }
+        if (args.length == 4 && "admin".equalsIgnoreCase(args[0]) && "import".equalsIgnoreCase(args[1])) {
+            return filter(List.of("preview", "apply", "rollback"), args[3]);
+        }
+        if (args.length == 5 && "admin".equalsIgnoreCase(args[0]) && "import".equalsIgnoreCase(args[1]) && "apply".equalsIgnoreCase(args[3])) {
+            return filter(List.of("merge", "replace", "--merge", "--replace"), args[4]);
         }
         if (args.length == 4
                 && "admin".equalsIgnoreCase(args[0])

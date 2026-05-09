@@ -838,6 +838,15 @@ auctionHouse:
     # Standardlaufzeit eines Listings.
     durationHours: 48
 
+importers:
+  economyShopGui:
+    # Ordner der EconomyShopGUI-Premium-Installation oder direkt deren shops-Unterordner.
+    sourcePath: ""
+
+  shopIntuitive:
+    # Ordner des alten Shop-Plugins oder direkt dessen Data-Unterordner.
+    sourcePath: ""
+
 integrations:
   placeholderApi:
     enabled: true
