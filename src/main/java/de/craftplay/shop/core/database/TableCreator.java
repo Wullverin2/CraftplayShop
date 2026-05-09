@@ -17,59 +17,59 @@ public class TableCreator {
         synchronized (database.lock()) {
             try (Statement statement = database.connection().createStatement()) {
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("transactions") + " (" +
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        "type TEXT, " +
-                        "player_uuid TEXT, " +
-                        "player_name TEXT, " +
-                        "source TEXT, " +
-                        "item_data TEXT, " +
-                        "material TEXT, " +
+                        idColumn() + ", " +
+                        textColumn("type") + ", " +
+                        uuidColumn("player_uuid") + ", " +
+                        shortTextColumn("player_name") + ", " +
+                        shortTextColumn("source") + ", " +
+                        largeTextColumn("item_data") + ", " +
+                        shortTextColumn("material") + ", " +
                         "amount INTEGER, " +
                         "price_each DOUBLE, " +
                         "total_price DOUBLE, " +
                         "created_at BIGINT)");
 
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("player_settings") + " (" +
-                        "player_uuid TEXT PRIMARY KEY, " +
-                        "player_name TEXT, " +
-                        "language TEXT, " +
+                        uuidColumn("player_uuid") + " PRIMARY KEY, " +
+                        shortTextColumn("player_name") + ", " +
+                        shortTextColumn("language") + ", " +
                         "direct_trade_enabled BOOLEAN, " +
                         "updated_at BIGINT)");
 
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("server_shop_stock") + " (" +
-                        "category_id TEXT, " +
-                        "item_id TEXT, " +
+                        shortTextColumn("category_id") + ", " +
+                        shortTextColumn("item_id") + ", " +
                         "stock INTEGER, " +
                         "updated_at BIGINT, " +
                         "PRIMARY KEY (category_id, item_id))");
 
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("server_shop_favorites") + " (" +
-                        "player_uuid TEXT, " +
-                        "category_id TEXT, " +
-                        "item_id TEXT, " +
+                        uuidColumn("player_uuid") + ", " +
+                        shortTextColumn("category_id") + ", " +
+                        shortTextColumn("item_id") + ", " +
                         "created_at BIGINT, " +
                         "PRIMARY KEY (player_uuid, category_id, item_id))");
 
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("player_shops") + " (" +
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        "owner_uuid TEXT, " +
-                        "owner_name TEXT, " +
-                        "type TEXT, " +
-                        "world TEXT, " +
+                        idColumn() + ", " +
+                        uuidColumn("owner_uuid") + ", " +
+                        shortTextColumn("owner_name") + ", " +
+                        shortTextColumn("type") + ", " +
+                        shortTextColumn("world") + ", " +
                         "container_x INTEGER, " +
                         "container_y INTEGER, " +
                         "container_z INTEGER, " +
                         "sign_x INTEGER, " +
                         "sign_y INTEGER, " +
                         "sign_z INTEGER, " +
-                        "item_data TEXT, " +
-                        "material TEXT, " +
+                        largeTextColumn("item_data") + ", " +
+                        shortTextColumn("material") + ", " +
                         "amount INTEGER, " +
                         "price DOUBLE, " +
-                        "trade_item_data TEXT, " +
-                        "trade_material TEXT, " +
+                        largeTextColumn("trade_item_data") + ", " +
+                        shortTextColumn("trade_material") + ", " +
                         "trade_amount INTEGER, " +
-                        "display_type TEXT, " +
+                        shortTextColumn("display_type") + ", " +
                         "active BOOLEAN, " +
                         "created_at BIGINT, " +
                         "updated_at BIGINT)");
@@ -79,14 +79,14 @@ public class TableCreator {
                 addColumnIfMissing(statement, database.table("player_shops"), "trade_amount", "INTEGER");
 
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("autosell_chests") + " (" +
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        "owner_uuid TEXT, " +
-                        "owner_name TEXT, " +
-                        "world TEXT, " +
+                        idColumn() + ", " +
+                        uuidColumn("owner_uuid") + ", " +
+                        shortTextColumn("owner_name") + ", " +
+                        shortTextColumn("world") + ", " +
                         "x INTEGER, " +
                         "y INTEGER, " +
                         "z INTEGER, " +
-                        "name TEXT, " +
+                        textColumn("name") + ", " +
                         "active BOOLEAN, " +
                         "notify_owner BOOLEAN, " +
                         "interval_level INTEGER, " +
@@ -101,15 +101,15 @@ public class TableCreator {
                 addColumnIfMissing(statement, database.table("autosell_chests"), "multiplier_level", "INTEGER");
 
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("autosell_logs") + " (" +
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        idColumn() + ", " +
                         "chest_id INTEGER, " +
-                        "owner_uuid TEXT, " +
-                        "owner_name TEXT, " +
-                        "world TEXT, " +
+                        uuidColumn("owner_uuid") + ", " +
+                        shortTextColumn("owner_name") + ", " +
+                        shortTextColumn("world") + ", " +
                         "x INTEGER, " +
                         "y INTEGER, " +
                         "z INTEGER, " +
-                        "material TEXT, " +
+                        shortTextColumn("material") + ", " +
                         "amount INTEGER, " +
                         "price_each DOUBLE, " +
                         "total_price DOUBLE, " +
@@ -117,8 +117,8 @@ public class TableCreator {
 
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("autosell_trust") + " (" +
                         "chest_id INTEGER, " +
-                        "player_uuid TEXT, " +
-                        "player_name TEXT, " +
+                        uuidColumn("player_uuid") + ", " +
+                        shortTextColumn("player_name") + ", " +
                         "open_allowed BOOLEAN, " +
                         "manage_allowed BOOLEAN, " +
                         "upgrade_allowed BOOLEAN, " +
@@ -128,30 +128,30 @@ public class TableCreator {
                         "PRIMARY KEY (chest_id, player_uuid))");
 
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("imports") + " (" +
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        "importer_name TEXT, " +
-                        "source_plugin TEXT, " +
-                        "source_path TEXT, " +
-                        "mode TEXT, " +
-                        "status TEXT, " +
-                        "created_by_uuid TEXT, " +
-                        "created_by_name TEXT, " +
+                        idColumn() + ", " +
+                        shortTextColumn("importer_name") + ", " +
+                        shortTextColumn("source_plugin") + ", " +
+                        textColumn("source_path") + ", " +
+                        shortTextColumn("mode") + ", " +
+                        shortTextColumn("status") + ", " +
+                        uuidColumn("created_by_uuid") + ", " +
+                        shortTextColumn("created_by_name") + ", " +
                         "created_at BIGINT, " +
                         "finished_at BIGINT, " +
                         "imported_count INTEGER, " +
                         "warning_count INTEGER, " +
                         "error_count INTEGER, " +
-                        "backup_path TEXT, " +
-                        "report_path TEXT)");
+                        textColumn("backup_path") + ", " +
+                        textColumn("report_path") + ")");
 
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("import_mappings") + " (" +
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        idColumn() + ", " +
                         "import_id INTEGER, " +
-                        "source_plugin TEXT, " +
-                        "source_identifier TEXT, " +
-                        "target_type TEXT, " +
-                        "target_id TEXT, " +
-                        "notes TEXT)");
+                        shortTextColumn("source_plugin") + ", " +
+                        textColumn("source_identifier") + ", " +
+                        shortTextColumn("target_type") + ", " +
+                        shortTextColumn("target_id") + ", " +
+                        textColumn("notes") + ")");
             }
         }
     }
@@ -165,5 +165,31 @@ public class TableCreator {
                 throw exception;
             }
         }
+    }
+
+    private String idColumn() {
+        return plugin.getDatabaseService().isMySql()
+                ? "id BIGINT PRIMARY KEY AUTO_INCREMENT"
+                : "id INTEGER PRIMARY KEY AUTOINCREMENT";
+    }
+
+    private String uuidColumn(String name) {
+        return namedColumn(name, plugin.getDatabaseService().isMySql() ? "VARCHAR(36)" : "TEXT");
+    }
+
+    private String shortTextColumn(String name) {
+        return namedColumn(name, plugin.getDatabaseService().isMySql() ? "VARCHAR(128)" : "TEXT");
+    }
+
+    private String textColumn(String name) {
+        return namedColumn(name, plugin.getDatabaseService().isMySql() ? "VARCHAR(255)" : "TEXT");
+    }
+
+    private String largeTextColumn(String name) {
+        return namedColumn(name, plugin.getDatabaseService().isMySql() ? "LONGTEXT" : "TEXT");
+    }
+
+    private String namedColumn(String name, String type) {
+        return name + " " + type;
     }
 }

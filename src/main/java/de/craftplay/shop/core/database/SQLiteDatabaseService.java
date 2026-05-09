@@ -55,4 +55,9 @@ public class SQLiteDatabaseService implements DatabaseService {
     public Object lock() {
         return lock;
     }
+
+    @Override
+    public DatabaseType type() {
+        return DatabaseType.SQLITE;
+    }
 }

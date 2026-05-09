@@ -103,12 +103,17 @@ public class PlayerSettingsService {
 
     private void save(PlayerSettings settings) {
         String table = plugin.getDatabaseService().table("player_settings");
+        String sql = plugin.getDatabaseService().isMySql()
+                ? "INSERT INTO " + table + " (player_uuid, player_name, language, direct_trade_enabled, updated_at) " +
+                "VALUES (?, ?, ?, ?, ?) " +
+                "ON DUPLICATE KEY UPDATE player_name = VALUES(player_name), language = VALUES(language), " +
+                "direct_trade_enabled = VALUES(direct_trade_enabled), updated_at = VALUES(updated_at)"
+                : "INSERT INTO " + table + " (player_uuid, player_name, language, direct_trade_enabled, updated_at) " +
+                "VALUES (?, ?, ?, ?, ?) " +
+                "ON CONFLICT(player_uuid) DO UPDATE SET player_name = excluded.player_name, language = excluded.language, " +
+                "direct_trade_enabled = excluded.direct_trade_enabled, updated_at = excluded.updated_at";
         synchronized (plugin.getDatabaseService().lock()) {
-            try (PreparedStatement statement = plugin.getDatabaseService().connection().prepareStatement(
-                    "INSERT INTO " + table + " (player_uuid, player_name, language, direct_trade_enabled, updated_at) " +
-                            "VALUES (?, ?, ?, ?, ?) " +
-                            "ON CONFLICT(player_uuid) DO UPDATE SET player_name = excluded.player_name, language = excluded.language, " +
-                            "direct_trade_enabled = excluded.direct_trade_enabled, updated_at = excluded.updated_at")) {
+            try (PreparedStatement statement = plugin.getDatabaseService().connection().prepareStatement(sql)) {
                 statement.setString(1, settings.playerUuid().toString());
                 statement.setString(2, settings.playerName());
                 statement.setString(3, settings.language());

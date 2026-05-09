@@ -69,11 +69,18 @@ public class AutoSellChestTrustService {
             cache(entry);
         }
         plugin.getTaskService().runAsync(() -> {
+            String sql = plugin.getDatabaseService().isMySql()
+                    ? "INSERT INTO " + plugin.getDatabaseService().table("autosell_trust") + " " +
+                    "(chest_id, player_uuid, player_name, open_allowed, manage_allowed, upgrade_allowed, delete_allowed, created_at, updated_at) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+                    "ON DUPLICATE KEY UPDATE player_name = VALUES(player_name), open_allowed = VALUES(open_allowed), " +
+                    "manage_allowed = VALUES(manage_allowed), upgrade_allowed = VALUES(upgrade_allowed), " +
+                    "delete_allowed = VALUES(delete_allowed), created_at = VALUES(created_at), updated_at = VALUES(updated_at)"
+                    : "INSERT OR REPLACE INTO " + plugin.getDatabaseService().table("autosell_trust") + " " +
+                    "(chest_id, player_uuid, player_name, open_allowed, manage_allowed, upgrade_allowed, delete_allowed, created_at, updated_at) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             synchronized (plugin.getDatabaseService().lock()) {
-                try (PreparedStatement statement = plugin.getDatabaseService().connection().prepareStatement(
-                        "INSERT OR REPLACE INTO " + plugin.getDatabaseService().table("autosell_trust") + " " +
-                                "(chest_id, player_uuid, player_name, open_allowed, manage_allowed, upgrade_allowed, delete_allowed, created_at, updated_at) " +
-                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
+                try (PreparedStatement statement = plugin.getDatabaseService().connection().prepareStatement(sql)) {
                     fillStatement(statement, entry);
                     statement.executeUpdate();
                 } catch (SQLException exception) {

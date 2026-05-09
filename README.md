@@ -312,7 +312,13 @@ Folgende Module sind strukturell vorbereitet, aber noch nicht vollstaendig umges
 - PlaceholderAPI, HeadDatabase, Floodgate, Citizens, Discord
 - EconomyShopGUI Importer
 - Shop Intuitive Importer
-- MySQL/MariaDB Service
+
+### Datenbank
+
+- SQLite ist produktiv aktiv.
+- MySQL/MariaDB ist jetzt als echte JDBC-Option implementiert und nicht mehr nur Platzhalter.
+- Tabellen werden beim Start fuer beide Datenbanktypen erstellt.
+- Wichtige Upsert-Pfade wie Player-Settings und AutoSellChest-Trust unterstuetzen jetzt SQLite und MySQL getrennt korrekt.
 
 ## Wichtige Konfigurationshinweise
 

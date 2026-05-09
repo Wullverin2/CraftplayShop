@@ -13,4 +13,10 @@ public interface DatabaseService {
     String table(String tableName);
 
     Object lock();
+
+    DatabaseType type();
+
+    default boolean isMySql() {
+        return type() == DatabaseType.MYSQL;
+    }
 }
