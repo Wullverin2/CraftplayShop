@@ -36,7 +36,20 @@ public class TradeCommand implements CommandExecutor {
             plugin.getDirectTradeService().setEnabled(player, false);
             return true;
         }
-        plugin.getLanguageService().send(player, "general.featureNotAvailable");
+        if ("accept".equalsIgnoreCase(args[0])) {
+            plugin.getDirectTradeService().accept(player);
+            return true;
+        }
+        if ("deny".equalsIgnoreCase(args[0])) {
+            plugin.getDirectTradeService().deny(player);
+            return true;
+        }
+        if ("cancel".equalsIgnoreCase(args[0])) {
+            plugin.getDirectTradeService().cancel(player);
+            return true;
+        }
+        Player target = plugin.getServer().getPlayerExact(args[0]);
+        plugin.getDirectTradeService().requestTrade(player, target);
         return true;
     }
 }

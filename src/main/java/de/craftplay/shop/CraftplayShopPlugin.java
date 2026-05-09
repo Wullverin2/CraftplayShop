@@ -140,7 +140,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
             playerSettingsService.loadAsync(player);
             serverShopFavoriteService.loadAsync(player);
         }
-        pluginLogService.info("CraftplayShop 0.1.0 enabled.");
+        pluginLogService.info("CraftplayShop " + getDescription().getVersion() + " enabled.");
     }
 
     @Override

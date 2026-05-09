@@ -1,12 +1,57 @@
-title: "&8DirectTrade"
-size: 54
+title: "&8DirectTrade: %target%"
+
+filler:
+  enabled: true
+  material: GRAY_STAINED_GLASS_PANE
+  name: " "
+  lore: []
+  slots: [0, 1, 2, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 44, 45, 47, 48, 50, 51, 52]
+
 items:
-  unavailable:
+  info:
     enabled: true
-    slot: 22
-    material: BARRIER
-    name: "&cNoch nicht verfügbar"
+    slot: 4
+    material: BOOK
+    name: "&eHandel mit %target%"
     lore:
-      - "&7In Phase 1 ist nur der Toggle aktiv."
-    leftClickActions:
-      - "MESSAGE:general.featureNotAvailable"
+      - "&7Phase: &f%phase%"
+      - "&7Dein Ready: %ready%"
+      - "&7Ziel Ready: %other_ready%"
+      - "&7Dein Final: %final%"
+      - "&7Ziel Final: %other_final%"
+  ownMoney:
+    enabled: true
+    slot: 46
+    material: EMERALD
+    name: "&aDein Geld"
+    lore:
+      - "&7Angebot: &f%own_money%"
+      - ""
+      - "&aLinksklick: +1"
+      - "&aShift-Linksklick: +10"
+      - "&cRechtsklick: -1"
+      - "&cShift-Rechtsklick: -10"
+  otherMoney:
+    enabled: true
+    slot: 52
+    material: GOLD_INGOT
+    name: "&eGeld von %target%"
+    lore:
+      - "&7Angebot: &f%other_money%"
+  ready:
+    enabled: true
+    slot: 49
+    material: LIME_DYE
+    name: "&aBereit / Final"
+    lore:
+      - "&7Dein Ready: %ready%"
+      - "&7Dein Final: %final%"
+      - ""
+      - "&eKlicken zum Umschalten"
+  cancel:
+    enabled: true
+    slot: 53
+    material: BARRIER
+    name: "&cHandel abbrechen"
+    lore:
+      - "&7Bricht den Handel ab"

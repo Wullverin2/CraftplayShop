@@ -91,6 +91,7 @@ list:
       - "&7Besitzer: &f%owner%"
       - "&7Menge: &e%amount%"
       - "&7Preis: &a%price%"
+      - "&7Tausch: &e%trade_amount%x %trade_item%"
       - "&7In Kiste: &e%stock%"
       - "&7Koordinaten: &f%world% %x% %y% %z%"
       - "&7Anzeige: &f%display_type%"
@@ -139,9 +140,10 @@ edit:
         - "&7ID: &f%id%"
         - "&7Material: &f%material%"
         - "&7Besitzer: &f%owner%"
+        - "&7Tauschitem: &f%trade_item%"
         - ""
-        - "&eKlicke mit einem Item am Cursor"
-        - "&eoder in der Hand, um das Shop-Item zu ändern."
+        - "&eLinksklick: Angebotsitem setzen"
+        - "&eRechtsklick: Tauschitem setzen"
     amount:
       material: CLOCK
       name: "&eMenge"
@@ -157,6 +159,7 @@ edit:
       name: "&aPreis"
       lore:
         - "&7Aktuell: &e%price%"
+        - "&7Trade-Shops nutzen hier die Tauschmenge."
         - ""
         - "&aLinksklick: +1"
         - "&aShift-Linksklick: +10"

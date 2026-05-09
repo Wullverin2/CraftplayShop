@@ -6,5 +6,6 @@ public enum TransactionType {
     SERVER_SELL_ALL,
     AUTOSELL_CHEST,
     PLAYER_SHOP_BUY,
-    PLAYER_SHOP_SELL
+    PLAYER_SHOP_SELL,
+    DIRECT_TRADE
 }

@@ -91,6 +91,7 @@ list:
       - "&7Owner: &f%owner%"
       - "&7Amount: &e%amount%"
       - "&7Price: &a%price%"
+      - "&7Trade: &e%trade_amount%x %trade_item%"
       - "&7In chest: &e%stock%"
       - "&7Coordinates: &f%world% %x% %y% %z%"
       - "&7Display: &f%display_type%"
@@ -139,9 +140,10 @@ edit:
         - "&7ID: &f%id%"
         - "&7Material: &f%material%"
         - "&7Owner: &f%owner%"
+        - "&7Trade item: &f%trade_item%"
         - ""
-        - "&eClick with an item on your cursor"
-        - "&eor in your hand to change the shop item."
+        - "&eLeft click: set offered item"
+        - "&eRight click: set requested trade item"
     amount:
       material: CLOCK
       name: "&eAmount"
@@ -157,6 +159,7 @@ edit:
       name: "&aPrice"
       lore:
         - "&7Current: &e%price%"
+        - "&7Trade shops use this as the requested amount."
         - ""
         - "&aLeft click: +1"
         - "&aShift-left click: +10"

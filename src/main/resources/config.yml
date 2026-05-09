@@ -275,6 +275,13 @@ playerShops:
         - "&f%amount%x %item%"
         - "&a%price%"
         - "&8%owner%"
+    trade:
+      # Schildtext für TRADE_ITEM-Shops. Spieler tauschen %trade_amount%x %trade_item% gegen %amount%x %item%.
+      lines:
+        - "%status_color%&l%action%"
+        - "&f%amount%x %item%"
+        - "&egegen %trade_amount%x %trade_item%"
+        - "&8%owner%"
     pending:
       # Schildtext, wenn der Spieler das Item nicht in der Hand hatte.
       lines:
@@ -560,7 +567,7 @@ autoSellChest:
     deleteChestsOnPlotDelete: true
 
 directTrade:
-  enabled: false
+  enabled: true
 
   # Spieler können DirectTrade für sich selbst deaktivieren.
   allowPlayerToggle: true

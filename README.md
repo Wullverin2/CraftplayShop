@@ -17,7 +17,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 ## Aktueller Stand
 
-**Version v0.2.0 ist abgeschlossen.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault/SQLite, ServerShop/AdminShop, Sell-Befehle, PlayerShop-MVP, DirectTrade-Toggle, AutoSellChest und die vorbereiteten Module fuer die naechsten Versionen.
+**Version v0.2.0 ist abgeschlossen.** Der aktuelle Entwicklungsstand geht bereits darueber hinaus und umfasst Core, Config, Sprache, GUI-System, Vault/SQLite, ServerShop/AdminShop, AutoSellChest, PlayerShop mit SELL/BUY/BUY_SELL/TRADE_ITEM sowie DirectTrade.
 
 ### Core
 
@@ -128,16 +128,18 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 ### PlayerShop / ChestShop
 
-- Erster PlayerShop-SELL-MVP ist aktiv.
+- PlayerShops mit `SELL`, `BUY`, `BUY_SELL` und `TRADE_ITEM` sind aktiv.
 - Spieler erstellen einen Kistenshop per Shift-Linksklick mit Item in der Hand auf eine Kiste.
-- Der Chat-Assistent fragt ab, ob der Shop Items verkaufen oder ankaufen soll.
-- Danach fragt der Chat-Assistent Menge pro Transaktion und Preis ab.
+- Der Chat-Assistent fragt ab, ob der Shop verkaufen, ankaufen, als Kombi-Shop oder als Tauschshop arbeiten soll.
+- Danach fragt der Chat-Assistent die benoetigten Mengen und je nach Typ Preis oder Tauschmenge ab.
 - CraftplayShop setzt automatisch ein Shop-Schild an die angeklickte Stelle der Kiste.
 - Spieler koennen alternativ weiterhin manuell ein Schild mit `shop`, `sell`, `[shop]`, `[cshop]` oder `buy` neben eine Kiste setzen.
 - Zeile 2 des Schilds bestimmt die Verkaufsmenge, Zeile 3 den Preis.
 - Das verkaufte Item wird beim Erstellen aus dem Item in der Hand uebernommen.
 - Rechtsklick auf SELL-Shop-Schild oder Kiste kauft die konfigurierte Menge aus dem Kistenbestand.
 - Rechtsklick auf BUY-Shop-Schild oder Kiste verkauft die konfigurierte Menge an den Shop und legt die Items in die Shop-Kiste.
+- `BUY_SELL`-Shops kombinieren beide Richtungen: Rechtsklick kauft aus dem Shop, Linksklick verkauft an den Shop.
+- `TRADE_ITEM`-Shops tauschen ein Itembuendel gegen ein anderes Itembuendel ohne Geldfluss.
 - PlayerShop-Nutzung auf PlotSquared-Plots benoetigt keine separate `use`-Flag; aktive Shop-Klicks werden vom Plugin vor dem normalen Plot-Use abgefangen.
 - PlayerShop-Schilder erkennen automatisch, ob ein SELL-Shop genug passende Items in der Kiste hat.
 - PlayerShop-Schilder erkennen automatisch, ob ein BUY-Shop genug Kistenplatz hat und der Besitzer genug Geld besitzt.
@@ -153,19 +155,19 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Verfuegbare Display-Typen: `NONE`, `ITEM`, `GLASS_CASE`, `LARGE_ITEM`, `ITEM_FRAME`.
 - Der Standard-Display-Typ für neu erstellte PlayerShops ist über `playerShops.creation.defaultDisplayType` konfigurierbar.
 - Der Display-Typ `ITEM` schwebt leicht auf und ab und dreht sich; die Animation nutzt Display-Interpolation und ist unter `playerShops.display.animation.item` konfigurierbar.
-- Besitzer oder Admins oeffnen per Shift-Rechtsklick eine Bearbeitungs-GUI fuer Item, Menge, Preis und Display-Typ.
+- Besitzer oder Admins oeffnen per Shift-Rechtsklick eine Bearbeitungs-GUI fuer Item, Menge, Preis bzw. Tauschmenge und Display-Typ.
 - PlayerShop-Hauptmenue mit allen Shops, eigener Shopliste und Suche.
 - Suche per Chat nach Item, Material, Besitzer oder Shop-Typ, mit deutschen und englischen Suchbegriffen.
 - Eigene Shops koennen im GUI bearbeitet, per Rechtsklick am Schild besucht und per Shift-Linksklick mit Bestaetigungs-GUI geloescht werden.
 - PlayerShop-Listen haben Seiten-Navigation fuer groessere Shopmengen.
-- Shop-Lore in der Liste zeigt Typ, Besitzer, Menge, Preis, Lagerbestand, Koordinaten, Display-Typ und Klickaktionen.
+- Shop-Lore in der Liste zeigt Typ, Besitzer, Menge, Preis bzw. Tauschdaten, Lagerbestand, Koordinaten, Display-Typ und Klickaktionen.
 - PlayerShop-GUI-Titel, Slots, Buttons, Bearbeitungs-GUI und Shop-Lore sind ueber `gui/<sprache>/playershop.yml` konfigurierbar.
 - Regelmaessiger Cleanup entfernt Shops aus Cache und Datenbank, wenn Kiste oder Schild physisch fehlen.
 - Fremde Spieler koennen PlayerShop-Kisten nicht als normales Inventar oeffnen.
 - Besitzer oder Admins koennen einen Shop durch Abbauen von Schild oder Kiste loeschen.
 - PlayerShop-Kaeufe und Ankaeufe werden in den Transaktionslogs gespeichert.
 - Optionaler PlotSquared-Hook entfernt PlayerShops aus Cache und Datenbank, wenn ein Plot geloescht wird.
-- BUY-Shops sind als v0.1-Funktion aktiv. BUY_SELL- und TRADE_ITEM-Shops sind weiterhin vorbereitet, aber noch nicht vollstaendig umgesetzt.
+- BUY-, BUY_SELL- und TRADE_ITEM-Shops sind aktiv und ueber Chat-Erstellung, Schildmarker und GUI-Bearbeitung eingebunden.
 
 ### Commands
 
@@ -198,6 +200,10 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `/trade toggle`
 - `/trade on`
 - `/trade off`
+- `/trade <spieler>`
+- `/trade accept`
+- `/trade deny`
+- `/trade cancel`
 - `/asc`
 - `/asc list`
 - `/asc create`
@@ -226,8 +232,8 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `craftplayshop.language` - Eigene Sprache umstellen.
 - `craftplayshop.trade.use` - DirectTrade-Befehl grundsätzlich nutzen.
 - `craftplayshop.trade.toggle` - `/trade toggle`, `/trade on`, `/trade off`.
-- `craftplayshop.trade.request` - Für spätere Handelsanfragen vorbereitet.
-- `craftplayshop.trade.accept` - Für spätere Annahme von Handelsanfragen vorbereitet.
+- `craftplayshop.trade.request` - Handelsanfragen senden.
+- `craftplayshop.trade.accept` - Handelsanfragen annehmen.
 - `craftplayshop.autosellchest.use` - AutoSellChest-Menue und eigene Kisten anzeigen.
 - `craftplayshop.autosellchest.create` - AutoSellChest-Spezialkisten platzieren.
 - `craftplayshop.autosellchest.trust` - Trust-GUI fuer eigene/vertraute AutoSellChests nutzen.
@@ -278,24 +284,31 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Optionaler PlotSquared-Hook entfernt AutoSellChests aus Cache und Datenbank, wenn ein Plot geloescht wird.
 - PlotSquared-Pruefungen fuer Erstellen, Bearbeiten und Abbauen sind vorbereitet; Shop-Nutzung bleibt ohne PlotSquared-`use`-Flag erlaubt.
 
-### DirectTrade Vorbereitung
+### DirectTrade
 
 - DirectTrade Spieler-Toggle.
 - `/trade toggle`, `/trade on`, `/trade off`.
-- Speicherung in `craftplay_shop_player_settings`.
-- Vollstaendiger DirectTrade ist noch nicht implementiert.
+- `/trade <spieler>`, `/trade accept`, `/trade deny`, `/trade cancel`.
+- Anfragen respektieren Cooldown, Timeout, Distanz und optional gleiche Welt.
+- Beide Spieler sehen ein gemeinsames Handels-GUI mit eigenen und fremden Angebotsfeldern.
+- Items werden aus dem Inventar in die Angebotsseite verschoben und bei Abbruch sauber zurueckgegeben.
+- Geldangebote sind im GUI moeglich.
+- Aenderungen setzen Ready- und Final-Status zurueck, wenn dies in der Config aktiv ist.
+- Optionaler Final-Confirm vor dem Abschluss.
+- Vor Abschluss werden Online-Status, Geld und Inventarplatz geprueft.
+- Speicherung des DirectTrade-Toggles in `craftplay_shop_player_settings`.
+- Transaktionslogging fuer abgeschlossene Trades ist eingebunden.
 
 ### Skeletons / vorbereitet
 
 Folgende Module sind strukturell vorbereitet, aber noch nicht vollstaendig umgesetzt:
 
-- PlayerShop BUY_SELL, TRADE_ITEM, Trust, erweiterter Finder und erweiterte Verwaltungs-GUI
-- vollstaendiger DirectTrade
+- PlayerShop-Trust, erweiterter Finder und erweiterte Verwaltungs-GUI
 - AuctionHouse
 - RankShop
 - PermissionShop
 - ReferralSystem
-- weitere Protection-Hooks neben PlotSquared-Plot-Cleanup und den vorbereiteten Basispruefungen
+- weitergehende Protection-Logik fuer WorldGuard, Lands und BentoBox ueber die aktuelle Hook-Erkennung hinaus
 - PlaceholderAPI, HeadDatabase, Floodgate, Citizens, Discord
 - EconomyShopGUI Importer
 - Shop Intuitive Importer

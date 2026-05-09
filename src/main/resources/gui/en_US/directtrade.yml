@@ -1,12 +1,57 @@
-title: "&8DirectTrade"
-size: 54
+title: "&8DirectTrade: %target%"
+
+filler:
+  enabled: true
+  material: GRAY_STAINED_GLASS_PANE
+  name: " "
+  lore: []
+  slots: [0, 1, 2, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 44, 45, 47, 48, 50, 51, 52]
+
 items:
-  unavailable:
+  info:
     enabled: true
-    slot: 22
-    material: BARRIER
-    name: "&cNot available yet"
+    slot: 4
+    material: BOOK
+    name: "&eTrading with %target%"
     lore:
-      - "&7Phase 1 only includes the toggle."
-    leftClickActions:
-      - "MESSAGE:general.featureNotAvailable"
+      - "&7Phase: &f%phase%"
+      - "&7Your ready: %ready%"
+      - "&7Target ready: %other_ready%"
+      - "&7Your final: %final%"
+      - "&7Target final: %other_final%"
+  ownMoney:
+    enabled: true
+    slot: 46
+    material: EMERALD
+    name: "&aYour money"
+    lore:
+      - "&7Offer: &f%own_money%"
+      - ""
+      - "&aLeft click: +1"
+      - "&aShift-left click: +10"
+      - "&cRight click: -1"
+      - "&cShift-right click: -10"
+  otherMoney:
+    enabled: true
+    slot: 52
+    material: GOLD_INGOT
+    name: "&e%target%'s money"
+    lore:
+      - "&7Offer: &f%other_money%"
+  ready:
+    enabled: true
+    slot: 49
+    material: LIME_DYE
+    name: "&aReady / Final"
+    lore:
+      - "&7Your ready: %ready%"
+      - "&7Your final: %final%"
+      - ""
+      - "&eClick to toggle"
+  cancel:
+    enabled: true
+    slot: 53
+    material: BARRIER
+    name: "&cCancel trade"
+    lore:
+      - "&7Cancels the trade"

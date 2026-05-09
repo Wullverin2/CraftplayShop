@@ -66,11 +66,17 @@ public class TableCreator {
                         "material TEXT, " +
                         "amount INTEGER, " +
                         "price DOUBLE, " +
+                        "trade_item_data TEXT, " +
+                        "trade_material TEXT, " +
+                        "trade_amount INTEGER, " +
                         "display_type TEXT, " +
                         "active BOOLEAN, " +
                         "created_at BIGINT, " +
                         "updated_at BIGINT)");
                 addColumnIfMissing(statement, database.table("player_shops"), "display_type", "TEXT");
+                addColumnIfMissing(statement, database.table("player_shops"), "trade_item_data", "TEXT");
+                addColumnIfMissing(statement, database.table("player_shops"), "trade_material", "TEXT");
+                addColumnIfMissing(statement, database.table("player_shops"), "trade_amount", "INTEGER");
 
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("autosell_chests") + " (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +

@@ -1,7 +1,10 @@
 package de.craftplay.shop.protection;
 
 import de.craftplay.shop.CraftplayShopPlugin;
+import de.craftplay.shop.protection.hooks.BentoBoxHook;
+import de.craftplay.shop.protection.hooks.LandsHook;
 import de.craftplay.shop.protection.hooks.PlotSquaredHook;
+import de.craftplay.shop.protection.hooks.WorldGuardHook;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -26,6 +29,18 @@ public class ProtectionService {
                 plotSquaredHook.register();
             }
             hooks.add(plotSquaredHook);
+        }
+        if (plugin.getConfig().getBoolean("protection.worldguard", true)
+                && plugin.getServer().getPluginManager().getPlugin("WorldGuard") != null) {
+            hooks.add(new WorldGuardHook());
+        }
+        if (plugin.getConfig().getBoolean("protection.lands", true)
+                && plugin.getServer().getPluginManager().getPlugin("Lands") != null) {
+            hooks.add(new LandsHook());
+        }
+        if (plugin.getConfig().getBoolean("protection.bentobox", true)
+                && plugin.getServer().getPluginManager().getPlugin("BentoBox") != null) {
+            hooks.add(new BentoBoxHook());
         }
         plugin.getPluginLogService().debug("Loaded " + hooks.size() + " protection hooks.");
     }
