@@ -152,6 +152,22 @@ autoSellChest:
   notifyEnabled: "%prefix%&aBesitzer-Benachrichtigungen für AutoSellChest &e#%id% &awurden aktiviert."
   notifyDisabled: "%prefix%&cBesitzer-Benachrichtigungen für AutoSellChest &e#%id% &cwurden deaktiviert."
 
+  debug:
+    waiting: "Warte auf den naechsten Verkauf."
+    serverShopSellDisabled: "ServerShop-Ankauf ist deaktiviert."
+    ownerOffline: "Besitzer ist offline."
+    worldNotLoaded: "Welt ist nicht geladen."
+    chunkNotLoaded: "Chunk ist nicht geladen."
+    physicalChestMissing: "Physische Kiste fehlt."
+    noSellableItems: "Keine ankaufbaren Items gefunden."
+    vaultFailed: "Vault-Auszahlung fehlgeschlagen."
+    lastSale: "Letzter Verkauf: %amount% Items fuer %price%."
+    blockedDamaged: "%amount% Items sind beschaedigt und fuer AutoSellChest gesperrt."
+    blockedMaterialFilter: "%amount% Items sind durch den AutoSellChest-Materialfilter gesperrt."
+    notInServerShop: "%amount% Items haben keinen ankaufbaren ServerShop-Eintrag."
+    sellDisabled: "%amount% Items sind im ServerShop nicht zum Ankauf aktiviert."
+    priceZero: "%amount% Items haben im ServerShop keinen gueltigen Ankaufspreis."
+
 gui:
   missingFile: "%prefix%&cGUI-Datei fehlt: %file%"
   missingItem: "%prefix%&cGUI-Item fehlt: %item%"

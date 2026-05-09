@@ -98,10 +98,18 @@ public class ServerShopRegistry {
     }
 
     public ServerShopItem findSellable(ItemStack itemStack) {
+        return findSellable(itemStack, true);
+    }
+
+    public ServerShopItem findAutoSellable(ItemStack itemStack) {
+        return findSellable(itemStack, false);
+    }
+
+    private ServerShopItem findSellable(ItemStack itemStack, boolean validateSellableStack) {
         if (itemStack == null || itemStack.getType().isAir()) {
             return null;
         }
-        if (!plugin.getServerShopService().canSellItemStack(itemStack)) {
+        if (validateSellableStack && !plugin.getServerShopService().canSellItemStack(itemStack)) {
             return null;
         }
         for (ServerShopCategory category : categories.values()) {

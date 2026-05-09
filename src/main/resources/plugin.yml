@@ -1,5 +1,5 @@
 name: CraftplayShop
-version: 0.2.0-SNAPSHOT
+version: 0.2.0
 main: de.craftplay.shop.CraftplayShopPlugin
 api-version: '1.21'
 author: Wullverin

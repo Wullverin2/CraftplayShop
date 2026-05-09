@@ -17,7 +17,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 ## Aktueller Stand
 
-**Version v0.1.0 ist abgeschlossen.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault/SQLite, ServerShop/AdminShop, Sell-Befehle, PlayerShop-MVP, DirectTrade-Toggle und die vorbereiteten Module fuer die naechsten Versionen.
+**Version v0.2.0 ist abgeschlossen.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault/SQLite, ServerShop/AdminShop, Sell-Befehle, PlayerShop-MVP, DirectTrade-Toggle, AutoSellChest und die vorbereiteten Module fuer die naechsten Versionen.
 
 ### Core
 
@@ -236,7 +236,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 ### AutoSellChest
 
-- AutoSellChest ist als Start von v0.2 integriert.
+- AutoSellChest ist fuer v0.2.0 integriert und produktiv nutzbar.
 - Admins geben Spezialkisten ueber `/asc give <spieler> [menge]` aus.
 - Spieler platzieren das Spezialitem, um eine AutoSellChest zu registrieren.
 - Spieler koennen mit `/asc create` eine angeschaut normale Kiste als AutoSellChest registrieren, wenn sie die Erstell-Permission haben.
@@ -253,6 +253,8 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Upgrade-Kosten werden erst nach Permission- und Geldpruefung ueber Vault abgezogen.
 - Items werden nur verkauft, wenn sie im CraftplayShop ServerShop ankaufbar sind.
 - Nicht ankaufbare Items bleiben in der Kiste.
+- Beschaedigte Items koennen separat fuer AutoSellChest blockiert werden, ohne normale ServerShop-Verkaeufe zu veraendern.
+- AutoSellChest kann zusaetzlich ueber eine eigene Material-Blocklist oder Allowlist gefiltert werden.
 - Besitzer erhalten Vault-Geld, auch wenn sie offline sind.
 - AutoSellChest-Verkaeufe werden in `craftplay_shop_autosell_logs` gespeichert.
 - Wenn der Besitzer online ist, wird zusaetzlich ein Transaktionslog vom Typ `AUTOSELL_CHEST` geschrieben.
@@ -261,6 +263,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Shift-Rechtsklick auf eine AutoSellChest oeffnet das Info-GUI.
 - Das AutoSellChest-GUI zeigt eigene Kisten, Status, Koordinaten, Intervall, Multiplikator, verkaufte Items und verdientes Geld.
 - Ueber AutoSellChests wird optional eine TextDisplay-Anzeige mit Name, Besitzer, Status, naechstem Verkauf und Multiplikator dargestellt.
+- Debuggruende zeigen jetzt genauer, ob Items z.B. am Materialfilter, an beschaedigten Items oder an fehlenden ServerShop-Eintraegen scheitern.
 - Das Info-GUI enthaelt Status-Toggle, Teleport, Upgrades, Statistiken und Loeschen.
 - Besitzer-Benachrichtigungen sind pro Kiste schaltbar; Config unterstuetzt Modus, Mindestwert und Cooldown.
 - Das Statistik-GUI zeigt Tageswerte, Gesamtwerte, letzte Verkaeufe und Material-Auswertung direkt aus den AutoSellChest-Logs.
@@ -325,7 +328,7 @@ adminShop:
 mvn clean package
 ```
 
-Die fertige Plugin-JAR liegt danach unter `target/CraftplayShop-0.2.0-SNAPSHOT.jar`.
+Die fertige Plugin-JAR liegt danach unter `target/CraftplayShop-0.2.0.jar`.
 
 ## Lizenz
 

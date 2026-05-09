@@ -16,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class AutoSellChestProcessor {
     }
 
     public String lastDebugReason(AutoSellChest chest) {
-        return lastDebugReasons.getOrDefault(chest.id(), "Warte auf den naechsten Verkauf.");
+        return lastDebugReasons.getOrDefault(chest.id(), debugText("autoSellChest.debug.waiting"));
     }
 
     public long secondsUntilNextSale(AutoSellChest chest) {
@@ -94,34 +95,34 @@ public class AutoSellChestProcessor {
 
     private void process(AutoSellChest chest) {
         if (!plugin.getServerShopService().allowSell()) {
-            setReason(chest, "ServerShop-Ankauf ist deaktiviert.");
+            setReason(chest, debugText("autoSellChest.debug.serverShopSellDisabled"));
             return;
         }
         if (plugin.getConfig().getBoolean("autoSellChest.selling.sellOnlyWhenOwnerOnline", false)
                 && Bukkit.getPlayer(chest.ownerUuid()) == null) {
-            setReason(chest, "Besitzer ist offline.");
+            setReason(chest, debugText("autoSellChest.debug.ownerOffline"));
             return;
         }
         Location location = chest.location();
         if (location == null || location.getWorld() == null) {
-            setReason(chest, "Welt ist nicht geladen.");
+            setReason(chest, debugText("autoSellChest.debug.worldNotLoaded"));
             return;
         }
         World world = location.getWorld();
         if (!world.isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
-            setReason(chest, "Chunk ist nicht geladen.");
+            setReason(chest, debugText("autoSellChest.debug.chunkNotLoaded"));
             return;
         }
         Block block = location.getBlock();
         BlockState state = block.getState();
         if (!(state instanceof Container container)) {
-            setReason(chest, "Physische Kiste fehlt.");
+            setReason(chest, debugText("autoSellChest.debug.physicalChestMissing"));
             registry.delete(chest);
             return;
         }
         SellPlan plan = createPlan(container.getInventory(), chest);
         if (plan.totalAmount <= 0 || plan.totalPrice <= 0.0D) {
-            setReason(chest, "Keine ankaufbaren Items gefunden.");
+            setReason(chest, plan.debugReason == null ? debugText("autoSellChest.debug.noSellableItems") : plan.debugReason);
             registry.update(chest.withSale(0L, 0.0D));
             return;
         }
@@ -129,10 +130,13 @@ public class AutoSellChestProcessor {
         OfflinePlayer owner = Bukkit.getOfflinePlayer(chest.ownerUuid());
         if (!plugin.getEconomyService().deposit(owner, plan.totalPrice)) {
             restore(container.getInventory(), plan.originals);
-            setReason(chest, "Vault-Auszahlung fehlgeschlagen.");
+            setReason(chest, debugText("autoSellChest.debug.vaultFailed"));
             return;
         }
-        setReason(chest, "Letzter Verkauf: " + plan.totalAmount + " Items fuer " + plugin.getEconomyService().format(plan.totalPrice) + ".");
+        setReason(chest, debugText("autoSellChest.debug.lastSale", Map.of(
+                "amount", Integer.toString(plan.totalAmount),
+                "price", plugin.getEconomyService().format(plan.totalPrice)
+        )));
         AutoSellChest updated = chest.withSale(plan.totalAmount, plan.totalPrice);
         registry.update(updated);
         for (SaleLine line : plan.lines.values()) {
@@ -150,6 +154,7 @@ public class AutoSellChestProcessor {
     private SellPlan createPlan(Inventory inventory, AutoSellChest chest) {
         int maxItems = Math.max(1, plugin.getConfig().getInt("autoSellChest.performance.maxItemsPerScan", 2304));
         SellPlan plan = new SellPlan();
+        Map<String, Integer> blockedCounts = new LinkedHashMap<>();
         ItemStack[] contents = inventory.getContents();
         int scannedItems = 0;
         for (int slot = 0; slot < contents.length && scannedItems < maxItems; slot++) {
@@ -158,8 +163,22 @@ public class AutoSellChestProcessor {
                 continue;
             }
             scannedItems += stack.getAmount();
-            ServerShopItem shopItem = plugin.getServerShopRegistry().findSellable(stack);
-            if (shopItem == null || !shopItem.sellEnabled() || shopItem.sellPrice() <= 0.0D) {
+            String blockedReason = plugin.getServerShopService().autoSellBlockReason(stack);
+            if (blockedReason != null) {
+                addBlocked(blockedCounts, blockedReason, stack.getAmount());
+                continue;
+            }
+            ServerShopItem shopItem = plugin.getServerShopRegistry().findAutoSellable(stack);
+            if (shopItem == null) {
+                addBlocked(blockedCounts, "not_in_server_shop", stack.getAmount());
+                continue;
+            }
+            if (!shopItem.sellEnabled()) {
+                addBlocked(blockedCounts, "sell_disabled", stack.getAmount());
+                continue;
+            }
+            if (shopItem.sellPrice() <= 0.0D) {
+                addBlocked(blockedCounts, "price_zero", stack.getAmount());
                 continue;
             }
             int amount = Math.min(stack.getAmount(), Math.max(0, maxItems - (scannedItems - stack.getAmount())));
@@ -176,6 +195,9 @@ public class AutoSellChestProcessor {
             SaleLine line = plan.lines.computeIfAbsent(key, ignored -> new SaleLine(shopItem.material().name(), priceEach, shopItem.createStack(1)));
             line.amount += amount;
             line.totalPrice += total;
+        }
+        if (plan.totalAmount <= 0) {
+            plan.debugReason = debugReason(blockedCounts);
         }
         return plan;
     }
@@ -250,6 +272,7 @@ public class AutoSellChestProcessor {
         private final Map<String, SaleLine> lines = new LinkedHashMap<>();
         private int totalAmount;
         private double totalPrice;
+        private String debugReason;
     }
 
     private void setReason(AutoSellChest chest, String reason) {
@@ -274,5 +297,50 @@ public class AutoSellChestProcessor {
             this.priceEach = priceEach;
             this.itemStack = itemStack;
         }
+    }
+
+    private void addBlocked(Map<String, Integer> blockedCounts, String reason, int amount) {
+        blockedCounts.merge(reason, Math.max(1, amount), Integer::sum);
+    }
+
+    private String debugReason(Map<String, Integer> blockedCounts) {
+        if (blockedCounts.isEmpty()) {
+            return debugText("autoSellChest.debug.noSellableItems");
+        }
+        Map.Entry<String, Integer> top = blockedCounts.entrySet().stream()
+                .sorted(Comparator.<Map.Entry<String, Integer>>comparingInt(entry -> priority(entry.getKey()))
+                        .thenComparing((left, right) -> Integer.compare(right.getValue(), left.getValue())))
+                .findFirst()
+                .orElse(null);
+        if (top == null) {
+            return debugText("autoSellChest.debug.noSellableItems");
+        }
+        return switch (top.getKey()) {
+            case "damaged" -> debugText("autoSellChest.debug.blockedDamaged", Map.of("amount", Integer.toString(top.getValue())));
+            case "material_filter" -> debugText("autoSellChest.debug.blockedMaterialFilter", Map.of("amount", Integer.toString(top.getValue())));
+            case "not_in_server_shop" -> debugText("autoSellChest.debug.notInServerShop", Map.of("amount", Integer.toString(top.getValue())));
+            case "sell_disabled" -> debugText("autoSellChest.debug.sellDisabled", Map.of("amount", Integer.toString(top.getValue())));
+            case "price_zero" -> debugText("autoSellChest.debug.priceZero", Map.of("amount", Integer.toString(top.getValue())));
+            default -> debugText("autoSellChest.debug.noSellableItems");
+        };
+    }
+
+    private int priority(String reason) {
+        return switch (reason) {
+            case "damaged" -> 0;
+            case "material_filter" -> 1;
+            case "not_in_server_shop" -> 2;
+            case "sell_disabled" -> 3;
+            case "price_zero" -> 4;
+            default -> 5;
+        };
+    }
+
+    private String debugText(String key) {
+        return debugText(key, Map.of());
+    }
+
+    private String debugText(String key, Map<String, String> placeholders) {
+        return plugin.getLanguageService().get(plugin.getConfigService().defaultLanguage(), key, placeholders);
     }
 }

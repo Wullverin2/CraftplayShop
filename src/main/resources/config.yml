@@ -369,6 +369,19 @@ autoSellChest:
     # Wenn true, verkauft eine Kiste nur, solange der Besitzer online ist.
     sellOnlyWhenOwnerOnline: false
 
+    # Wenn false, bleiben beschaedigte Tools, Ruestungen und andere kaputte Items in der Kiste.
+    allowDamagedItems: false
+
+    materialFilter:
+      # Optionaler Materialfilter nur fuer AutoSellChest.
+      enabled: false
+
+      # BLOCKLIST sperrt die gelisteten Materialien, ALLOWLIST erlaubt nur die gelisteten Materialien.
+      mode: "BLOCKLIST"
+
+      # Materialnamen wie in Bukkit/Paper, z.B. BEDROCK, SPAWNER oder DIAMOND_SWORD.
+      materials: []
+
   upgrades:
     # Aktiviert kaufbare AutoSellChest-Upgrades.
     enabled: true

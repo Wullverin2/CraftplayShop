@@ -152,6 +152,22 @@ autoSellChest:
   notifyEnabled: "%prefix%&aOwner notifications for AutoSellChest &e#%id% &awere enabled."
   notifyDisabled: "%prefix%&cOwner notifications for AutoSellChest &e#%id% &cwere disabled."
 
+  debug:
+    waiting: "Waiting for the next sale."
+    serverShopSellDisabled: "ServerShop selling is disabled."
+    ownerOffline: "Owner is offline."
+    worldNotLoaded: "World is not loaded."
+    chunkNotLoaded: "Chunk is not loaded."
+    physicalChestMissing: "Physical chest is missing."
+    noSellableItems: "No sellable items found."
+    vaultFailed: "Vault payout failed."
+    lastSale: "Last sale: %amount% items for %price%."
+    blockedDamaged: "%amount% items are damaged and blocked for AutoSellChest."
+    blockedMaterialFilter: "%amount% items are blocked by the AutoSellChest material filter."
+    notInServerShop: "%amount% items do not have a sellable ServerShop entry."
+    sellDisabled: "%amount% items are not enabled for selling in the ServerShop."
+    priceZero: "%amount% items do not have a valid sell price in the ServerShop."
+
 gui:
   missingFile: "%prefix%&cGUI file missing: %file%"
   missingItem: "%prefix%&cGUI item missing: %item%"
