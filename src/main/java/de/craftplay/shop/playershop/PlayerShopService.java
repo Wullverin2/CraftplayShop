@@ -192,7 +192,7 @@ public class PlayerShopService implements Listener {
         if (type == null) {
             return;
         }
-        if (type != PlayerShopType.SELL && type != PlayerShopType.BUY) {
+        if (type != PlayerShopType.SELL && type != PlayerShopType.BUY && type != PlayerShopType.BUY_SELL) {
             plugin.getLanguageService().send(event.getPlayer(), "general.featureNotAvailable");
             return;
         }
@@ -289,6 +289,11 @@ public class PlayerShopService implements Listener {
             openEditGui(event.getPlayer(), shop);
             return;
         }
+        if (shop != null && shop.active() && shop.type() == PlayerShopType.BUY_SELL && event.getAction() == Action.LEFT_CLICK_BLOCK) {
+            event.setCancelled(true);
+            useShop(event.getPlayer(), shop, event.getAction());
+            return;
+        }
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
@@ -297,14 +302,28 @@ public class PlayerShopService implements Listener {
         }
         Player player = event.getPlayer();
         event.setCancelled(true);
-        useShop(player, shop);
+        useShop(player, shop, event.getAction());
     }
 
     private void useShop(Player player, PlayerShop shop) {
+        useShop(player, shop, Action.RIGHT_CLICK_BLOCK);
+    }
+
+    private void useShop(Player player, PlayerShop shop, Action action) {
         if (shop.type() == PlayerShopType.SELL) {
             buyFromShop(player, shop);
-        } else if (shop.type() == PlayerShopType.BUY) {
+            return;
+        }
+        if (shop.type() == PlayerShopType.BUY) {
             sellToShop(player, shop);
+            return;
+        }
+        if (shop.type() == PlayerShopType.BUY_SELL) {
+            if (action == Action.LEFT_CLICK_BLOCK) {
+                sellToShop(player, shop);
+            } else {
+                buyFromShop(player, shop);
+            }
         }
     }
 
@@ -1114,8 +1133,18 @@ public class PlayerShopService implements Listener {
                 Map.entry("item", displayItem(shop.itemStack())),
                 Map.entry("material", shop.material()),
                 Map.entry("owner", shop.ownerName()),
-                Map.entry("type", shop.type() == PlayerShopType.BUY ? "Ankauf" : "Verkauf"),
-                Map.entry("type_en", shop.type() == PlayerShopType.BUY ? "Buying" : "Selling"),
+                Map.entry("type", switch (shop.type()) {
+                    case BUY -> "Ankauf";
+                    case BUY_SELL -> "Kombi";
+                    case TRADE_ITEM -> "Tausch";
+                    default -> "Verkauf";
+                }),
+                Map.entry("type_en", switch (shop.type()) {
+                    case BUY -> "Buying";
+                    case BUY_SELL -> "Combo";
+                    case TRADE_ITEM -> "Trade";
+                    default -> "Selling";
+                }),
                 Map.entry("amount", Integer.toString(shop.amount())),
                 Map.entry("price", plugin.getEconomyService().format(shop.price())),
                 Map.entry("stock", Integer.toString(stock)),
@@ -1352,9 +1381,7 @@ public class PlayerShopService implements Listener {
         }
         Block container = event.getClickedBlock();
         if (findByLocation(container.getLocation()) != null) {
-            plugin.getLanguageService().send(player, "playerShop.alreadyExists");
-            event.setCancelled(true);
-            return true;
+            return false;
         }
         if (!plugin.getProtectionService().canCreateShop(player, container.getLocation())) {
             plugin.getLanguageService().send(player, "general.noPermission");
@@ -1400,7 +1427,12 @@ public class PlayerShopService implements Listener {
                 return;
             }
             updateChatCreation(player, new ChatCreation(creation.containerLocation(), creation.clickedFace(), creation.itemStack(), type, 0, 0.0D, CreationStep.AMOUNT));
-            plugin.getLanguageService().send(player, type == PlayerShopType.BUY ? "playerShop.creationBuyAmountPrompt" : "playerShop.creationSellAmountPrompt");
+            String amountKey = switch (type) {
+                case BUY -> "playerShop.creationBuyAmountPrompt";
+                case BUY_SELL -> "playerShop.creationComboAmountPrompt";
+                default -> "playerShop.creationSellAmountPrompt";
+            };
+            plugin.getLanguageService().send(player, amountKey);
             return;
         }
         if (creation.step() == CreationStep.AMOUNT) {
@@ -1455,6 +1487,7 @@ public class PlayerShopService implements Listener {
         return switch (input) {
             case "verkaufen", "sell", "selling", "v" -> PlayerShopType.SELL;
             case "ankaufen", "kaufen", "buy", "buying", "a" -> PlayerShopType.BUY;
+            case "kombi", "kombi-shop", "combo", "combo-shop", "buy_sell", "buy-sell", "beides", "both" -> PlayerShopType.BUY_SELL;
             default -> null;
         };
     }
@@ -1600,7 +1633,11 @@ public class PlayerShopService implements Listener {
     }
 
     private List<String> signLines(PlayerShop shop) {
-        String path = shop.type() == PlayerShopType.BUY ? "playerShops.sign.buy.lines" : "playerShops.sign.sell.lines";
+        String path = switch (shop.type()) {
+            case BUY -> "playerShops.sign.buy.lines";
+            case BUY_SELL -> "playerShops.sign.combo.lines";
+            default -> "playerShops.sign.sell.lines";
+        };
         List<String> configured = plugin.getConfig().getStringList(path);
         if (configured.size() < 4 || isLegacyDefaultSign(shop.type(), configured)) {
             configured = shop.type() == PlayerShopType.BUY
@@ -1631,8 +1668,16 @@ public class PlayerShopService implements Listener {
         String item = shop != null ? displayItem(shop.itemStack()) : "";
         PlayerShopType type = shop != null ? shop.type() : pending.type();
         SignStatus status = signStatus(shop);
-        String action = type == PlayerShopType.BUY ? "Ankaufen" : "Verkaufen";
-        String actionEnglish = type == PlayerShopType.BUY ? "Buying" : "Selling";
+        String action = switch (type) {
+            case BUY -> "Ankaufen";
+            case BUY_SELL -> "Handeln";
+            default -> "Verkaufen";
+        };
+        String actionEnglish = switch (type) {
+            case BUY -> "Buying";
+            case BUY_SELL -> "Trading";
+            default -> "Selling";
+        };
         String formattedPrice = plugin.getEconomyService().format(price);
         return line
                 .replace("%owner%", owner)
@@ -1676,6 +1721,10 @@ public class PlayerShopService implements Listener {
                 } else if (shop.type() == PlayerShopType.BUY) {
                     available = space >= shop.amount()
                             && plugin.getEconomyService().has(Bukkit.getOfflinePlayer(shop.ownerUuid()), shop.price());
+                } else if (shop.type() == PlayerShopType.BUY_SELL) {
+                    available = stock >= shop.amount()
+                            || (space >= shop.amount()
+                            && plugin.getEconomyService().has(Bukkit.getOfflinePlayer(shop.ownerUuid()), shop.price()));
                 }
             }
         }

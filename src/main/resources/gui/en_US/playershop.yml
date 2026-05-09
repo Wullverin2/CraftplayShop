@@ -98,6 +98,7 @@ list:
       - "&eLeft click &7Edit"
       - "&eRight click &7Teleport to sign"
       - "&eShift-left click &7Confirm deletion"
+      - "&7Combo shops: &fRight click buys, left click sells"
 
 deleteConfirm:
   title: "&8Delete shop?"

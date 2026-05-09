@@ -98,6 +98,7 @@ list:
       - "&eLinksklick &7Bearbeiten"
       - "&eRechtsklick &7Zum Schild teleportieren"
       - "&eShift-Linksklick &7Löschen bestätigen"
+      - "&7Kombi-Shops: &fRechtsklick kaufen, Linksklick verkaufen"
 
 deleteConfirm:
   title: "&8Shop löschen?"
