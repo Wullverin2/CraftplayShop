@@ -260,3 +260,19 @@ auctionHouse:
   claimed: "%prefix%&aDas Listing wurde abgeholt."
   notClaimable: "%prefix%&cDieses Listing kann nicht abgeholt werden."
   listingMissing: "%prefix%&cDieses Listing wurde nicht gefunden."
+
+rankshop:
+  missingProduct: "%prefix%&cDieses Rang-Produkt wurde nicht gefunden."
+  disabled: "%prefix%&cDieses Rang-Produkt ist deaktiviert."
+  requirementsMissing: "%prefix%&cDu erfuellst die Voraussetzungen fuer diesen Rang nicht."
+  alreadyOwned: "%prefix%&cDiesen Rang besitzt du bereits."
+  commandFailed: "%prefix%&cDer Rangkauf konnte nicht vollstaendig ausgefuehrt werden."
+  bought: "%prefix%&aDu hast &e%product% &afuer &e%price% &agekauft."
+
+permissionshop:
+  missingProduct: "%prefix%&cDieses Permission-Produkt wurde nicht gefunden."
+  disabled: "%prefix%&cDieses Permission-Produkt ist deaktiviert."
+  requirementsMissing: "%prefix%&cDu erfuellst die Voraussetzungen fuer dieses Produkt nicht."
+  alreadyOwned: "%prefix%&cDieses Produkt besitzt du bereits."
+  commandFailed: "%prefix%&cDer Kauf konnte nicht vollstaendig ausgefuehrt werden."
+  bought: "%prefix%&aDu hast &e%product% &afuer &e%price% &agekauft."

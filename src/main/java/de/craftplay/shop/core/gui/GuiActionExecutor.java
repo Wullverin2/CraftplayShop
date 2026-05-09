@@ -56,6 +56,8 @@ public class GuiActionExecutor {
             case "SOUND" -> playSound(player, value, 1.0F, 1.0F);
             case "DIRECT_TRADE_TOGGLE" -> plugin.getDirectTradeService().toggle(player);
             case "LANGUAGE_SET" -> setLanguage(player, value);
+            case "RANK_BUY" -> plugin.getRankShopService().buy(player, value);
+            case "PERMISSION_PRODUCT_BUY" -> plugin.getPermissionProductService().buy(player, value);
             case "SELL_HAND" -> {
                 if (has(player, PermissionNodes.SERVER_SHOP_SELL_HAND)) {
                     plugin.getSellCommandService().sellHand(player);

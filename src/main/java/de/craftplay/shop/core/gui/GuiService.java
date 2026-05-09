@@ -55,6 +55,14 @@ public class GuiService {
             plugin.getAuctionHouseService().openHome(player);
             return;
         }
+        if ("rankshop".equalsIgnoreCase(guiId)) {
+            plugin.getRankShopService().open(player);
+            return;
+        }
+        if ("permissionshop".equalsIgnoreCase(guiId)) {
+            plugin.getPermissionProductService().open(player);
+            return;
+        }
         String language = plugin.getPlayerLanguageService().getLanguage(player);
         GuiDefinition definition = definition(language, guiId);
         if (definition == null) {

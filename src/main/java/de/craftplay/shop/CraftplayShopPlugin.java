@@ -29,9 +29,11 @@ import de.craftplay.shop.importers.ImporterService;
 import de.craftplay.shop.integrations.HeadDatabaseHook;
 import de.craftplay.shop.integrations.PlaceholderApiHook;
 import de.craftplay.shop.permissionshop.PermissionProductService;
+import de.craftplay.shop.permissionshop.PermissionShopHolder;
 import de.craftplay.shop.playershop.PlayerShopService;
 import de.craftplay.shop.protection.ProtectionService;
 import de.craftplay.shop.rankshop.RankShopService;
+import de.craftplay.shop.rankshop.RankShopHolder;
 import de.craftplay.shop.referral.ReferralService;
 import de.craftplay.shop.servershop.SellCommandService;
 import de.craftplay.shop.servershop.ServerShopCategoryGui;
@@ -85,6 +87,8 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
     private ProtectionService protectionService;
     private PlayerShopService playerShopService;
     private AutoSellChestService autoSellChestService;
+    private PermissionProductService permissionProductService;
+    private RankShopService rankShopService;
 
     @Override
     public void onEnable() {
@@ -129,8 +133,8 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         autoSellChestService = new AutoSellChestService(this);
         auctionHouseService = new AuctionHouseService(this);
         new ReferralService(this);
-        new RankShopService(this);
-        new PermissionProductService(this);
+        rankShopService = new RankShopService(this);
+        permissionProductService = new PermissionProductService(this);
         new ImporterService(this);
 
         reloadAll();
@@ -198,6 +202,12 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         }
         if (auctionHouseService != null) {
             auctionHouseService.load();
+        }
+        if (rankShopService != null) {
+            rankShopService.load();
+        }
+        if (permissionProductService != null) {
+            permissionProductService.load();
         }
     }
 
@@ -397,5 +407,13 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
 
     public AuctionHouseService getAuctionHouseService() {
         return auctionHouseService;
+    }
+
+    public PermissionProductService getPermissionProductService() {
+        return permissionProductService;
+    }
+
+    public RankShopService getRankShopService() {
+        return rankShopService;
     }
 }

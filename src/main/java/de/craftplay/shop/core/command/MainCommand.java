@@ -96,6 +96,14 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             auctionHouse(sender, java.util.Arrays.copyOfRange(args, 1, args.length));
             return true;
         }
+        if ("rankshop".equals(sub) || "ranks".equals(sub)) {
+            rankShop(sender);
+            return true;
+        }
+        if ("permissionshop".equals(sub) || "permshop".equals(sub) || "permissions".equals(sub)) {
+            permissionShop(sender);
+            return true;
+        }
         plugin.getLanguageService().send(sender, "general.unknownCommand");
         return true;
     }
@@ -343,13 +351,37 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    private void rankShop(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            plugin.getLanguageService().send(sender, "general.playerOnly");
+            return;
+        }
+        if (!player.hasPermission(PermissionNodes.RANK_SHOP_USE)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        plugin.getRankShopService().open(player);
+    }
+
+    private void permissionShop(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            plugin.getLanguageService().send(sender, "general.playerOnly");
+            return;
+        }
+        if (!player.hasPermission(PermissionNodes.PERMISSION_SHOP_USE)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        plugin.getPermissionProductService().open(player);
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
             if ("ah".equalsIgnoreCase(command.getName())) {
                 return filter(List.of("browse", "search", "sell", "mine", "claims"), args[0]);
             }
-            return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall", "sellgui", "search", "favorites", "playershop", "pshop", "auctionhouse", "ah"), args[0]);
+            return filter(List.of("admin", "reload", "language", "lang", "sellhand", "sellall", "sellgui", "search", "favorites", "playershop", "pshop", "auctionhouse", "ah", "rankshop", "permissionshop"), args[0]);
         }
         if (args.length == 2 && ("auctionhouse".equalsIgnoreCase(args[0]) || "ah".equalsIgnoreCase(args[0]))) {
             return filter(List.of("browse", "search", "sell", "mine", "claims"), args[1]);

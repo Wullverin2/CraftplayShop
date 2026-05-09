@@ -79,6 +79,34 @@ items:
     leftClickActions:
       - "OPEN_GUI:auctionhouse"
 
+  rankShop:
+    enabled: true
+    slot: 24
+    material: NAME_TAG
+    name: "&dRankShop"
+    lore:
+      - "&7Kaufe Ränge und Upgrades"
+      - "&7mit Ingame-Währung."
+      - ""
+      - "&eKlicken zum Oeffnen"
+    permission: "craftplayshop.rankshop.use"
+    leftClickActions:
+      - "OPEN_GUI:rankshop"
+
+  permissionShop:
+    enabled: true
+    slot: 25
+    material: WRITABLE_BOOK
+    name: "&bPermissionShop"
+    lore:
+      - "&7Kaufe Rechte, Befehle"
+      - "&7und Produkt-Bundles."
+      - ""
+      - "&eKlicken zum Oeffnen"
+    permission: "craftplayshop.permissionshop.use"
+    leftClickActions:
+      - "OPEN_GUI:permissionshop"
+
   sellGui:
     enabled: true
     slot: 30
@@ -95,7 +123,7 @@ items:
 
   referral:
     enabled: true
-    slot: 24
+    slot: 26
     material: PLAYER_HEAD
     head:
       type: HEAD_DATABASE

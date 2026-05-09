@@ -17,7 +17,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 ## Aktueller Stand
 
-**Version v0.7.0 ist der aktuelle Stand.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault, SQLite, MySQL/MariaDB, ServerShop/AdminShop, AutoSellChest, PlayerShop mit SELL/BUY/BUY_SELL/TRADE_ITEM, Protection-Hooks, DirectTrade und AuctionHouse.
+**Version v0.8.0 ist der aktuelle Stand.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault, SQLite, MySQL/MariaDB, ServerShop/AdminShop, AutoSellChest, PlayerShop mit SELL/BUY/BUY_SELL/TRADE_ITEM, Protection-Hooks, DirectTrade, AuctionHouse, PermissionShop und RankShop.
 
 ### Core
 
@@ -312,13 +312,30 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Abgebrochene oder abgelaufene Listings koennen abgeholt werden.
 - AuctionHouse-Kaeufe und -Listings laufen ueber das vorhandene Transaktionslogging.
 
+### PermissionShop
+
+- PermissionShop mit Produkten aus der `config.yml`.
+- Produkte unterstuetzen Preis, Slot, Material, Lore, Dauer und One-Time-Kaeufe.
+- Produkte koennen mehrere Permissions, Console-Commands und Player-Commands enthalten.
+- Rechte werden ueber konfigurierbare Command-Formate ausgefuehrt.
+- Required-Permissions und Already-Owned-Pruefung sind eingebaut.
+- GUI ist integriert und ueber das Hauptmenue erreichbar.
+- Kaeufe werden ueber das Transaktionslogging erfasst.
+
+### RankShop
+
+- RankShop mit Produkten aus der `config.yml`.
+- Produkte unterstuetzen permanente und temporaere Gruppen.
+- Rang-Upgrades koennen alte Gruppen per Command-Format entfernen.
+- Required-Permissions und Already-Owned-Pruefung sind eingebaut.
+- GUI ist integriert und ueber das Hauptmenue erreichbar.
+- Kaeufe werden ueber das Transaktionslogging erfasst.
+
 ### Skeletons / vorbereitet
 
 Folgende Module sind strukturell vorbereitet, aber noch nicht vollstaendig umgesetzt:
 
 - PlayerShop-Trust, erweiterter Finder und erweiterte Verwaltungs-GUI
-- RankShop
-- PermissionShop
 - ReferralSystem
 - weitergehende Protection-Logik fuer WorldGuard, Lands und BentoBox ueber die aktuelle Hook-Erkennung hinaus
 - PlaceholderAPI, HeadDatabase, Floodgate, Citizens, Discord

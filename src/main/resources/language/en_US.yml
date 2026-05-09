@@ -260,3 +260,19 @@ auctionHouse:
   claimed: "%prefix%&aThe listing has been claimed."
   notClaimable: "%prefix%&cThat listing cannot be claimed."
   listingMissing: "%prefix%&cThat listing could not be found."
+
+rankshop:
+  missingProduct: "%prefix%&cThat rank product could not be found."
+  disabled: "%prefix%&cThat rank product is disabled."
+  requirementsMissing: "%prefix%&cYou do not meet the requirements for this rank."
+  alreadyOwned: "%prefix%&cYou already own this rank."
+  commandFailed: "%prefix%&cThe rank purchase could not be completed fully."
+  bought: "%prefix%&aYou bought &e%product% &afor &e%price%&a."
+
+permissionshop:
+  missingProduct: "%prefix%&cThat permission product could not be found."
+  disabled: "%prefix%&cThat permission product is disabled."
+  requirementsMissing: "%prefix%&cYou do not meet the requirements for this product."
+  alreadyOwned: "%prefix%&cYou already own this product."
+  commandFailed: "%prefix%&cThe purchase could not be completed fully."
+  bought: "%prefix%&aYou bought &e%product% &afor &e%price%&a."

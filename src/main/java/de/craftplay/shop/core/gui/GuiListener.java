@@ -2,6 +2,8 @@ package de.craftplay.shop.core.gui;
 
 import de.craftplay.shop.CraftplayShopPlugin;
 import de.craftplay.shop.auctionhouse.AuctionHouseHolder;
+import de.craftplay.shop.permissionshop.PermissionShopHolder;
+import de.craftplay.shop.rankshop.RankShopHolder;
 import de.craftplay.shop.servershop.ServerShopAmountHolder;
 import de.craftplay.shop.servershop.ServerShopCategoryHolder;
 import de.craftplay.shop.servershop.ServerShopHolder;
@@ -80,6 +82,20 @@ public class GuiListener implements Listener {
             }
             return;
         }
+        if (holder instanceof RankShopHolder rankShopHolder) {
+            event.setCancelled(true);
+            if (event.getWhoClicked() instanceof org.bukkit.entity.Player player) {
+                plugin.getRankShopService().handleClick(player, rankShopHolder, event);
+            }
+            return;
+        }
+        if (holder instanceof PermissionShopHolder permissionShopHolder) {
+            event.setCancelled(true);
+            if (event.getWhoClicked() instanceof org.bukkit.entity.Player player) {
+                plugin.getPermissionProductService().handleClick(player, permissionShopHolder, event);
+            }
+            return;
+        }
         if (holder instanceof SellGuiHolder sellGuiHolder && event.getWhoClicked() instanceof org.bukkit.entity.Player player) {
             plugin.getSellCommandService().handleSellGuiClick(player, sellGuiHolder, event);
         }
@@ -88,7 +104,7 @@ public class GuiListener implements Listener {
     @EventHandler
     public void onDrag(InventoryDragEvent event) {
         InventoryHolder holder = event.getInventory().getHolder();
-        if (holder instanceof GuiHolder || holder instanceof ServerShopHolder || holder instanceof ServerShopCategoryHolder || holder instanceof ServerShopAmountHolder || holder instanceof ServerShopListHolder || holder instanceof ServerShopAdminHolder || holder instanceof AuctionHouseHolder || holder instanceof SellGuiHolder) {
+        if (holder instanceof GuiHolder || holder instanceof ServerShopHolder || holder instanceof ServerShopCategoryHolder || holder instanceof ServerShopAmountHolder || holder instanceof ServerShopListHolder || holder instanceof ServerShopAdminHolder || holder instanceof AuctionHouseHolder || holder instanceof RankShopHolder || holder instanceof PermissionShopHolder || holder instanceof SellGuiHolder) {
             event.setCancelled(true);
             if (holder instanceof ServerShopAdminHolder adminHolder && event.getWhoClicked() instanceof org.bukkit.entity.Player player) {
                 plugin.getServerShopAdminEditor().handleDrag(player, adminHolder, event);
