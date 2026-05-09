@@ -151,7 +151,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - BUY-Shops ziehen dem Besitzer die Kosten per Vault ab und zahlen sie dem verkaufenden Spieler aus.
 - Ueber Kistenshops schwebt eine konfigurierbare Item-Anzeige.
 - Verfuegbare Display-Typen: `NONE`, `ITEM`, `GLASS_CASE`, `LARGE_ITEM`, `ITEM_FRAME`.
-- Der Display-Typ `ITEM` schwebt leicht auf und ab und dreht sich; die Animation ist unter `playerShops.display.animation.item` konfigurierbar.
+- Der Display-Typ `ITEM` schwebt leicht auf und ab und dreht sich; die Animation nutzt Display-Interpolation und ist unter `playerShops.display.animation.item` konfigurierbar.
 - Besitzer oder Admins oeffnen per Shift-Rechtsklick eine Bearbeitungs-GUI fuer Item, Menge, Preis und Display-Typ.
 - PlayerShop-Hauptmenue mit allen Shops, eigener Shopliste und Suche.
 - Suche per Chat nach Item, Material, Besitzer oder Shop-Typ, mit deutschen und englischen Suchbegriffen.

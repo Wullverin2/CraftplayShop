@@ -277,16 +277,20 @@ playerShops:
         enabled: true
 
         # Wie oft die Animation aktualisiert wird.
-        intervalTicks: 2
+        intervalTicks: 1
+
+        # Clientseitige Interpolation der Display-Transformation.
+        # Hoehere Werte wirken weicher, reagieren aber etwas traeger.
+        interpolationTicks: 4
 
         # Maximale Hoehe der Auf-/Ab-Bewegung in Bloecken.
-        hoverAmplitude: 0.12
+        hoverAmplitude: 0.08
 
         # Geschwindigkeit der Auf-/Ab-Bewegung.
-        hoverSpeed: 2.0
+        hoverSpeed: 1.35
 
         # Drehgeschwindigkeit in Grad pro Tick.
-        rotationDegreesPerTick: 3.0
+        rotationDegreesPerTick: 1.5
 
         # Schutzwert, damit bei sehr vielen Shops nicht alle Displays in einem Tick bewegt werden.
         maxAnimatedDisplaysPerTick: 150

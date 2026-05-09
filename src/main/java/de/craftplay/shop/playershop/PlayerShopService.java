@@ -41,6 +41,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Transformation;
+import org.joml.AxisAngle4f;
+import org.joml.Vector3f;
 
 import java.io.File;
 import java.sql.PreparedStatement;
@@ -1752,6 +1755,7 @@ public class PlayerShopService implements Listener {
         double amplitude = Math.max(0.0D, plugin.getConfig().getDouble("playerShops.display.animation.item.hoverAmplitude", 0.12D));
         double hoverSpeed = Math.max(0.0D, plugin.getConfig().getDouble("playerShops.display.animation.item.hoverSpeed", 2.0D));
         double rotationDegreesPerTick = plugin.getConfig().getDouble("playerShops.display.animation.item.rotationDegreesPerTick", 3.0D);
+        int interpolationTicks = clampDisplayDuration(plugin.getConfig().getInt("playerShops.display.animation.item.interpolationTicks", 4));
         int maxAnimated = Math.max(1, plugin.getConfig().getInt("playerShops.display.animation.item.maxAnimatedDisplaysPerTick", 150));
         double elapsedTicks = System.currentTimeMillis() / 50.0D;
         int animated = 0;
@@ -1763,13 +1767,17 @@ public class PlayerShopService implements Listener {
             if (itemDisplay == null) {
                 continue;
             }
-            Location base = displayBaseLocation(shop);
             double phase = (elapsedTicks / 20.0D * hoverSpeed) + (shop.id() * 0.73D);
             double offset = Math.sin(phase) * amplitude;
-            float yaw = (float) ((elapsedTicks * rotationDegreesPerTick + shop.id() * 37.0D) % 360.0D);
-            Location animatedLocation = base.add(0.0D, offset, 0.0D);
-            animatedLocation.setYaw(yaw);
-            itemDisplay.teleport(animatedLocation);
+            float yawRadians = (float) Math.toRadians((elapsedTicks * rotationDegreesPerTick + shop.id() * 37.0D) % 360.0D);
+            itemDisplay.setInterpolationDelay(0);
+            itemDisplay.setInterpolationDuration(interpolationTicks);
+            itemDisplay.setTransformation(new Transformation(
+                    new Vector3f(0.0F, (float) offset, 0.0F),
+                    new AxisAngle4f(yawRadians, 0.0F, 1.0F, 0.0F),
+                    new Vector3f(1.0F, 1.0F, 1.0F),
+                    new AxisAngle4f(0.0F, 0.0F, 1.0F, 0.0F)
+            ));
             animated++;
             if (animated >= maxAnimated) {
                 return;
@@ -1793,6 +1801,10 @@ public class PlayerShopService implements Listener {
 
     private Location displayBaseLocation(PlayerShop shop) {
         return displayAnchorBlock(shop).getLocation().add(0.5D, 1.35D, 0.5D);
+    }
+
+    private int clampDisplayDuration(int ticks) {
+        return Math.max(0, Math.min(59, ticks));
     }
 
     private void removeDisplay(PlayerShop shop) {
