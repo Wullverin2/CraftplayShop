@@ -14,6 +14,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
@@ -32,6 +33,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -73,6 +76,8 @@ public class PlayerShopService implements Listener {
     private final Map<UUID, Boolean> searchInputs = new HashMap<>();
     private BukkitTask cleanupTask;
     private BukkitTask displayAnimationTask;
+    private BukkitTask signStatusTask;
+    private int signStatusCursor;
 
     public PlayerShopService(CraftplayShopPlugin plugin) {
         this.plugin = plugin;
@@ -92,6 +97,7 @@ public class PlayerShopService implements Listener {
         }
         startCleanupTask();
         startDisplayAnimationTask();
+        startSignStatusTask();
     }
 
     public void shutdown() {
@@ -103,6 +109,10 @@ public class PlayerShopService implements Listener {
             displayAnimationTask.cancel();
         }
         displayAnimationTask = null;
+        if (signStatusTask != null && !signStatusTask.isCancelled()) {
+            signStatusTask.cancel();
+        }
+        signStatusTask = null;
     }
 
     public int deleteShopsInRegion(String world, int minX, int maxX, int minZ, int maxZ) {
@@ -334,6 +344,7 @@ public class PlayerShopService implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
+        PlayerShop inventoryShop = findByInventory(event.getInventory());
         if (event.getInventory().getHolder() instanceof PlayerShopDeleteHolder holder
                 && event.getWhoClicked() instanceof Player player) {
             event.setCancelled(true);
@@ -348,6 +359,9 @@ public class PlayerShopService implements Listener {
         }
         if (!(event.getInventory().getHolder() instanceof PlayerShopEditHolder holder)
                 || !(event.getWhoClicked() instanceof Player player)) {
+            if (inventoryShop != null) {
+                scheduleSignUpdate(inventoryShop);
+            }
             return;
         }
         event.setCancelled(true);
@@ -405,6 +419,31 @@ public class PlayerShopService implements Listener {
                 || event.getInventory().getHolder() instanceof PlayerShopMenuHolder
                 || event.getInventory().getHolder() instanceof PlayerShopDeleteHolder) {
             event.setCancelled(true);
+            return;
+        }
+        PlayerShop shop = findByInventory(event.getInventory());
+        if (shop != null) {
+            scheduleSignUpdate(shop);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onInventoryClose(InventoryCloseEvent event) {
+        PlayerShop shop = findByInventory(event.getInventory());
+        if (shop != null) {
+            scheduleSignUpdate(shop);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onInventoryMoveItem(InventoryMoveItemEvent event) {
+        PlayerShop sourceShop = findByInventory(event.getSource());
+        PlayerShop destinationShop = findByInventory(event.getDestination());
+        if (sourceShop != null) {
+            scheduleSignUpdate(sourceShop);
+        }
+        if (destinationShop != null && (sourceShop == null || sourceShop.id() != destinationShop.id())) {
+            scheduleSignUpdate(destinationShop);
         }
     }
 
@@ -740,6 +779,36 @@ public class PlayerShopService implements Listener {
         }
         long interval = Math.max(20L, plugin.getConfig().getLong("playerShops.cleanup.intervalSeconds", 60L) * 20L);
         cleanupTask = plugin.getServer().getScheduler().runTaskTimer(plugin, this::cleanupMissingPhysicalShops, interval, interval);
+    }
+
+    private void startSignStatusTask() {
+        if (signStatusTask != null && !signStatusTask.isCancelled()) {
+            signStatusTask.cancel();
+        }
+        signStatusTask = null;
+        signStatusCursor = 0;
+        if (!plugin.getConfig().getBoolean("playerShops.sign.statusRefresh.enabled", true)) {
+            return;
+        }
+        long interval = Math.max(1L, plugin.getConfig().getLong("playerShops.sign.statusRefresh.intervalTicks", 20L));
+        signStatusTask = plugin.getServer().getScheduler().runTaskTimer(plugin, this::refreshShopSignStatuses, interval, interval);
+    }
+
+    private void refreshShopSignStatuses() {
+        List<PlayerShop> shops = snapshotShops().stream()
+                .filter(PlayerShop::active)
+                .toList();
+        if (shops.isEmpty()) {
+            signStatusCursor = 0;
+            return;
+        }
+        int max = Math.max(1, plugin.getConfig().getInt("playerShops.sign.statusRefresh.maxSignsPerTick", 25));
+        int updates = Math.min(max, shops.size());
+        for (int i = 0; i < updates; i++) {
+            int index = (signStatusCursor + i) % shops.size();
+            updateSign(shops.get(index));
+        }
+        signStatusCursor = (signStatusCursor + updates) % shops.size();
     }
 
     private void cleanupMissingPhysicalShops() {
@@ -1185,10 +1254,32 @@ public class PlayerShopService implements Listener {
 
     private PlayerShop findByInventory(Inventory inventory) {
         InventoryHolder holder = inventory.getHolder();
-        if (!(holder instanceof BlockState state)) {
-            return null;
+        if (holder instanceof BlockState state) {
+            return findByLocation(state.getLocation());
         }
-        return findByLocation(state.getLocation());
+        if (holder instanceof DoubleChest doubleChest) {
+            InventoryHolder left = doubleChest.getLeftSide();
+            if (left instanceof BlockState leftState) {
+                PlayerShop shop = findByLocation(leftState.getLocation());
+                if (shop != null) {
+                    return shop;
+                }
+            }
+            InventoryHolder right = doubleChest.getRightSide();
+            if (right instanceof BlockState rightState) {
+                return findByLocation(rightState.getLocation());
+            }
+        }
+        return null;
+    }
+
+    private void scheduleSignUpdate(PlayerShop shop) {
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            PlayerShop current = findById(shop.id());
+            if (current != null) {
+                updateSign(current);
+            }
+        }, 1L);
     }
 
     private PlayerShop findByLocation(Location location) {
@@ -1846,7 +1937,11 @@ public class PlayerShopService implements Listener {
     }
 
     private PlayerShopDisplayType defaultDisplayType() {
-        return displayType(plugin.getConfig().getString("playerShops.display.defaultType", "ITEM"));
+        String configured = plugin.getConfig().getString("playerShops.creation.defaultDisplayType");
+        if (configured == null || configured.isBlank()) {
+            configured = plugin.getConfig().getString("playerShops.display.defaultType", "ITEM");
+        }
+        return displayType(configured);
     }
 
     private PlayerShopDisplayType displayType(String value) {

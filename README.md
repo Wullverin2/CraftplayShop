@@ -142,6 +142,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - PlayerShop-Nutzung auf PlotSquared-Plots benoetigt keine separate `use`-Flag; aktive Shop-Klicks werden vom Plugin vor dem normalen Plot-Use abgefangen.
 - PlayerShop-Schilder erkennen automatisch, ob ein SELL-Shop genug passende Items in der Kiste hat.
 - PlayerShop-Schilder erkennen automatisch, ob ein BUY-Shop genug Kistenplatz hat und der Besitzer genug Geld besitzt.
+- PlayerShop-Schilder werden nach Kistenklicks, Inventar-Schließen, Hopper-Bewegungen und zusätzlich per kleinem Refresh-Takt aktualisiert.
 - Die erste Schildzeile kann mit `%status_color%`, `%action%` und weiteren Platzhaltern gruen oder rot formatiert werden.
 - Schildfarben, Statustexte und alle vier Schildzeilen sind unter `playerShops.sign` in der `config.yml` frei anpassbar.
 - Die `config.yml` dokumentiert die Schild-Platzhalter wie `%action%`, `%amount%`, `%price%`, `%stock%`, `%space%`, `%status%`, `%available%`, `%status_color%` und `%stock_color%`.
@@ -151,6 +152,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - BUY-Shops ziehen dem Besitzer die Kosten per Vault ab und zahlen sie dem verkaufenden Spieler aus.
 - Ueber Kistenshops schwebt eine konfigurierbare Item-Anzeige.
 - Verfuegbare Display-Typen: `NONE`, `ITEM`, `GLASS_CASE`, `LARGE_ITEM`, `ITEM_FRAME`.
+- Der Standard-Display-Typ für neu erstellte PlayerShops ist über `playerShops.creation.defaultDisplayType` konfigurierbar.
 - Der Display-Typ `ITEM` schwebt leicht auf und ab und dreht sich; die Animation nutzt Display-Interpolation und ist unter `playerShops.display.animation.item` konfigurierbar.
 - Besitzer oder Admins oeffnen per Shift-Rechtsklick eine Bearbeitungs-GUI fuer Item, Menge, Preis und Display-Typ.
 - PlayerShop-Hauptmenue mit allen Shops, eigener Shopliste und Suche.
@@ -198,6 +200,32 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `/trade on`
 - `/trade off`
 - `/asc` als saubere Noch-nicht-verfuegbar-Meldung
+
+### Permissions
+
+- `craftplayshop.use` - Grundrecht für `/shop` und das Hauptmenü.
+- `craftplayshop.admin` - Admin-Grundrecht für CraftplayShop.
+- `craftplayshop.reload` - `/shop reload` und `/cshop reload`.
+- `craftplayshop.servershop.use` - ServerShop öffnen.
+- `craftplayshop.servershop.buy` - Items im ServerShop kaufen.
+- `craftplayshop.servershop.sell` - Items im ServerShop verkaufen.
+- `craftplayshop.servershop.sellhand` - `/sellhand` und `/shop sellhand`.
+- `craftplayshop.servershop.sellall` - `/sellall` und `/shop sellall`.
+- `craftplayshop.servershop.sellgui` - `/sellgui` und `/shop sellgui`.
+- `craftplayshop.playershop.use` - PlayerShop-Menü, Shoplisten und Suche öffnen.
+- `craftplayshop.playershop.create` - Kistenshops erstellen.
+- `craftplayshop.playershop.buy` - Bei SELL-PlayerShops einkaufen.
+- `craftplayshop.playershop.sell` - An BUY-PlayerShops verkaufen.
+- `craftplayshop.playershop.edit` - Eigene PlayerShops per GUI bearbeiten.
+- `craftplayshop.playershop.admin` - Fremde PlayerShops administrativ bearbeiten oder löschen.
+- `craftplayshop.language` - Eigene Sprache umstellen.
+- `craftplayshop.trade.use` - DirectTrade-Befehl grundsätzlich nutzen.
+- `craftplayshop.trade.toggle` - `/trade toggle`, `/trade on`, `/trade off`.
+- `craftplayshop.trade.request` - Für spätere Handelsanfragen vorbereitet.
+- `craftplayshop.trade.accept` - Für spätere Annahme von Handelsanfragen vorbereitet.
+- `craftplayshop.autosellchest.use` - Für AutoSellChest vorbereitet.
+- `craftplayshop.autosellchest.create` - Für AutoSellChest-Erstellung vorbereitet.
+- `craftplayshop.autosellchest.admin` - Für AutoSellChest-Administration vorbereitet.
 
 ### DirectTrade Vorbereitung
 

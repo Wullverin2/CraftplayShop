@@ -15,16 +15,16 @@ settings:
   debug: false
 
 commands:
-  # Hauptbefehl, den du fuer CraftplayShop verwenden moechtest.
-  # In Phase 1 koennen die in plugin.yml registrierten Befehle genutzt werden:
+  # Hauptbefehl, den du für CraftplayShop verwenden möchtest.
+  # In Phase 1 können die in plugin.yml registrierten Befehle genutzt werden:
   # "cshop", "shop" oder "craftplayshop".
   # Beispiel: "cshop" => /cshop admin editor
   pluginCommand: "cshop"
 
 files:
-  # Wenn true, ergaenzt CraftplayShop beim Start und Reload vorhandene
+  # Wenn true, ergänzt CraftplayShop beim Start und Reload vorhandene
   # config-, language- und gui-Dateien automatisch um fehlende neue Keys.
-  # Bestehende Werte werden dabei nicht ueberschrieben.
+  # Bestehende Werte werden dabei nicht überschrieben.
   autoUpdateExisting: true
 
 economy:
@@ -99,13 +99,13 @@ serverShop:
   itemMatchMode: "MATERIAL_ONLY"
 
   amountSelection:
-    # Wenn true, steht die Mengenauswahl fuer spaetere GUI-Aktionen bereit.
-    # Der normale Spieler-Klick im ServerShop nutzt standardmaessig das EconomyShopGUI-System:
+    # Wenn true, steht die Mengenauswahl für spätere GUI-Aktionen bereit.
+    # Der normale Spieler-Klick im ServerShop nutzt standardmäßig das EconomyShopGUI-System:
     # Linksklick kauft 1, Shift-Linksklick kauft einen Stack, Rechtsklick verkauft 1,
     # Shift-Rechtsklick verkauft einen Stack.
     enabled: false
 
-    # Vorgegebene Mengen fuer Kaufen und Verkaufen.
+    # Vorgegebene Mengen für Kaufen und Verkaufen.
     amounts:
       - 1
       - 8
@@ -113,32 +113,32 @@ serverShop:
       - 32
       - 64
 
-    # Wenn true, koennen Spieler eine eigene Menge per Chat eingeben.
+    # Wenn true, können Spieler eine eigene Menge per Chat eingeben.
     allowCustomAmount: true
 
     # Maximale eigene Menge aus der Chat-Eingabe.
     maxCustomAmount: 64
 
   buyConfirmation:
-    # Wenn true, muessen teure Kaeufe im ServerShop bestaetigt werden.
+    # Wenn true, müssen teure Käufe im ServerShop bestätigt werden.
     enabled: true
 
-    # Ab welchem Gesamtpreis eine Bestaetigungs-GUI angezeigt wird.
+    # Ab welchem Gesamtpreis eine Bestätigungs-GUI angezeigt wird.
     threshold: 10000.0
 
   stock:
-    # Intervall, in dem geaenderter ServerShop-Stock gebuendelt in die Datenbank geschrieben wird.
-    # Beim Stoppen des Plugins wird zusaetzlich synchron gespeichert.
+    # Intervall, in dem geänderter ServerShop-Stock gebündelt in die Datenbank geschrieben wird.
+    # Beim Stoppen des Plugins wird zusätzlich synchron gespeichert.
     flushIntervalSeconds: 30
 
   sellProtection:
-    # Blockiert ServerShop-Verkaeufe aus dem Creative-Modus.
+    # Blockiert ServerShop-Verkäufe aus dem Creative-Modus.
     blockCreative: true
 
-    # Blockiert ServerShop-Verkaeufe aus dem Spectator-Modus.
+    # Blockiert ServerShop-Verkäufe aus dem Spectator-Modus.
     blockSpectator: true
 
-    # Blockiert den Verkauf beschaedigter Items.
+    # Blockiert den Verkauf beschädigter Items.
     # Wichtig bei MATERIAL_ONLY-Matching, damit abgenutzte Tools nicht wie neue Items verkauft werden.
     blockDamagedItems: true
 
@@ -155,7 +155,7 @@ serverShop:
       list: []
 
     gameModes:
-      # Wenn true, duerfen nur die unten genannten GameModes kaufen/verkaufen.
+      # Wenn true, dürfen nur die unten genannten GameModes kaufen/verkaufen.
       enabled: true
 
       buyAllowed:
@@ -168,10 +168,10 @@ serverShop:
 
 adminShop:
   backups:
-    # Erstellt vor Aenderungen ueber den Ingame-Editor ein Backup der server_shop.yml.
+    # Erstellt vor Änderungen über den Ingame-Editor ein Backup der server_shop.yml.
     enabled: true
 
-    # Unterordner im Plugin-Ordner fuer ServerShop-Backups.
+    # Unterordner im Plugin-Ordner für ServerShop-Backups.
     folder: "backups/server_shop"
 
     # Mindestabstand zwischen zwei automatischen Backups.
@@ -193,21 +193,25 @@ playerShops:
   enabled: true
   useGuiCreation: true
 
-  # Itemvergleich fuer PlayerShop-Kisten.
-  # EXACT prueft Material und ItemMeta, MATERIAL_ONLY nur das Material.
+  # Itemvergleich für PlayerShop-Kisten.
+  # EXACT prüft Material und ItemMeta, MATERIAL_ONLY nur das Material.
   itemMatchMode: "EXACT"
 
   creation:
-    # Spieler koennen mit Shift-Linksklick auf eine Kiste einen Chat-Assistenten starten.
+    # Standard-Display-Typ für neu erstellte Kistenshops.
+    # NONE, ITEM, GLASS_CASE, LARGE_ITEM oder ITEM_FRAME.
+    defaultDisplayType: ITEM
+
+    # Spieler können mit Shift-Linksklick auf eine Kiste einen Chat-Assistenten starten.
     chatCreationEnabled: true
 
-    # Material fuer automatisch gesetzte Shop-Schilder.
+    # Material für automatisch gesetzte Shop-Schilder.
     autoSignMaterial: OAK_WALL_SIGN
 
-    # Material fuer automatische stehende Schilder, wenn oben auf eine Kiste geklickt wird.
+    # Material für automatische stehende Schilder, wenn oben auf eine Kiste geklickt wird.
     autoStandingSignMaterial: OAK_SIGN
 
-    # Spieler koennen einen SELL-Kistenshop erstellen, indem sie ein Schild mit [shop]
+    # Spieler können einen SELL-Kistenshop erstellen, indem sie ein Schild mit [shop]
     # neben eine Kiste setzen. Zeile 2 = Menge, Zeile 3 = Preis.
     signCreationEnabled: true
 
@@ -221,16 +225,27 @@ playerShops:
       - "ankaufen"
 
   sign:
-    # Statusfarben und Statustexte fuer PlayerShop-Schilder.
-    # Bei SELL-Shops ist ein Shop verfuegbar, wenn genug passende Items in der Kiste liegen.
-    # Bei BUY-Shops ist ein Shop verfuegbar, wenn genug Platz in der Kiste ist und der Besitzer genug Geld hat.
+    # Statusfarben und Statustexte für PlayerShop-Schilder.
+    # Bei SELL-Shops ist ein Shop verfügbar, wenn genug passende Items in der Kiste liegen.
+    # Bei BUY-Shops ist ein Shop verfügbar, wenn genug Platz in der Kiste ist und der Besitzer genug Geld hat.
     status:
       availableColor: "&a"
       unavailableColor: "&c"
-      availableText: "Verfuegbar"
-      unavailableText: "Nicht verfuegbar"
+      availableText: "Verfügbar"
+      unavailableText: "Nicht verfügbar"
 
-    # Verfuegbare Schild-Platzhalter:
+    statusRefresh:
+      # Aktualisiert Shop-Schilder automatisch, wenn sich Kisteninhalte ändern.
+      # Zusätzlich werden Inventarklicks, Inventar-Schließen und Hopper-Bewegungen sofort nachgezogen.
+      enabled: true
+
+      # Wie oft Shop-Schilder im Hintergrund geprüft werden.
+      intervalTicks: 20
+
+      # Maximal aktualisierte Schilder pro Durchlauf.
+      maxSignsPerTick: 25
+
+    # Verfügbare Schild-Platzhalter:
     # %action% = Verkaufen oder Ankaufen
     # %action_en% = Selling oder Buying
     # %type% = SELL oder BUY
@@ -239,20 +254,20 @@ playerShops:
     # %item% = Itemname oder Material
     # %price% = formatierter Preis
     # %stock% = vorhandene passende Items in der Kiste
-    # %space% = freier Platz fuer passende Items in der Kiste
-    # %status% = verfuegbarer oder nicht verfuegbarer Statustext
+    # %space% = freier Platz für passende Items in der Kiste
+    # %status% = verfügbarer oder nicht verfügbarer Statustext
     # %available% = true oder false
     # %status_color% und %stock_color% = configured Statusfarbe
     # Alte [owner], [amount], [item], [price], [stock color] Platzhalter funktionieren weiterhin.
     sell:
-      # Schildtext fuer SELL-Shops nach dem Erstellen.
+      # Schildtext für SELL-Shops nach dem Erstellen.
       lines:
         - "%status_color%&l%action%"
         - "&f%amount%x %item%"
         - "&a%price%"
         - "&8%owner%"
     buy:
-      # Schildtext fuer BUY-Shops, die Items von Spielern ankaufen.
+      # Schildtext für BUY-Shops, die Items von Spielern ankaufen.
       lines:
         - "%status_color%&l%action%"
         - "&f%amount%x %item%"
@@ -267,8 +282,9 @@ playerShops:
         - "&8%owner%"
 
   display:
-    # Standard-Anzeige ueber neu erstellten Kistenshops.
+    # Standard-Anzeige über neu erstellten Kistenshops.
     # NONE, ITEM, GLASS_CASE, LARGE_ITEM oder ITEM_FRAME.
+    # Alias für ältere Configs. Neue Shops nutzen playerShops.creation.defaultDisplayType.
     defaultType: ITEM
 
     animation:
@@ -280,10 +296,10 @@ playerShops:
         intervalTicks: 1
 
         # Clientseitige Interpolation der Display-Transformation.
-        # Hoehere Werte wirken weicher, reagieren aber etwas traeger.
+        # Höhere Werte wirken weicher, reagieren aber etwas träger.
         interpolationTicks: 4
 
-        # Maximale Hoehe der Auf-/Ab-Bewegung in Bloecken.
+        # Maximale Höhe der Auf-/Ab-Bewegung in Blöcken.
         hoverAmplitude: 0.08
 
         # Geschwindigkeit der Auf-/Ab-Bewegung.
@@ -296,20 +312,20 @@ playerShops:
         maxAnimatedDisplaysPerTick: 150
 
   cleanup:
-    # Prueft regelmaessig, ob Kiste und Schild noch existieren.
+    # Prüft regelmäßig, ob Kiste und Schild noch existieren.
     # Fehlende physische Shops werden aus Cache und Datenbank entfernt.
     enabled: true
     intervalSeconds: 60
 
   protection:
-    # Blockiert das Oeffnen fremder PlayerShop-Kisten.
+    # Blockiert das Öffnen fremder PlayerShop-Kisten.
     blockContainerOpenByOthers: true
 
-    # Loescht einen PlayerShop automatisch, wenn Besitzer oder Admin Schild/Kiste abbauen.
+    # Löscht einen PlayerShop automatisch, wenn Besitzer oder Admin Schild/Kiste abbauen.
     deleteShopOnOwnerBreak: true
 
   plotsquared:
-    # Wenn PlotSquared vorhanden ist, werden PlayerShops innerhalb eines geloeschten Plots
+    # Wenn PlotSquared vorhanden ist, werden PlayerShops innerhalb eines gelöschten Plots
     # automatisch aus Cache und Datenbank entfernt.
     deleteShopsOnPlotDelete: true
 
