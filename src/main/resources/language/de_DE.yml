@@ -161,6 +161,22 @@ playerShop:
 floodgate:
   bedrockMenuOpened: "%prefix%&aDas Bedrock-Menue wurde geoeffnet."
   bedrockUnavailable: "%prefix%&cFloodgate-Formulare sind aktuell nicht verfuegbar."
+  serverShopTitle: "&8ServerShop"
+  serverShopContent: "&7Waehle eine Kategorie."
+  serverShopItemsContent: "&7Waehle ein Item."
+  playerShopTitle: "&8Spielershops"
+  playerShopContent: "&7Waehle eine Aktion."
+  playerShopAll: "&aAlle Spielershops"
+  playerShopOwn: "&eMeine Spielershops"
+  playerShopSearch: "&bSpielershop-Suche"
+  back: "&eZurueck"
+  disabled: "&cdeaktiviert"
+  buyOne: "&a1 kaufen"
+  buyStack: "&aStack kaufen"
+  sellOne: "&c1 verkaufen"
+  sellStack: "&cStack verkaufen"
+  itemPriceLine: "&7Kauf: %buy% &8| &7Verkauf: %sell%"
+  itemDetails: "&7Kaufpreis: &e%buy%\n&7Verkaufspreis: &e%sell%\n&7Material: &f%material%"
 
 autoSellChest:
   usage: "%prefix%&7Nutze: &e/asc&7, &e/asc create&7, &e/asc give <spieler> [menge]&7, &e/asc toggle&7, &e/asc remove"

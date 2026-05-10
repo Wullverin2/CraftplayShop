@@ -6,7 +6,7 @@ buttons:
     label: "&aServerShop"
     lore:
       - "&7Buy and sell items."
-    openGui: "servershop"
+    openForm: "servershop"
     permission: "craftplayshop.servershop.use"
   playershop:
     enabled: true
@@ -14,7 +14,7 @@ buttons:
     lore:
       - "&7Browse shops and manage"
       - "&7your chest shops."
-    openGui: "playershop"
+    openForm: "playershop"
     permission: "craftplayshop.playershop.use"
   auctionhouse:
     enabled: true

@@ -161,6 +161,22 @@ playerShop:
 floodgate:
   bedrockMenuOpened: "%prefix%&aThe Bedrock menu was opened."
   bedrockUnavailable: "%prefix%&cFloodgate forms are currently unavailable."
+  serverShopTitle: "&8ServerShop"
+  serverShopContent: "&7Choose a category."
+  serverShopItemsContent: "&7Choose an item."
+  playerShopTitle: "&8PlayerShops"
+  playerShopContent: "&7Choose an action."
+  playerShopAll: "&aAll PlayerShops"
+  playerShopOwn: "&eMy PlayerShops"
+  playerShopSearch: "&bPlayerShop search"
+  back: "&eBack"
+  disabled: "&cdisabled"
+  buyOne: "&aBuy 1"
+  buyStack: "&aBuy stack"
+  sellOne: "&cSell 1"
+  sellStack: "&cSell stack"
+  itemPriceLine: "&7Buy: %buy% &8| &7Sell: %sell%"
+  itemDetails: "&7Buy price: &e%buy%\n&7Sell price: &e%sell%\n&7Material: &f%material%"
 
 autoSellChest:
   usage: "%prefix%&7Use: &e/asc&7, &e/asc create&7, &e/asc give <player> [amount]&7, &e/asc toggle&7, &e/asc remove"

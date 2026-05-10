@@ -42,6 +42,8 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - PlaceholderAPI-Hook optional; CMI, Jobs Reborn und andere Expansions werden durchgereicht, wenn PlaceholderAPI sie bereitstellt.
 - HeadDatabase-Hook vorbereitet und optional.
 - Floodgate-Hook mit Bedrock-Hauptmenue per Formular fuer Floodgate-Spieler.
+- Bedrock-Spieler koennen den ServerShop nativ ueber Formulare bedienen: Kategorieauswahl, Itemauswahl und Kauf-/Verkaufsaktionen.
+- Bedrock-Spieler erhalten ein PlayerShop-Formular fuer alle Shops, eigene Shops und Suche.
 - GUI-Sicherheitslogik gegen Item-Entnahme, Drag, Shift-Click und Number-Key.
 
 ### Economy und Datenbank
