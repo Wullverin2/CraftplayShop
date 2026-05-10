@@ -1,5 +1,5 @@
 home:
-  title: "&8Player Shops"
+  title: "&8PlayerShops"
   size: 27
   buttons:
     allShops:
@@ -38,9 +38,9 @@ home:
       lore: []
 
 list:
-  allTitle: "&8All Player Shops %page%/%pages%"
-  ownTitle: "&8My Player Shops %page%/%pages%"
-  searchTitle: "&8Player Shop Search: %query% %page%/%pages%"
+  allTitle: "&8All PlayerShops %page%/%pages%"
+  ownTitle: "&8My PlayerShops %page%/%pages%"
+  searchTitle: "&8PlayerShop Search: %query% %page%/%pages%"
   size: 54
   shopSlots: [10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34]
   buttons:
@@ -68,14 +68,14 @@ list:
       enabled: true
       slot: 48
       material: ARROW
-      name: "&ePrevious Page"
+      name: "&ePrevious page"
       lore:
         - "&7Page &f%page%&7/&f%pages%"
     next:
       enabled: true
       slot: 50
       material: ARROW
-      name: "&eNext Page"
+      name: "&eNext page"
       lore:
         - "&7Page &f%page%&7/&f%pages%"
   emptyItem:
@@ -87,12 +87,13 @@ list:
   shopItem:
     name: "&e%item%"
     lore:
-      - "&7Type: &f%type_en%"
+      - "&7Type: &f%type%"
       - "&7Owner: &f%owner%"
       - "&7Amount: &e%amount%"
       - "&7Price: &a%price%"
       - "&7Trade: &e%trade_amount%x %trade_item%"
       - "&7In chest: &e%stock%"
+      - "&7Status: %active%"
       - "&7Coordinates: &f%world% %x% %y% %z%"
       - "&7Display: &f%display_type%"
       - ""
@@ -122,16 +123,18 @@ deleteConfirm:
       material: EMERALD_BLOCK
       name: "&aCancel"
       lore:
-        - "&7Back to shop list."
+        - "&7Back to the shop list."
 
 edit:
-  title: "&8Edit ChestShop"
+  title: "&8Edit chest shop"
   size: 27
   slots:
     item: 11
     amount: 13
     price: 15
+    status: 21
     display: 22
+    trust: 23
     close: 26
   items:
     item:
@@ -142,8 +145,8 @@ edit:
         - "&7Owner: &f%owner%"
         - "&7Trade item: &f%trade_item%"
         - ""
-        - "&eLeft click: set offered item"
-        - "&eRight click: set requested trade item"
+        - "&eLeft click: Set offered item"
+        - "&eRight click: Set requested item"
     amount:
       material: CLOCK
       name: "&eAmount"
@@ -159,19 +162,119 @@ edit:
       name: "&aPrice"
       lore:
         - "&7Current: &e%price%"
-        - "&7Trade shops use this as the requested amount."
+        - "&7Trade shops use this for the trade amount."
         - ""
         - "&aLeft click: +1"
         - "&aShift-left click: +10"
         - "&cRight click: -1"
         - "&cShift-right click: -10"
+    status:
+      material: LEVER
+      name: "&eStatus"
+      lore:
+        - "&7Current: %active%"
+        - ""
+        - "&eClick to toggle"
     display:
       material: ITEM_FRAME
       name: "&bDisplay"
       lore:
         - "&7Current: &e%display_type%"
         - ""
-        - "&eClick to switch"
+        - "&eClick to cycle"
+    trust:
+      material: WRITABLE_BOOK
+      name: "&dEmployees"
+      lore:
+        - "&7Trusted players: &e%trust_count%"
+        - ""
+        - "&eClick to manage"
+    close:
+      material: BARRIER
+      name: "&cClose"
+      lore: []
+
+trustList:
+  title: "&8Shop employees"
+  size: 36
+  entrySlots: [10, 11, 12, 13, 14, 15, 16]
+  slots:
+    add: 30
+    back: 32
+    close: 35
+  items:
+    entry:
+      material: PLAYER_HEAD
+      name: "&e%trust_player%"
+      lore:
+        - "&7Open chest: %trust_open%"
+        - "&7Manage shop: %trust_manage%"
+        - "&7Delete shop: %trust_delete%"
+        - ""
+        - "&eClick to edit"
+    empty:
+      slot: 13
+      material: BARRIER
+      name: "&cNo employees"
+      lore:
+        - "&7This shop does not have any"
+        - "&7trusted players yet."
+    add:
+      material: EMERALD
+      name: "&aAdd player"
+      lore:
+        - "&7Enter the name in chat."
+    back:
+      material: ARROW
+      name: "&eBack"
+      lore:
+        - "&7Back to the shop."
+    close:
+      material: BARRIER
+      name: "&cClose"
+      lore: []
+
+trustEdit:
+  title: "&8Edit employee"
+  size: 27
+  slots:
+    open: 11
+    manage: 13
+    delete: 15
+    remove: 18
+    back: 22
+    close: 26
+  items:
+    open:
+      material: CHEST
+      name: "&eOpen chest"
+      lore:
+        - "&7Current: %trust_open%"
+        - ""
+        - "&eClick to toggle"
+    manage:
+      material: ANVIL
+      name: "&bManage shop"
+      lore:
+        - "&7Current: %trust_manage%"
+        - ""
+        - "&eClick to toggle"
+    delete:
+      material: IRON_AXE
+      name: "&cDelete shop"
+      lore:
+        - "&7Current: %trust_delete%"
+        - ""
+        - "&eClick to toggle"
+    remove:
+      material: REDSTONE_BLOCK
+      name: "&cRemove employee"
+      lore:
+        - "&7Removes &e%trust_player%&7."
+    back:
+      material: ARROW
+      name: "&eBack"
+      lore: []
     close:
       material: BARRIER
       name: "&cClose"

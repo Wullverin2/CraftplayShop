@@ -67,6 +67,8 @@ permissions:
     default: true
   craftplayshop.playershop.edit:
     default: true
+  craftplayshop.playershop.trust:
+    default: true
   craftplayshop.playershop.admin:
     default: op
   craftplayshop.language:

@@ -1,0 +1,46 @@
+title: "&8CraftplayShop"
+content: "&7Waehle den Bereich, den du auf Bedrock oeffnen moechtest."
+buttons:
+  servershop:
+    enabled: true
+    label: "&aServerShop"
+    lore:
+      - "&7Kaufe und verkaufe Items."
+    openGui: "servershop"
+    permission: "craftplayshop.servershop.use"
+  playershop:
+    enabled: true
+    label: "&6Spielershops"
+    lore:
+      - "&7Suche Shops und verwalte"
+      - "&7deine Kistenshops."
+    openGui: "playershop"
+    permission: "craftplayshop.playershop.use"
+  auctionhouse:
+    enabled: true
+    label: "&6Auktionshaus"
+    lore:
+      - "&7Durchsuche globale Angebote."
+    openGui: "auctionhouse"
+    permission: "craftplayshop.auctionhouse.use"
+  rankshop:
+    enabled: true
+    label: "&dRankShop"
+    lore:
+      - "&7Kaufe Raenge und Upgrades."
+    openGui: "rankshop"
+    permission: "craftplayshop.rankshop.use"
+  permissionshop:
+    enabled: true
+    label: "&bPermissionShop"
+    lore:
+      - "&7Kaufe Rechte und Produkte."
+    openGui: "permissionshop"
+    permission: "craftplayshop.permissionshop.use"
+  referral:
+    enabled: true
+    label: "&bReferral"
+    lore:
+      - "&7Zeige Codes und loese sie ein."
+    openGui: "referral"
+    permission: "craftplayshop.referral.use"

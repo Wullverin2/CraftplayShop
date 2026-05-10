@@ -1,0 +1,46 @@
+title: "&8CraftplayShop"
+content: "&7Choose the area you want to open on Bedrock."
+buttons:
+  servershop:
+    enabled: true
+    label: "&aServerShop"
+    lore:
+      - "&7Buy and sell items."
+    openGui: "servershop"
+    permission: "craftplayshop.servershop.use"
+  playershop:
+    enabled: true
+    label: "&6PlayerShops"
+    lore:
+      - "&7Browse shops and manage"
+      - "&7your chest shops."
+    openGui: "playershop"
+    permission: "craftplayshop.playershop.use"
+  auctionhouse:
+    enabled: true
+    label: "&6AuctionHouse"
+    lore:
+      - "&7Browse global listings."
+    openGui: "auctionhouse"
+    permission: "craftplayshop.auctionhouse.use"
+  rankshop:
+    enabled: true
+    label: "&dRankShop"
+    lore:
+      - "&7Buy ranks and upgrades."
+    openGui: "rankshop"
+    permission: "craftplayshop.rankshop.use"
+  permissionshop:
+    enabled: true
+    label: "&bPermissionShop"
+    lore:
+      - "&7Buy permissions and products."
+    openGui: "permissionshop"
+    permission: "craftplayshop.permissionshop.use"
+  referral:
+    enabled: true
+    label: "&bReferral"
+    lore:
+      - "&7Show and redeem codes."
+    openGui: "referral"
+    permission: "craftplayshop.referral.use"

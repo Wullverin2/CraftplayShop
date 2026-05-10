@@ -144,6 +144,23 @@ playerShop:
   searchPrompt: "%prefix%&7Write an item, material, owner or shop type in chat. Write &ccancel &7to cancel."
   searchCancelled: "%prefix%&cPlayer shop search cancelled."
   teleported: "%prefix%&aYou have been teleported to the player shop."
+  trustDisabled: "%prefix%&cThe employee system for player shops is disabled."
+  trustAddPrompt: "%prefix%&7Type the employee player name in chat. &cCancel &7aborts."
+  trustAdded: "%prefix%&a%player% was added as an employee."
+  trustUpdated: "%prefix%&aEmployee rights for &e%player% &awere updated."
+  trustRemoved: "%prefix%&c%player% was removed from the shop."
+  trustOwnerBlocked: "%prefix%&cThe owner does not need to be added as an employee."
+  trustInvalidPlayer: "%prefix%&cThat player could not be found."
+  trustAlreadyExists: "%prefix%&c%player% is already listed as an employee."
+  inputCancelled: "%prefix%&cInput cancelled."
+  activated: "%prefix%&aThe player shop was activated."
+  deactivated: "%prefix%&cThe player shop was deactivated."
+  statusEnabled: "&aactive"
+  statusDisabled: "&cinactive"
+
+floodgate:
+  bedrockMenuOpened: "%prefix%&aThe Bedrock menu was opened."
+  bedrockUnavailable: "%prefix%&cFloodgate forms are currently unavailable."
 
 autoSellChest:
   usage: "%prefix%&7Use: &e/asc&7, &e/asc create&7, &e/asc give <player> [amount]&7, &e/asc toggle&7, &e/asc remove"

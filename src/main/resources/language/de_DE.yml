@@ -144,6 +144,23 @@ playerShop:
   searchPrompt: "%prefix%&7Schreibe ein Item, Material, Besitzer oder Shop-Typ in den Chat. Schreibe &ccancel &7zum Abbrechen."
   searchCancelled: "%prefix%&cSpielershop-Suche abgebrochen."
   teleported: "%prefix%&aDu wurdest zum Spielershop teleportiert."
+  trustDisabled: "%prefix%&cDas Mitarbeiter-System fuer Spielershops ist deaktiviert."
+  trustAddPrompt: "%prefix%&7Schreibe den Spielernamen fuer den Mitarbeiter in den Chat. &cAbbrechen &7bricht ab."
+  trustAdded: "%prefix%&a%player% wurde als Mitarbeiter hinzugefuegt."
+  trustUpdated: "%prefix%&aDie Mitarbeiterrechte fuer &e%player% &awurden aktualisiert."
+  trustRemoved: "%prefix%&c%player% wurde aus dem Shop entfernt."
+  trustOwnerBlocked: "%prefix%&cDer Besitzer muss nicht als Mitarbeiter hinzugefuegt werden."
+  trustInvalidPlayer: "%prefix%&cDieser Spieler wurde nicht gefunden."
+  trustAlreadyExists: "%prefix%&c%player% ist bereits als Mitarbeiter eingetragen."
+  inputCancelled: "%prefix%&cEingabe abgebrochen."
+  activated: "%prefix%&aDer Spielershop wurde aktiviert."
+  deactivated: "%prefix%&cDer Spielershop wurde deaktiviert."
+  statusEnabled: "&aaktiv"
+  statusDisabled: "&cinaktiv"
+
+floodgate:
+  bedrockMenuOpened: "%prefix%&aDas Bedrock-Menue wurde geoeffnet."
+  bedrockUnavailable: "%prefix%&cFloodgate-Formulare sind aktuell nicht verfuegbar."
 
 autoSellChest:
   usage: "%prefix%&7Nutze: &e/asc&7, &e/asc create&7, &e/asc give <spieler> [menge]&7, &e/asc toggle&7, &e/asc remove"

@@ -364,6 +364,16 @@ playerShops:
     # automatisch aus Cache und Datenbank entfernt.
     deleteShopsOnPlotDelete: true
 
+  trust:
+    # Aktiviert Mitarbeiter fuer Spielershops.
+    enabled: true
+
+    # Standardrechte fuer neu hinzugefuegte Mitarbeiter.
+    defaultRights:
+      open: true
+      manage: false
+      delete: false
+
 autoSellChest:
   # Aktiviert AutoSellChest. Bestehende Configs behalten ihren Wert und können hier auf true gesetzt werden.
   enabled: true
@@ -884,6 +894,19 @@ integrations:
 
   floodgate:
     enabled: true
+
+    forms:
+      # Aktiviert Bedrock-spezifische Floodgate-Formulare.
+      enabled: true
+
+      # Wenn true, erhalten Floodgate-Spieler nach dem Joinen automatisch das Hauptmenue.
+      openMainOnJoin: false
+
+      # Wenn true, oeffnet /shop fuer Floodgate-Spieler zuerst das Bedrock-Menue.
+      preferFormsForShopCommand: true
+
+      # Verzoegerung nach dem Join, bevor das Formular gesendet wird.
+      joinDelayTicks: 40
 
   discord:
     enabled: false

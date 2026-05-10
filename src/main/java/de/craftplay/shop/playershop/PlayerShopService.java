@@ -74,6 +74,7 @@ public class PlayerShopService implements Listener {
     private final Map<String, PendingCreation> pendingCreations = new HashMap<>();
     private final Map<UUID, ChatCreation> chatCreations = new HashMap<>();
     private final Map<UUID, Boolean> searchInputs = new HashMap<>();
+    private final Map<UUID, Long> pendingTrustAdds = new HashMap<>();
     private BukkitTask cleanupTask;
     private BukkitTask displayAnimationTask;
     private BukkitTask signStatusTask;
@@ -170,6 +171,12 @@ public class PlayerShopService implements Listener {
         }
     }
 
+    public boolean hasTrustAddInput(Player player) {
+        synchronized (pendingTrustAdds) {
+            return pendingTrustAdds.containsKey(player.getUniqueId());
+        }
+    }
+
     public void handleSearchInput(Player player, String message) {
         synchronized (searchInputs) {
             searchInputs.remove(player.getUniqueId());
@@ -180,6 +187,62 @@ public class PlayerShopService implements Listener {
             return;
         }
         openList(player, PlayerShopMenuView.SEARCH, query, 0);
+    }
+
+    private void requestTrustAdd(Player player, PlayerShop shop) {
+        if (!player.hasPermission(PermissionNodes.PLAYER_SHOP_TRUST) && !player.hasPermission(PermissionNodes.PLAYER_SHOP_ADMIN)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        synchronized (pendingTrustAdds) {
+            pendingTrustAdds.put(player.getUniqueId(), shop.id());
+        }
+        player.closeInventory();
+        plugin.getLanguageService().send(player, "playerShop.trustAddPrompt");
+    }
+
+    private void handleTrustAddInput(Player player, String message) {
+        Long shopId;
+        synchronized (pendingTrustAdds) {
+            shopId = pendingTrustAdds.remove(player.getUniqueId());
+        }
+        if (shopId == null) {
+            return;
+        }
+        String input = message == null ? "" : message.trim();
+        if (input.equalsIgnoreCase("cancel") || input.equalsIgnoreCase("abbrechen")) {
+            plugin.getLanguageService().send(player, "playerShop.inputCancelled");
+            return;
+        }
+        PlayerShop shop = findById(shopId);
+        if (shop == null) {
+            plugin.getLanguageService().send(player, "playerShop.missingContainer");
+            return;
+        }
+        if (!canManage(player, shop)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        OfflinePlayer target = Bukkit.getPlayerExact(input);
+        if (target == null) {
+            target = Bukkit.getOfflinePlayer(input);
+            if ((!target.hasPlayedBefore() && !target.isOnline()) || target.getName() == null) {
+                plugin.getLanguageService().send(player, "playerShop.trustInvalidPlayer");
+                return;
+            }
+        }
+        if (target.getUniqueId().equals(shop.ownerUuid())) {
+            plugin.getLanguageService().send(player, "playerShop.trustOwnerBlocked");
+            return;
+        }
+        if (plugin.getPlayerShopTrustService().find(shop.id(), target.getUniqueId()) != null) {
+            plugin.getLanguageService().send(player, "playerShop.trustAlreadyExists", Map.of("player", target.getName()));
+            openTrustList(player, shop);
+            return;
+        }
+        plugin.getPlayerShopTrustService().add(shop.id(), target.getUniqueId(), target.getName());
+        plugin.getLanguageService().send(player, "playerShop.trustAdded", Map.of("player", target.getName()));
+        openTrustList(player, shop);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -365,6 +428,12 @@ public class PlayerShopService implements Listener {
             creation = chatCreations.get(event.getPlayer().getUniqueId());
         }
         if (creation == null) {
+            if (hasTrustAddInput(event.getPlayer())) {
+                event.setCancelled(true);
+                String message = event.getMessage();
+                plugin.getTaskService().runSync(() -> handleTrustAddInput(event.getPlayer(), message));
+                return;
+            }
             if (hasSearchInput(event.getPlayer())) {
                 event.setCancelled(true);
                 String message = event.getMessage();
@@ -385,7 +454,7 @@ public class PlayerShopService implements Listener {
             return;
         }
         PlayerShop shop = findByInventory(event.getInventory());
-        if (shop == null || canManage(player, shop)) {
+        if (shop == null || canOpenContainer(player, shop)) {
             return;
         }
         event.setCancelled(true);
@@ -399,6 +468,18 @@ public class PlayerShopService implements Listener {
                 && event.getWhoClicked() instanceof Player player) {
             event.setCancelled(true);
             handleDeleteConfirmClick(player, holder, event);
+            return;
+        }
+        if (event.getInventory().getHolder() instanceof PlayerShopTrustListHolder holder
+                && event.getWhoClicked() instanceof Player player) {
+            event.setCancelled(true);
+            handleTrustListClick(player, holder, event);
+            return;
+        }
+        if (event.getInventory().getHolder() instanceof PlayerShopTrustEditHolder holder
+                && event.getWhoClicked() instanceof Player player) {
+            event.setCancelled(true);
+            handleTrustEditClick(player, holder, event);
             return;
         }
         if (event.getInventory().getHolder() instanceof PlayerShopMenuHolder holder
@@ -429,6 +510,8 @@ public class PlayerShopService implements Listener {
         int amountSlot = slot(gui, "edit.slots.amount", 13);
         int priceSlot = slot(gui, "edit.slots.price", 15);
         int displaySlot = slot(gui, "edit.slots.display", 22);
+        int statusSlot = slot(gui, "edit.slots.status", 21);
+        int trustSlot = slot(gui, "edit.slots.trust", 23);
         int closeSlot = slot(gui, "edit.slots.close", 26);
         if (slot == itemSlot) {
             ItemStack cursor = event.getCursor();
@@ -474,6 +557,14 @@ public class PlayerShopService implements Listener {
             updateShop(player, shop, shop.itemStack(), shop.amount(), shop.price(), nextDisplayType(shop.displayType()));
             return;
         }
+        if (slot == statusSlot) {
+            toggleActive(player, shop);
+            return;
+        }
+        if (slot == trustSlot) {
+            openTrustList(player, shop);
+            return;
+        }
         if (slot == closeSlot) {
             player.closeInventory();
         }
@@ -482,6 +573,8 @@ public class PlayerShopService implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryDrag(InventoryDragEvent event) {
         if (event.getInventory().getHolder() instanceof PlayerShopEditHolder
+                || event.getInventory().getHolder() instanceof PlayerShopTrustListHolder
+                || event.getInventory().getHolder() instanceof PlayerShopTrustEditHolder
                 || event.getInventory().getHolder() instanceof PlayerShopMenuHolder
                 || event.getInventory().getHolder() instanceof PlayerShopDeleteHolder) {
             event.setCancelled(true);
@@ -523,7 +616,7 @@ public class PlayerShopService implements Listener {
             return;
         }
         Player player = event.getPlayer();
-        if (!canManage(player, shop) || !plugin.getProtectionService().canBreakShop(player, shop.containerLocation())) {
+        if (!canDelete(player, shop)) {
             event.setCancelled(true);
             plugin.getLanguageService().send(player, "playerShop.breakProtected");
             return;
@@ -915,6 +1008,7 @@ public class PlayerShopService implements Listener {
         synchronized (byContainer) {
             uncache(shop);
         }
+        plugin.getPlayerShopTrustService().removeAll(shop.id());
         plugin.getTaskService().runAsync(() -> deleteOne(shop.id()));
     }
 
@@ -932,12 +1026,20 @@ public class PlayerShopService implements Listener {
 
     private void deleteMany(List<PlayerShop> shops) {
         String table = plugin.getDatabaseService().table("player_shops");
+        String trustTable = plugin.getDatabaseService().table("player_shop_trust");
+        for (PlayerShop shop : shops) {
+            plugin.getPlayerShopTrustService().forget(shop.id());
+        }
         synchronized (plugin.getDatabaseService().lock()) {
-            try (PreparedStatement statement = plugin.getDatabaseService().connection().prepareStatement("DELETE FROM " + table + " WHERE id = ?")) {
+            try (PreparedStatement trustStatement = plugin.getDatabaseService().connection().prepareStatement("DELETE FROM " + trustTable + " WHERE shop_id = ?");
+                 PreparedStatement statement = plugin.getDatabaseService().connection().prepareStatement("DELETE FROM " + table + " WHERE id = ?")) {
                 for (PlayerShop shop : shops) {
+                    trustStatement.setLong(1, shop.id());
+                    trustStatement.addBatch();
                     statement.setLong(1, shop.id());
                     statement.addBatch();
                 }
+                trustStatement.executeBatch();
                 statement.executeBatch();
             } catch (SQLException exception) {
                 plugin.getPluginLogService().error("Could not delete player shops in PlotSquared region.", exception);
@@ -1016,14 +1118,70 @@ public class PlayerShopService implements Listener {
             return;
         }
         YamlConfiguration gui = gui(player);
-        Map<String, String> placeholders = shopPlaceholders(shop);
+        Map<String, String> placeholders = shopPlaceholders(player, shop);
         Inventory inventory = Bukkit.createInventory(new PlayerShopEditHolder(shop.id()), size(gui, "edit.size", 27),
                 title(player, gui, "edit.title", plugin.getLanguageService().get(player, "playerShop.editTitle"), placeholders));
         inventory.setItem(slot(gui, "edit.slots.item", 11), editItem(player, gui, shop, placeholders));
         inventory.setItem(slot(gui, "edit.slots.amount", 13), configuredItem(player, gui.getConfigurationSection("edit.items.amount"), placeholders));
         inventory.setItem(slot(gui, "edit.slots.price", 15), configuredItem(player, gui.getConfigurationSection("edit.items.price"), placeholders));
+        inventory.setItem(slot(gui, "edit.slots.status", 21), configuredItem(player, gui.getConfigurationSection("edit.items.status"), placeholders));
         inventory.setItem(slot(gui, "edit.slots.display", 22), configuredItem(player, gui.getConfigurationSection("edit.items.display"), placeholders));
+        inventory.setItem(slot(gui, "edit.slots.trust", 23), configuredItem(player, gui.getConfigurationSection("edit.items.trust"), placeholders));
         inventory.setItem(slot(gui, "edit.slots.close", 26), configuredItem(player, gui.getConfigurationSection("edit.items.close"), placeholders));
+        player.openInventory(inventory);
+    }
+
+    private void openTrustList(Player player, PlayerShop shop) {
+        if (!player.hasPermission(PermissionNodes.PLAYER_SHOP_TRUST) && !player.hasPermission(PermissionNodes.PLAYER_SHOP_ADMIN)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        if (!plugin.getPlayerShopTrustService().enabled()) {
+            plugin.getLanguageService().send(player, "playerShop.trustDisabled");
+            return;
+        }
+        YamlConfiguration gui = gui(player);
+        Map<String, String> placeholders = shopPlaceholders(player, shop);
+        List<PlayerShopTrustEntry> trusted = plugin.getPlayerShopTrustService().trusted(shop.id());
+        PlayerShopTrustListHolder holder = new PlayerShopTrustListHolder(shop.id());
+        Inventory inventory = Bukkit.createInventory(holder, size(gui, "trustList.size", 36),
+                title(player, gui, "trustList.title", "&8Shop-Mitarbeiter", placeholders));
+        List<Integer> slots = gui.getIntegerList("trustList.entrySlots");
+        if (slots.isEmpty()) {
+            slots = List.of(10, 11, 12, 13, 14, 15, 16);
+        }
+        int index = 0;
+        for (PlayerShopTrustEntry entry : trusted) {
+            if (index >= slots.size()) {
+                break;
+            }
+            int slot = slots.get(index++);
+            holder.entries().put(slot, entry.playerUuid());
+            inventory.setItem(slot, configuredItem(player, gui.getConfigurationSection("trustList.items.entry"), trustPlaceholders(player, shop, entry)));
+        }
+        if (trusted.isEmpty()) {
+            ConfigurationSection empty = gui.getConfigurationSection("trustList.items.empty");
+            if (empty != null) {
+                inventory.setItem(empty.getInt("slot", 13), configuredItem(player, empty, placeholders));
+            }
+        }
+        inventory.setItem(slot(gui, "trustList.slots.add", 30), configuredItem(player, gui.getConfigurationSection("trustList.items.add"), placeholders));
+        inventory.setItem(slot(gui, "trustList.slots.back", 32), configuredItem(player, gui.getConfigurationSection("trustList.items.back"), placeholders));
+        inventory.setItem(slot(gui, "trustList.slots.close", 35), configuredItem(player, gui.getConfigurationSection("trustList.items.close"), placeholders));
+        player.openInventory(inventory);
+    }
+
+    private void openTrustEdit(Player player, PlayerShop shop, PlayerShopTrustEntry entry) {
+        YamlConfiguration gui = gui(player);
+        Map<String, String> placeholders = trustPlaceholders(player, shop, entry);
+        Inventory inventory = Bukkit.createInventory(new PlayerShopTrustEditHolder(shop.id(), entry.playerUuid()), size(gui, "trustEdit.size", 27),
+                title(player, gui, "trustEdit.title", "&8Mitarbeiter bearbeiten", placeholders));
+        inventory.setItem(slot(gui, "trustEdit.slots.open", 11), configuredItem(player, gui.getConfigurationSection("trustEdit.items.open"), placeholders));
+        inventory.setItem(slot(gui, "trustEdit.slots.manage", 13), configuredItem(player, gui.getConfigurationSection("trustEdit.items.manage"), placeholders));
+        inventory.setItem(slot(gui, "trustEdit.slots.delete", 15), configuredItem(player, gui.getConfigurationSection("trustEdit.items.delete"), placeholders));
+        inventory.setItem(slot(gui, "trustEdit.slots.remove", 18), configuredItem(player, gui.getConfigurationSection("trustEdit.items.remove"), placeholders));
+        inventory.setItem(slot(gui, "trustEdit.slots.back", 22), configuredItem(player, gui.getConfigurationSection("trustEdit.items.back"), placeholders));
+        inventory.setItem(slot(gui, "trustEdit.slots.close", 26), configuredItem(player, gui.getConfigurationSection("trustEdit.items.close"), placeholders));
         player.openInventory(inventory);
     }
 
@@ -1039,7 +1197,7 @@ public class PlayerShopService implements Listener {
             slots = List.of(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34);
         }
         List<PlayerShop> shops = shopsForView(player, view, query).stream()
-                .filter(PlayerShop::active)
+                .filter(shop -> view == PlayerShopMenuView.OWN || shop.active())
                 .sorted(Comparator.comparing(PlayerShop::ownerName).thenComparing(PlayerShop::material).thenComparingLong(PlayerShop::id))
                 .toList();
         int perPage = Math.max(1, slots.size());
@@ -1121,7 +1279,7 @@ public class PlayerShopService implements Listener {
             return;
         }
         if (event.isShiftClick() && event.isLeftClick()) {
-            if (!canManage(player, shop)) {
+            if (!canDelete(player, shop)) {
                 plugin.getLanguageService().send(player, "general.noPermission");
                 return;
             }
@@ -1143,7 +1301,7 @@ public class PlayerShopService implements Listener {
 
     private void openDeleteConfirm(Player player, PlayerShop shop, PlayerShopMenuHolder returnHolder) {
         YamlConfiguration gui = gui(player);
-        Map<String, String> placeholders = shopPlaceholders(shop);
+        Map<String, String> placeholders = shopPlaceholders(player, shop);
         placeholders = new HashMap<>(placeholders);
         placeholders.put("page", Integer.toString(returnHolder.page() + 1));
         placeholders.put("pages", Integer.toString(returnHolder.totalPages()));
@@ -1182,7 +1340,7 @@ public class PlayerShopService implements Listener {
             openList(player, holder.returnView(), holder.query(), holder.page());
             return;
         }
-        if (!canManage(player, shop)) {
+        if (!canDelete(player, shop)) {
             plugin.getLanguageService().send(player, "general.noPermission");
             openList(player, holder.returnView(), holder.query(), holder.page());
             return;
@@ -1190,6 +1348,93 @@ public class PlayerShopService implements Listener {
         deleteShop(shop);
         plugin.getLanguageService().send(player, "playerShop.deleted");
         openList(player, holder.returnView(), holder.query(), holder.page());
+    }
+
+    private void handleTrustListClick(Player player, PlayerShopTrustListHolder holder, InventoryClickEvent event) {
+        PlayerShop shop = findById(holder.shopId());
+        if (shop == null) {
+            player.closeInventory();
+            plugin.getLanguageService().send(player, "playerShop.missingContainer");
+            return;
+        }
+        if (!canManage(player, shop)) {
+            player.closeInventory();
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        YamlConfiguration gui = gui(player);
+        int slot = event.getRawSlot();
+        if (slot == slot(gui, "trustList.slots.add", 30)) {
+            requestTrustAdd(player, shop);
+            return;
+        }
+        if (slot == slot(gui, "trustList.slots.back", 32)) {
+            openEditGui(player, shop);
+            return;
+        }
+        if (slot == slot(gui, "trustList.slots.close", 35)) {
+            player.closeInventory();
+            return;
+        }
+        UUID target = holder.entries().get(slot);
+        if (target == null) {
+            return;
+        }
+        PlayerShopTrustEntry entry = plugin.getPlayerShopTrustService().find(shop.id(), target);
+        if (entry == null) {
+            openTrustList(player, shop);
+            return;
+        }
+        openTrustEdit(player, shop, entry);
+    }
+
+    private void handleTrustEditClick(Player player, PlayerShopTrustEditHolder holder, InventoryClickEvent event) {
+        PlayerShop shop = findById(holder.shopId());
+        if (shop == null) {
+            player.closeInventory();
+            plugin.getLanguageService().send(player, "playerShop.missingContainer");
+            return;
+        }
+        if (!canManage(player, shop)) {
+            player.closeInventory();
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return;
+        }
+        PlayerShopTrustEntry entry = plugin.getPlayerShopTrustService().find(shop.id(), holder.playerUuid());
+        if (entry == null) {
+            openTrustList(player, shop);
+            return;
+        }
+        YamlConfiguration gui = gui(player);
+        int slot = event.getRawSlot();
+        if (slot == slot(gui, "trustEdit.slots.open", 11)) {
+            saveTrust(player, shop, new PlayerShopTrustEntry(entry.shopId(), entry.playerUuid(), entry.playerName(),
+                    !entry.openAllowed(), entry.manageAllowed(), entry.deleteAllowed(), entry.createdAt(), System.currentTimeMillis()));
+            return;
+        }
+        if (slot == slot(gui, "trustEdit.slots.manage", 13)) {
+            saveTrust(player, shop, new PlayerShopTrustEntry(entry.shopId(), entry.playerUuid(), entry.playerName(),
+                    entry.openAllowed(), !entry.manageAllowed(), entry.deleteAllowed(), entry.createdAt(), System.currentTimeMillis()));
+            return;
+        }
+        if (slot == slot(gui, "trustEdit.slots.delete", 15)) {
+            saveTrust(player, shop, new PlayerShopTrustEntry(entry.shopId(), entry.playerUuid(), entry.playerName(),
+                    entry.openAllowed(), entry.manageAllowed(), !entry.deleteAllowed(), entry.createdAt(), System.currentTimeMillis()));
+            return;
+        }
+        if (slot == slot(gui, "trustEdit.slots.remove", 18)) {
+            plugin.getPlayerShopTrustService().remove(shop.id(), entry.playerUuid());
+            plugin.getLanguageService().send(player, "playerShop.trustRemoved", Map.of("player", entry.playerName()));
+            openTrustList(player, shop);
+            return;
+        }
+        if (slot == slot(gui, "trustEdit.slots.back", 22)) {
+            openTrustList(player, shop);
+            return;
+        }
+        if (slot == slot(gui, "trustEdit.slots.close", 26)) {
+            player.closeInventory();
+        }
     }
 
     private List<PlayerShop> snapshotShops() {
@@ -1236,7 +1481,7 @@ public class PlayerShopService implements Listener {
         ConfigurationSection section = gui.getConfigurationSection("list.shopItem");
         ItemMeta meta = itemStack.getItemMeta();
         if (meta != null && section != null) {
-            Map<String, String> placeholders = shopPlaceholders(shop);
+            Map<String, String> placeholders = shopPlaceholders(player, shop);
             meta.setDisplayName(TextUtil.color(applyPlaceholders(player, section.getString("name", "%item%"), placeholders)));
             List<String> lore = new ArrayList<>();
             for (String line : section.getStringList("lore")) {
@@ -1284,8 +1529,9 @@ public class PlayerShopService implements Listener {
         return itemStack;
     }
 
-    private Map<String, String> shopPlaceholders(PlayerShop shop) {
+    private Map<String, String> shopPlaceholders(Player player, PlayerShop shop) {
         int stock = matchingStock(shop);
+        int trustCount = plugin.getPlayerShopTrustService().trusted(shop.id()).size();
         return Map.ofEntries(
                 Map.entry("id", Long.toString(shop.id())),
                 Map.entry("item", displayItem(shop.itemStack())),
@@ -1312,8 +1558,29 @@ public class PlayerShopService implements Listener {
                 Map.entry("x", Integer.toString(shop.containerX())),
                 Map.entry("y", Integer.toString(shop.containerY())),
                 Map.entry("z", Integer.toString(shop.containerZ())),
-                Map.entry("display_type", shop.displayType().name())
+                Map.entry("display_type", shop.displayType().name()),
+                Map.entry("active", shop.active()
+                        ? plugin.getLanguageService().get(player, "playerShop.statusEnabled")
+                        : plugin.getLanguageService().get(player, "playerShop.statusDisabled")),
+                Map.entry("active_raw", Boolean.toString(shop.active())),
+                Map.entry("trust_count", Integer.toString(trustCount))
         );
+    }
+
+    private Map<String, String> trustPlaceholders(Player player, PlayerShop shop, PlayerShopTrustEntry entry) {
+        Map<String, String> placeholders = new HashMap<>(shopPlaceholders(player, shop));
+        placeholders.put("trust_player", entry.playerName());
+        placeholders.put("trust_uuid", entry.playerUuid().toString());
+        placeholders.put("trust_open", entry.openAllowed()
+                ? plugin.getLanguageService().get(player, "playerShop.statusEnabled")
+                : plugin.getLanguageService().get(player, "playerShop.statusDisabled"));
+        placeholders.put("trust_manage", entry.manageAllowed()
+                ? plugin.getLanguageService().get(player, "playerShop.statusEnabled")
+                : plugin.getLanguageService().get(player, "playerShop.statusDisabled"));
+        placeholders.put("trust_delete", entry.deleteAllowed()
+                ? plugin.getLanguageService().get(player, "playerShop.statusEnabled")
+                : plugin.getLanguageService().get(player, "playerShop.statusDisabled"));
+        return placeholders;
     }
 
     private int matchingStock(PlayerShop shop) {
@@ -1441,12 +1708,35 @@ public class PlayerShopService implements Listener {
         plugin.getLanguageService().send(player, "playerShop.updated");
     }
 
+    private void toggleActive(Player player, PlayerShop oldShop) {
+        long now = System.currentTimeMillis();
+        PlayerShop updated = new PlayerShop(oldShop.id(), oldShop.ownerUuid(), oldShop.ownerName(), oldShop.type(),
+                oldShop.world(), oldShop.containerX(), oldShop.containerY(), oldShop.containerZ(),
+                oldShop.signX(), oldShop.signY(), oldShop.signZ(), oldShop.itemStack(), oldShop.material(), oldShop.amount(), oldShop.price(),
+                oldShop.tradeItemStack(), oldShop.tradeMaterial(), oldShop.tradeAmount(), oldShop.displayType(), !oldShop.active(), oldShop.createdAt(), now);
+        synchronized (byContainer) {
+            uncache(oldShop);
+            cache(updated);
+        }
+        updateSign(updated);
+        spawnDisplay(updated);
+        saveShopAsync(updated);
+        openEditGui(player, updated);
+        plugin.getLanguageService().send(player, updated.active() ? "playerShop.activated" : "playerShop.deactivated");
+    }
+
+    private void saveTrust(Player player, PlayerShop shop, PlayerShopTrustEntry entry) {
+        plugin.getPlayerShopTrustService().save(entry);
+        plugin.getLanguageService().send(player, "playerShop.trustUpdated", Map.of("player", entry.playerName()));
+        openTrustEdit(player, shop, entry);
+    }
+
     private void saveShopAsync(PlayerShop shop) {
         plugin.getTaskService().runAsync(() -> {
             String table = plugin.getDatabaseService().table("player_shops");
             synchronized (plugin.getDatabaseService().lock()) {
                 try (PreparedStatement statement = plugin.getDatabaseService().connection().prepareStatement(
-                        "UPDATE " + table + " SET item_data = ?, material = ?, amount = ?, price = ?, trade_item_data = ?, trade_material = ?, trade_amount = ?, display_type = ?, updated_at = ? WHERE id = ?")) {
+                        "UPDATE " + table + " SET item_data = ?, material = ?, amount = ?, price = ?, trade_item_data = ?, trade_material = ?, trade_amount = ?, display_type = ?, active = ?, updated_at = ? WHERE id = ?")) {
                     statement.setString(1, plugin.getItemSerializer().serialize(shop.itemStack()));
                     statement.setString(2, shop.material());
                     statement.setInt(3, shop.amount());
@@ -1455,8 +1745,9 @@ public class PlayerShopService implements Listener {
                     statement.setString(6, shop.tradeMaterial());
                     statement.setInt(7, shop.tradeAmount());
                     statement.setString(8, shop.displayType().name());
-                    statement.setLong(9, shop.updatedAt());
-                    statement.setLong(10, shop.id());
+                    statement.setBoolean(9, shop.active());
+                    statement.setLong(10, shop.updatedAt());
+                    statement.setLong(11, shop.id());
                     statement.executeUpdate();
                 } catch (SQLException exception) {
                     plugin.getPluginLogService().error("Could not update player shop.", exception);
@@ -1530,8 +1821,18 @@ public class PlayerShopService implements Listener {
     }
 
     private boolean canManage(Player player, PlayerShop shop) {
-        boolean ownerOrAdmin = player.getUniqueId().equals(shop.ownerUuid()) || player.hasPermission(PermissionNodes.PLAYER_SHOP_ADMIN);
-        return ownerOrAdmin && plugin.getProtectionService().canEditShop(player, shop.containerLocation());
+        return plugin.getPlayerShopTrustService().canManage(player, shop)
+                && plugin.getProtectionService().canEditShop(player, shop.containerLocation());
+    }
+
+    private boolean canDelete(Player player, PlayerShop shop) {
+        return plugin.getPlayerShopTrustService().canDelete(player, shop)
+                && plugin.getProtectionService().canBreakShop(player, shop.containerLocation());
+    }
+
+    private boolean canOpenContainer(Player player, PlayerShop shop) {
+        return plugin.getPlayerShopTrustService().canOpen(player, shop)
+                && plugin.getProtectionService().canUseShop(player, shop.containerLocation());
     }
 
     private Block findAdjacentContainer(Block signBlock) {
@@ -1974,7 +2275,7 @@ public class PlayerShopService implements Listener {
         boolean available = false;
         int stock = 0;
         int space = 0;
-        if (shop != null) {
+        if (shop != null && shop.active()) {
             BlockState state = shop.containerLocation().getBlock().getState();
             if (state instanceof Container container) {
                 stock = countMatching(container.getInventory(), shop.itemStack());

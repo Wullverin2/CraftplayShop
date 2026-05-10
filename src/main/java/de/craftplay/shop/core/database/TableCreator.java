@@ -78,6 +78,17 @@ public class TableCreator {
                 addColumnIfMissing(statement, database.table("player_shops"), "trade_material", "TEXT");
                 addColumnIfMissing(statement, database.table("player_shops"), "trade_amount", "INTEGER");
 
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("player_shop_trust") + " (" +
+                        "shop_id INTEGER, " +
+                        uuidColumn("player_uuid") + ", " +
+                        shortTextColumn("player_name") + ", " +
+                        "open_allowed BOOLEAN, " +
+                        "manage_allowed BOOLEAN, " +
+                        "delete_allowed BOOLEAN, " +
+                        "created_at BIGINT, " +
+                        "updated_at BIGINT, " +
+                        "PRIMARY KEY (shop_id, player_uuid))");
+
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("autosell_chests") + " (" +
                         idColumn() + ", " +
                         uuidColumn("owner_uuid") + ", " +

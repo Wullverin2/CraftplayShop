@@ -237,6 +237,26 @@ public class ConfigService {
         return config().getBoolean("playerShops.enabled", true);
     }
 
+    public boolean floodgateEnabled() {
+        return config().getBoolean("integrations.floodgate.enabled", true);
+    }
+
+    public boolean floodgateFormsEnabled() {
+        return config().getBoolean("integrations.floodgate.forms.enabled", true);
+    }
+
+    public boolean floodgateOpenMainOnJoin() {
+        return config().getBoolean("integrations.floodgate.forms.openMainOnJoin", false);
+    }
+
+    public boolean floodgatePreferFormsForShopCommand() {
+        return config().getBoolean("integrations.floodgate.forms.preferFormsForShopCommand", true);
+    }
+
+    public long floodgateJoinDelayTicks() {
+        return Math.max(1L, config().getLong("integrations.floodgate.forms.joinDelayTicks", 40L));
+    }
+
     public boolean autoSellChestEnabled() {
         return config().getBoolean("autoSellChest.enabled", false);
     }

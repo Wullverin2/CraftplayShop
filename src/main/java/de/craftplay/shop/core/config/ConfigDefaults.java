@@ -14,6 +14,7 @@ public final class ConfigDefaults {
             "directtrade.yml",
             "autosellchest.yml",
             "playershop.yml",
+            "bedrock_main.yml",
             "rankshop.yml",
             "permissionshop.yml",
             "referral.yml",

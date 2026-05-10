@@ -26,10 +26,12 @@ import de.craftplay.shop.core.scheduler.TaskService;
 import de.craftplay.shop.core.transaction.TransactionRollbackService;
 import de.craftplay.shop.core.transaction.TransactionService;
 import de.craftplay.shop.importers.ImporterService;
+import de.craftplay.shop.integrations.FloodgateHook;
 import de.craftplay.shop.integrations.HeadDatabaseHook;
 import de.craftplay.shop.integrations.PlaceholderApiHook;
 import de.craftplay.shop.permissionshop.PermissionProductService;
 import de.craftplay.shop.playershop.PlayerShopService;
+import de.craftplay.shop.playershop.PlayerShopTrustService;
 import de.craftplay.shop.protection.ProtectionService;
 import de.craftplay.shop.rankshop.RankShopService;
 import de.craftplay.shop.referral.ReferralService;
@@ -82,7 +84,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
     private AuctionHouseService auctionHouseService;
     private HeadDatabaseHook headDatabaseHook;
     private PlaceholderApiHook placeholderApiHook;
+    private FloodgateHook floodgateHook;
     private ProtectionService protectionService;
+    private PlayerShopTrustService playerShopTrustService;
     private PlayerShopService playerShopService;
     private AutoSellChestService autoSellChestService;
     private PermissionProductService permissionProductService;
@@ -104,6 +108,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         itemMatcher = new ItemMatcher();
         headDatabaseHook = new HeadDatabaseHook(this);
         placeholderApiHook = new PlaceholderApiHook(this);
+        floodgateHook = new FloodgateHook(this);
         protectionService = new ProtectionService(this);
         if (!setupDatabase()) {
             return;
@@ -130,6 +135,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         sellCommandService = new SellCommandService(this);
         directTradeService = new DirectTradeService(this);
 
+        playerShopTrustService = new PlayerShopTrustService(this);
         playerShopService = new PlayerShopService(this);
         autoSellChestService = new AutoSellChestService(this);
         auctionHouseService = new AuctionHouseService(this);
@@ -201,6 +207,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         if (protectionService != null) {
             protectionService.loadHooks();
         }
+        if (playerShopTrustService != null) {
+            playerShopTrustService.load();
+        }
         if (playerShopService != null) {
             playerShopService.load();
         }
@@ -231,6 +240,12 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         }
         if (referralService != null) {
             referralService.onJoin(event.getPlayer());
+        }
+        if (floodgateHook != null
+                && configService.floodgateOpenMainOnJoin()
+                && floodgateHook.isFloodgatePlayer(event.getPlayer())) {
+            getServer().getScheduler().runTaskLater(this, () -> floodgateHook.openMainForm(event.getPlayer()),
+                    configService.floodgateJoinDelayTicks());
         }
     }
 
@@ -406,12 +421,20 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         return placeholderApiHook;
     }
 
+    public FloodgateHook getFloodgateHook() {
+        return floodgateHook;
+    }
+
     public ProtectionService getProtectionService() {
         return protectionService;
     }
 
     public PlayerShopService getPlayerShopService() {
         return playerShopService;
+    }
+
+    public PlayerShopTrustService getPlayerShopTrustService() {
+        return playerShopTrustService;
     }
 
     public AutoSellChestService getAutoSellChestService() {

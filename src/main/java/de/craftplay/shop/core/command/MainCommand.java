@@ -47,6 +47,11 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 plugin.getLanguageService().send(player, "general.noPermission");
                 return true;
             }
+            if (plugin.getFloodgateHook() != null
+                    && plugin.getConfigService().floodgatePreferFormsForShopCommand()
+                    && plugin.getFloodgateHook().openMainForm(player)) {
+                return true;
+            }
             plugin.getGuiService().open(player, "main");
             return true;
         }

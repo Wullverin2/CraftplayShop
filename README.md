@@ -41,6 +41,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - CraftplayShop-Platzhalter und PlaceholderAPI-Platzhalter in GUI-Namen, GUI-Lores, Button-Texten und Sprachdateien.
 - PlaceholderAPI-Hook optional; CMI, Jobs Reborn und andere Expansions werden durchgereicht, wenn PlaceholderAPI sie bereitstellt.
 - HeadDatabase-Hook vorbereitet und optional.
+- Floodgate-Hook mit Bedrock-Hauptmenue per Formular fuer Floodgate-Spieler.
 - GUI-Sicherheitslogik gegen Item-Entnahme, Drag, Shift-Click und Number-Key.
 
 ### Economy und Datenbank
@@ -157,6 +158,10 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Der Standard-Display-Typ für neu erstellte PlayerShops ist über `playerShops.creation.defaultDisplayType` konfigurierbar.
 - Der Display-Typ `ITEM` schwebt leicht auf und ab und dreht sich; die Animation nutzt Display-Interpolation und ist unter `playerShops.display.animation.item` konfigurierbar.
 - Besitzer oder Admins oeffnen per Shift-Rechtsklick eine Bearbeitungs-GUI fuer Item, Menge, Preis bzw. Tauschmenge und Display-Typ.
+- Die Bearbeitungs-GUI kann Shops jetzt auch aktivieren/deaktivieren und Mitarbeiter verwalten.
+- Employee-/Trust-System fuer PlayerShops mit Rechten fuer Kiste oeffnen, Shop verwalten und Shop loeschen.
+- Mitarbeiter werden in einer eigenen GUI gelistet, koennen per Chat hinzugefuegt und im GUI bearbeitet oder entfernt werden.
+- Inaktive Shops bleiben in der eigenen Shopliste sichtbar und koennen weiter verwaltet werden.
 - PlayerShop-Hauptmenue mit allen Shops, eigener Shopliste und Suche.
 - Suche per Chat nach Item, Material, Besitzer oder Shop-Typ, mit deutschen und englischen Suchbegriffen.
 - Eigene Shops koennen im GUI bearbeitet, per Rechtsklick am Schild besucht und per Shift-Linksklick mit Bestaetigungs-GUI geloescht werden.
@@ -241,6 +246,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `craftplayshop.playershop.buy` - Bei SELL-PlayerShops einkaufen.
 - `craftplayshop.playershop.sell` - An BUY-PlayerShops verkaufen.
 - `craftplayshop.playershop.edit` - Eigene PlayerShops per GUI bearbeiten.
+- `craftplayshop.playershop.trust` - Mitarbeiter fuer eigene PlayerShops verwalten.
 - `craftplayshop.playershop.admin` - Fremde PlayerShops administrativ bearbeiten oder löschen.
 - `craftplayshop.language` - Eigene Sprache umstellen.
 - `craftplayshop.trade.use` - DirectTrade-Befehl grundsätzlich nutzen.
@@ -384,11 +390,12 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 ### Skeletons / vorbereitet
 
-Folgende Module sind strukturell vorbereitet, aber noch nicht vollstaendig umgesetzt:
+Folgende Bereiche sind strukturell vorbereitet oder koennen noch weiter vertieft werden:
 
-- PlayerShop-Trust, erweiterter Finder und erweiterte Verwaltungs-GUI
+- erweiterter Finder und weitere Verwaltungswerkzeuge fuer PlayerShops
 - weitergehende Protection-Logik fuer WorldGuard, Lands und BentoBox ueber die aktuelle Hook-Erkennung hinaus
-- PlaceholderAPI, HeadDatabase, Floodgate, Citizens, Discord
+- tiefere Bedrock-Floodgate-Untermenues fuer weitere Module
+- PlaceholderAPI, HeadDatabase, Citizens, Discord
 
 ### Datenbank
 

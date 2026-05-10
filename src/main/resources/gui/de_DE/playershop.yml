@@ -10,7 +10,7 @@ home:
       lore:
         - "&7Zeigt alle aktiven Spielershops."
         - ""
-        - "&eKlicken zum Öffnen"
+        - "&eKlicken zum Oeffnen"
     ownShops:
       enabled: true
       slot: 13
@@ -19,7 +19,7 @@ home:
       lore:
         - "&7Verwalte deine eigenen Shops."
         - ""
-        - "&eKlicken zum Öffnen"
+        - "&eKlicken zum Oeffnen"
     search:
       enabled: true
       slot: 15
@@ -34,7 +34,7 @@ home:
       enabled: true
       slot: 26
       material: BARRIER
-      name: "&cSchließen"
+      name: "&cSchliessen"
       lore: []
 
 list:
@@ -48,7 +48,7 @@ list:
       enabled: true
       slot: 45
       material: ARROW
-      name: "&eZurück"
+      name: "&eZurueck"
       lore: []
     search:
       enabled: true
@@ -75,7 +75,7 @@ list:
       enabled: true
       slot: 50
       material: ARROW
-      name: "&eNächste Seite"
+      name: "&eNaechste Seite"
       lore:
         - "&7Seite &f%page%&7/&f%pages%"
   emptyItem:
@@ -93,16 +93,17 @@ list:
       - "&7Preis: &a%price%"
       - "&7Tausch: &e%trade_amount%x %trade_item%"
       - "&7In Kiste: &e%stock%"
+      - "&7Status: %active%"
       - "&7Koordinaten: &f%world% %x% %y% %z%"
       - "&7Anzeige: &f%display_type%"
       - ""
       - "&eLinksklick &7Bearbeiten"
       - "&eRechtsklick &7Zum Schild teleportieren"
-      - "&eShift-Linksklick &7Löschen bestätigen"
+      - "&eShift-Linksklick &7Loeschen bestaetigen"
       - "&7Kombi-Shops: &fRechtsklick kaufen, Linksklick verkaufen"
 
 deleteConfirm:
-  title: "&8Shop löschen?"
+  title: "&8Shop loeschen?"
   size: 27
   slots:
     confirm: 11
@@ -111,18 +112,18 @@ deleteConfirm:
   items:
     confirm:
       material: REDSTONE_BLOCK
-      name: "&cShop löschen"
+      name: "&cShop loeschen"
       lore:
         - "&7Item: &f%item%"
         - "&7Besitzer: &f%owner%"
         - "&7Koordinaten: &f%world% %x% %y% %z%"
         - ""
-        - "&cKlicken zum endgültigen Löschen"
+        - "&cKlicken zum endgueltigen Loeschen"
     cancel:
       material: EMERALD_BLOCK
       name: "&aAbbrechen"
       lore:
-        - "&7Zurück zur Shopliste."
+        - "&7Zurueck zur Shopliste."
 
 edit:
   title: "&8Kistenshop bearbeiten"
@@ -131,7 +132,9 @@ edit:
     item: 11
     amount: 13
     price: 15
+    status: 21
     display: 22
+    trust: 23
     close: 26
   items:
     item:
@@ -165,6 +168,13 @@ edit:
         - "&aShift-Linksklick: +10"
         - "&cRechtsklick: -1"
         - "&cShift-Rechtsklick: -10"
+    status:
+      material: LEVER
+      name: "&eStatus"
+      lore:
+        - "&7Aktuell: %active%"
+        - ""
+        - "&eKlicken zum Umschalten"
     display:
       material: ITEM_FRAME
       name: "&bAnzeige"
@@ -172,7 +182,100 @@ edit:
         - "&7Aktuell: &e%display_type%"
         - ""
         - "&eKlicken zum Wechseln"
+    trust:
+      material: WRITABLE_BOOK
+      name: "&dMitarbeiter"
+      lore:
+        - "&7Vertraute Spieler: &e%trust_count%"
+        - ""
+        - "&eKlicken zum Verwalten"
     close:
       material: BARRIER
-      name: "&cSchließen"
+      name: "&cSchliessen"
+      lore: []
+
+trustList:
+  title: "&8Shop-Mitarbeiter"
+  size: 36
+  entrySlots: [10, 11, 12, 13, 14, 15, 16]
+  slots:
+    add: 30
+    back: 32
+    close: 35
+  items:
+    entry:
+      material: PLAYER_HEAD
+      name: "&e%trust_player%"
+      lore:
+        - "&7Kiste oeffnen: %trust_open%"
+        - "&7Shop verwalten: %trust_manage%"
+        - "&7Shop loeschen: %trust_delete%"
+        - ""
+        - "&eKlicken zum Bearbeiten"
+    empty:
+      slot: 13
+      material: BARRIER
+      name: "&cKeine Mitarbeiter"
+      lore:
+        - "&7Dieser Shop hat noch keine"
+        - "&7vertrauten Spieler."
+    add:
+      material: EMERALD
+      name: "&aSpieler hinzufuegen"
+      lore:
+        - "&7Name per Chat eingeben."
+    back:
+      material: ARROW
+      name: "&eZurueck"
+      lore:
+        - "&7Zurueck zum Shop."
+    close:
+      material: BARRIER
+      name: "&cSchliessen"
+      lore: []
+
+trustEdit:
+  title: "&8Mitarbeiter bearbeiten"
+  size: 27
+  slots:
+    open: 11
+    manage: 13
+    delete: 15
+    remove: 18
+    back: 22
+    close: 26
+  items:
+    open:
+      material: CHEST
+      name: "&eKiste oeffnen"
+      lore:
+        - "&7Aktuell: %trust_open%"
+        - ""
+        - "&eKlicken zum Umschalten"
+    manage:
+      material: ANVIL
+      name: "&bShop verwalten"
+      lore:
+        - "&7Aktuell: %trust_manage%"
+        - ""
+        - "&eKlicken zum Umschalten"
+    delete:
+      material: IRON_AXE
+      name: "&cShop loeschen"
+      lore:
+        - "&7Aktuell: %trust_delete%"
+        - ""
+        - "&eKlicken zum Umschalten"
+    remove:
+      material: REDSTONE_BLOCK
+      name: "&cMitarbeiter entfernen"
+      lore:
+        - "&7Entfernt &e%trust_player%&7."
+    back:
+      material: ARROW
+      name: "&eZurueck"
+      lore: []
+    close:
+      material: BARRIER
+      name: "&cSchliessen"
       lore: []
