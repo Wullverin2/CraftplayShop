@@ -149,7 +149,9 @@ public class ServerShopCategoryGui {
         ServerShopAmountHolder holder = new ServerShopAmountHolder(ServerShopAmountHolder.View.AMOUNT_SELECTION, categoryId, itemId, action, 0, keysBySlot);
         Map<String, String> placeholders = itemPlaceholders(player, item);
         placeholders.put("action", actionName(player, action));
-        placeholders.put("price", plugin.getEconomyService().format(action == ServerShopAction.BUY ? item.buyPrice() : item.sellPrice()));
+        placeholders.put("price", plugin.getEconomyService().format(action == ServerShopAction.BUY
+                ? plugin.getServerShopPricingService().buyUnitPrice(item)
+                : plugin.getServerShopPricingService().sellUnitPrice(item)));
         String title = parse(player, gui.getString("amountSelection.title", "&8%item%"), placeholders);
         Inventory inventory = Bukkit.createInventory(holder, sanitizeSize(gui.getInt("amountSelection.size", 54)), TextUtil.color(title));
         holder.setInventory(inventory);
@@ -197,7 +199,7 @@ public class ServerShopCategoryGui {
         Map<String, String> placeholders = itemPlaceholders(player, item);
         placeholders.put("action", actionName(player, ServerShopAction.BUY));
         placeholders.put("amount", Integer.toString(amount));
-        placeholders.put("price", plugin.getEconomyService().format(item.buyPrice() * amount));
+        placeholders.put("price", plugin.getEconomyService().format(plugin.getServerShopPricingService().buyTotal(item, amount)));
         Inventory inventory = Bukkit.createInventory(holder, sanitizeSize(gui.getInt("buyConfirmation.size", 54)), TextUtil.color(parse(player, gui.getString("buyConfirmation.title", "&8Confirm"), placeholders)));
         holder.setInventory(inventory);
         fill(inventory, gui);
@@ -254,7 +256,9 @@ public class ServerShopCategoryGui {
         Map<String, String> placeholders = itemPlaceholders(player, item);
         placeholders.put("action", actionName(player, action));
         placeholders.put("amount", Integer.toString(amount));
-        double total = action == ServerShopAction.BUY ? item.buyPrice() * amount : item.sellPrice() * amount;
+        double total = action == ServerShopAction.BUY
+                ? plugin.getServerShopPricingService().buyTotal(item, amount)
+                : plugin.getServerShopPricingService().sellTotal(item, amount);
         placeholders.put("price", plugin.getEconomyService().format(total));
         return configuredItem(player, gui.getConfigurationSection("items.amountButton"), placeholders);
     }
@@ -392,16 +396,21 @@ public class ServerShopCategoryGui {
         placeholders.put("item", TextUtil.color(item.displayName()));
         placeholders.put("item_id", item.id());
         placeholders.put("material", item.material().name());
-        placeholders.put("buy_price", plugin.getEconomyService().format(item.buyPrice()));
-        placeholders.put("sell_price", plugin.getEconomyService().format(item.sellPrice()));
+        placeholders.put("buy_price", plugin.getEconomyService().format(plugin.getServerShopPricingService().buyUnitPrice(item)));
+        placeholders.put("sell_price", plugin.getEconomyService().format(plugin.getServerShopPricingService().sellUnitPrice(item)));
+        placeholders.put("base_buy_price", plugin.getEconomyService().format(item.buyPrice()));
+        placeholders.put("base_sell_price", plugin.getEconomyService().format(item.sellPrice()));
+        placeholders.put("price_multiplier", String.format(Locale.US, "%.2f", plugin.getServerShopPricingService().multiplier(item)));
         String unlimited = plugin.getLanguageService().get(player, "serverShop.limitUnlimited");
         placeholders.put("min_buy_amount", "1");
         placeholders.put("max_buy_amount", unlimited);
         placeholders.put("min_sell_amount", "1");
         placeholders.put("max_sell_amount", unlimited);
-        placeholders.put("stock_status", unlimited);
-        placeholders.put("stock", unlimited);
-        placeholders.put("max_stock", unlimited);
+        placeholders.put("stock_status", item.stockEnabled()
+                ? plugin.getLanguageService().get(player, "serverShop.stockEnabled")
+                : plugin.getLanguageService().get(player, "serverShop.stockDisabled"));
+        placeholders.put("stock", item.stockEnabled() ? Integer.toString(plugin.getServerShopRegistry().availableStock(item)) : unlimited);
+        placeholders.put("max_stock", item.stockEnabled() && item.hasStockMaximum() ? Integer.toString(item.maxStock()) : unlimited);
         placeholders.put("buy_status", Boolean.toString(item.buyEnabled()));
         placeholders.put("sell_status", Boolean.toString(item.sellEnabled()));
         return placeholders;

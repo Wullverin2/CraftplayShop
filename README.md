@@ -17,7 +17,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 ## Aktueller Stand
 
-**Version v1.0.0 ist der aktuelle Stand.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault, SQLite, MySQL/MariaDB, ServerShop/AdminShop, AutoSellChest, PlayerShop mit SELL/BUY/BUY_SELL/TRADE_ITEM, Protection-Hooks, DirectTrade, AuctionHouse, PermissionShop, RankShop, ReferralSystem und Importer.
+**Version v1.0.0 ist der aktuelle Stand.** Der Stand umfasst Core, Config, Sprache, GUI-System, Vault, SQLite, MySQL/MariaDB, ServerShop/AdminShop, AutoSellChest, PlayerShop mit SELL/BUY/BUY_SELL/TRADE_ITEM, Protection-Hooks, DirectTrade, AuctionHouse, PermissionShop, RankShop, ReferralSystem, Importer, Discord/Citizens-Integration, Bedrock-Untermenues und eine Multi-Server-Sync-Basis.
 
 ### Core
 
@@ -43,8 +43,11 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - HeadDatabase-Hook vorbereitet und optional.
 - Floodgate-Hook mit Bedrock-Hauptmenue per Formular fuer Floodgate-Spieler.
 - Bedrock-Spieler koennen den ServerShop nativ ueber Formulare bedienen: Kategorieauswahl, Itemauswahl und Kauf-/Verkaufsaktionen.
-- Bedrock-Spieler erhalten ein PlayerShop-Formular fuer alle Shops, eigene Shops und Suche.
+- Bedrock-Spieler erhalten Formulare fuer ServerShop, PlayerShop, AuctionHouse und AutoSellChest; RankShop, PermissionShop und Referral oeffnen aus dem Formular heraus ihre GUI.
 - GUI-Sicherheitslogik gegen Item-Entnahme, Drag, Shift-Click und Number-Key.
+- Discord-Webhooks fuer konfigurierbare Transaktionstypen.
+- Citizens-NPCs koennen per Config GUI-Aktionen wie ServerShop, PlayerShop oder Adminshop ausloesen.
+- Multi-Server-Sync-Basis schreibt optionale Server-Snapshots fuer spaetere netzwerkweite Auswertung.
 
 ### Economy und Datenbank
 
@@ -55,6 +58,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Tabellen fuer Transaktionen, Spieler-Einstellungen, Imports und Import-Mappings.
 - Tabelle fuer Spieler-Favoriten im ServerShop.
 - Tabelle fuer PlayerShop-Kistenshops.
+- Tabellen fuer ServerShop-Stock, Dynamic-Pricing-State und Preis-Historie.
 - Async Transaktionslogging.
 - Spieler-Einstellungen mit Sprache und DirectTrade-Status.
 
@@ -69,6 +73,11 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Rechtsklick verkauft 1, Shift-Rechtsklick verkauft einen Stack.
 - Vorbereitete Mengenauswahl mit Mengenbuttons und Chat-Eingabe, aktuell nicht als Standard-Spielerklick belegt.
 - Kaufen und Verkaufen sind unbegrenzt, wenn die jeweilige Funktion am Item aktiviert ist.
+- Optionales Stock-System pro Item ueber `stockEnabled`, `stock` und `maxStock`; ohne `stockEnabled` bleibt das Item unbegrenzt.
+- Optionales Dynamic Pricing mit Multiplikator, Grenzen, Schrittweite und stundenweiser Erholung Richtung Basispreis.
+- Preis-Historie speichert gehandelte Mengen, Preise und Multiplikator in der Datenbank.
+- Optionale Kaufgebuehren und Verkaufssteuern.
+- Eventshop-/Daily-Deal-Multiplikatoren fuer bestimmte Kategorien oder Items.
 - Sell-All verkauft alle ankaufbaren Items ohne ServerShop-Stock- oder Mengenlimit.
 - Konfigurierbare Bestaetigungs-GUI fuer teure Kaeufe.
 - Creative- und Spectator-Verkaufsschutz gegen ServerShop-, Sell-Hand-, Sell-All- und Sell-GUI-Verkaeufe.
@@ -165,6 +174,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Mitarbeiter werden in einer eigenen GUI gelistet, koennen per Chat hinzugefuegt und im GUI bearbeitet oder entfernt werden.
 - Inaktive Shops bleiben in der eigenen Shopliste sichtbar und koennen weiter verwaltet werden.
 - PlayerShop-Hauptmenue mit allen Shops, eigener Shopliste und Suche.
+- PlayerShop-Finder mit "Shops in der Naehe" nach Radius aus `playerShops.finder.nearbyRadius`.
 - Suche per Chat nach Item, Material, Besitzer oder Shop-Typ, mit deutschen und englischen Suchbegriffen.
 - Eigene Shops koennen im GUI bearbeitet, per Rechtsklick am Schild besucht und per Shift-Linksklick mit Bestaetigungs-GUI geloescht werden.
 - PlayerShop-Listen haben Seiten-Navigation fuer groessere Shopmengen.
@@ -191,6 +201,7 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - `/shop playershop`
 - `/shop playershop search`
 - `/shop playershop mine`
+- `/shop playershop nearby`
 - `/servershop`
 - `/sellhand`
 - `/sellall`
@@ -377,6 +388,16 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 - Jeder Import schreibt einen Bericht nach `plugins/CraftplayShop/imports/reports/` und legt Backups unter `plugins/CraftplayShop/imports/backups/` an.
 - Import-Mappings werden in der Datenbank gespeichert, damit Importquellen und Zielobjekte nachvollziehbar bleiben.
 
+### Integrationen
+
+- PlaceholderAPI wird optional geladen und reicht Expansion-Platzhalter in GUI- und Sprachtexte durch.
+- HeadDatabase bleibt optional; fehlt das Plugin, nutzt CraftplayShop Fallback-Materialien.
+- Floodgate bietet native Bedrock-Formulare fuer Hauptmenue, ServerShop, PlayerShop, AuctionHouse und AutoSellChest.
+- Discord-Webhooks senden Transaktionsmeldungen, wenn `integrations.discord.enabled` und `webhookUrl` gesetzt sind.
+- Citizens-NPCs koennen unter `integrations.citizens.npcs` mit NPC-ID oder NPC-Name und einer GUI-Aktion verbunden werden.
+- WorldGuard, PlotSquared, Lands und BentoBox werden zentral ueber `ProtectionService` erkannt; Admin-Bypass ist konfigurierbar.
+- Die Multi-Server-Sync-Basis schreibt optional Snapshot-Dateien unter `plugins/CraftplayShop/sync/`.
+
 ### Debugging
 
 - Dateibasiertes Debuglogging nach `plugins/CraftplayShop/debuglogs/`.
@@ -394,10 +415,10 @@ CraftplayShop soll langfristig ein modulares System fuer ServerShop/AdminShop, P
 
 Folgende Bereiche sind strukturell vorbereitet oder koennen noch weiter vertieft werden:
 
-- erweiterter Finder und weitere Verwaltungswerkzeuge fuer PlayerShops
-- weitergehende Protection-Logik fuer WorldGuard, Lands und BentoBox ueber die aktuelle Hook-Erkennung hinaus
-- tiefere Bedrock-Floodgate-Untermenues fuer weitere Module
-- PlaceholderAPI, HeadDatabase, Citizens, Discord
+- Multi-Server-Sync ist aktuell eine Snapshot-Basis, noch keine aktive netzwerkweite Shop-Replikation.
+- Dynamic Pricing ist pro ServerShop-Item aktivierbar, aber noch ohne Admin-Analyse-GUI fuer Preisverlauf.
+- Citizens nutzt konfigurierbare NPC-Aktionen, aber noch keine eigene NPC-Verwaltungs-GUI.
+- Discord sendet Transaktionsmeldungen, aber noch keine reich formatierten Embeds.
 
 ### Datenbank
 

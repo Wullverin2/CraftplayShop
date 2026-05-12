@@ -39,6 +39,7 @@ debug:
       - "rankshop"
       - "permissionshop"
       - "gui"
+      - "sync"
 
 commands:
   # Hauptbefehl, den du für CraftplayShop verwenden möchtest.
@@ -120,6 +121,59 @@ serverShop:
   allowBuy: true
   allowSell: true
   defaultCurrency: "VAULT"
+
+  stock:
+    # Wenn true, liest der ServerShop stockEnabled/stock/maxStock pro Item aus der server_shop.yml.
+    # Ohne stockEnabled bleiben Items weiterhin unbegrenzt kauf- und verkaufbar.
+    enabled: true
+
+    # Persistiert geänderte Bestände gebündelt, nicht bei jedem Klick synchron.
+    flushIntervalSeconds: 30
+
+  dynamicPricing:
+    # Aktiviert automatische Preisbewegungen durch Kauf/Verkauf.
+    # Käufe erhöhen den Multiplikator, Verkäufe senken ihn.
+    enabled: false
+
+    # Preisänderung pro 64 gehandelte Items.
+    stepPerStack: 0.02
+
+    # Untere und obere Grenze für den dynamischen Multiplikator.
+    minMultiplier: 0.50
+    maxMultiplier: 2.00
+
+    # Rückkehr des Multiplikators Richtung 1.0 pro Stunde.
+    recoveryPerHour: 0.01
+
+  priceHistory:
+    # Schreibt Preis- und Multiplikatorhistorie in die Datenbank.
+    enabled: true
+
+  fees:
+    buy:
+      # Zusätzliche Kaufgebühr. Wird auf den Kaufpreis aufgeschlagen.
+      enabled: false
+      flat: 0.0
+      percent: 0.0
+    sell:
+      # Verkaufssteuer. Wird vom Auszahlungsbetrag abgezogen.
+      enabled: false
+      flat: 0.0
+      percent: 0.0
+
+  eventShop:
+    # Temporäre Multiplikatoren für Daily Deals, Events oder Wochenangebote.
+    enabled: false
+
+    # category/item können "*" sein. startEpochMillis/endEpochMillis 0 bedeutet keine Zeitgrenze.
+    deals:
+      - enabled: false
+        category: "blocks"
+        item: "stone"
+        buyMultiplier: 0.80
+        sellMultiplier: 1.20
+        startEpochMillis: 0
+        endEpochMillis: 0
 
   # Standard-Itemvergleich für einfache ServerShop-Items.
   itemMatchMode: "MATERIAL_ONLY"
@@ -213,6 +267,10 @@ sellCommands:
 playerShops:
   enabled: true
   useGuiCreation: true
+
+  finder:
+    # Radius für die Spielershop-Ansicht "Shops in der Nähe".
+    nearbyRadius: 128.0
 
   # Itemvergleich für PlayerShop-Kisten.
   # EXACT prüft Material und ItemMeta, MATERIAL_ONLY nur das Material.
@@ -911,7 +969,51 @@ integrations:
   discord:
     enabled: false
 
+    # Discord Webhook-URL für Transaktionsmeldungen.
+    webhookUrl: ""
+
+    # Diese Transaktionstypen werden gesendet. Leer = alle Typen.
+    transactionTypes:
+      - "SERVER_BUY"
+      - "SERVER_SELL"
+      - "SERVER_SELL_ALL"
+      - "AUTOSELL_CHEST"
+      - "PLAYER_SHOP_BUY"
+      - "PLAYER_SHOP_SELL"
+
+    # Nachrichtenvorlage für Webhook-Transaktionen.
+    transactionMessage: "[%type%] %player% %amount%x %material% für %total_price% auf %source%"
+
+  citizens:
+    # Aktiviert NPC-Shop-Buttons, wenn Citizens vorhanden ist.
+    enabled: true
+
+    # Beispiel:
+    # npcs:
+    #   servershop:
+    #     id: 1
+    #     name: ""
+    #     permission: "craftplayshop.servershop.use"
+    #     action: "OPEN_GUI:servershop"
+    npcs: {}
+
+multiServerSync:
+  # Schreibt einen leichten Status-Snapshot für spätere Multi-Server-Synchronisierung.
+  enabled: false
+
+  # Eindeutige Server-ID. Kann identisch mit panel.serverId sein.
+  serverId: "server-1"
+
+  # Unterordner im Plugin-Ordner für Snapshot-Dateien.
+  folder: "sync"
+
+  # Intervall für Snapshot-Aktualisierung.
+  intervalSeconds: 30
+
 protection:
+  # Admins mit craftplayshop.admin umgehen externe Protection-Hooks.
+  adminBypass: true
+
   worldguard: true
   plotsquared: true
   lands: true

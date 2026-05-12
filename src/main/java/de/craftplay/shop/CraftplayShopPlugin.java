@@ -29,6 +29,9 @@ import de.craftplay.shop.importers.ImporterService;
 import de.craftplay.shop.integrations.FloodgateHook;
 import de.craftplay.shop.integrations.HeadDatabaseHook;
 import de.craftplay.shop.integrations.PlaceholderApiHook;
+import de.craftplay.shop.integrations.CitizensHook;
+import de.craftplay.shop.integrations.DiscordWebhookService;
+import de.craftplay.shop.integrations.MultiServerSyncService;
 import de.craftplay.shop.permissionshop.PermissionProductService;
 import de.craftplay.shop.playershop.PlayerShopService;
 import de.craftplay.shop.playershop.PlayerShopTrustService;
@@ -40,6 +43,7 @@ import de.craftplay.shop.servershop.ServerShopCategoryGui;
 import de.craftplay.shop.servershop.ServerShopFavoriteService;
 import de.craftplay.shop.servershop.ServerShopGui;
 import de.craftplay.shop.servershop.ServerShopListGui;
+import de.craftplay.shop.servershop.ServerShopPricingService;
 import de.craftplay.shop.servershop.ServerShopRegistry;
 import de.craftplay.shop.servershop.ServerShopService;
 import de.craftplay.shop.servershop.ServerShopTransactionService;
@@ -85,6 +89,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
     private HeadDatabaseHook headDatabaseHook;
     private PlaceholderApiHook placeholderApiHook;
     private FloodgateHook floodgateHook;
+    private DiscordWebhookService discordWebhookService;
+    private CitizensHook citizensHook;
+    private MultiServerSyncService multiServerSyncService;
     private ProtectionService protectionService;
     private PlayerShopTrustService playerShopTrustService;
     private PlayerShopService playerShopService;
@@ -93,6 +100,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
     private RankShopService rankShopService;
     private ReferralService referralService;
     private ImporterService importerService;
+    private ServerShopPricingService serverShopPricingService;
 
     @Override
     public void onEnable() {
@@ -109,6 +117,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         headDatabaseHook = new HeadDatabaseHook(this);
         placeholderApiHook = new PlaceholderApiHook(this);
         floodgateHook = new FloodgateHook(this);
+        discordWebhookService = new DiscordWebhookService(this);
+        citizensHook = new CitizensHook(this);
+        multiServerSyncService = new MultiServerSyncService(this);
         protectionService = new ProtectionService(this);
         if (!setupDatabase()) {
             return;
@@ -126,6 +137,7 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         guiService = new GuiService(this);
         serverShopFavoriteService = new ServerShopFavoriteService(this);
         serverShopRegistry = new ServerShopRegistry(this);
+        serverShopPricingService = new ServerShopPricingService(this);
         serverShopService = new ServerShopService(this);
         serverShopGui = new ServerShopGui(this);
         serverShopCategoryGui = new ServerShopCategoryGui(this);
@@ -171,6 +183,9 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         if (serverShopRegistry != null) {
             serverShopRegistry.cancelStockFlushTask();
         }
+        if (multiServerSyncService != null) {
+            multiServerSyncService.stop();
+        }
         if (playerShopService != null) {
             playerShopService.shutdown();
         }
@@ -198,11 +213,23 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         if (serverShopRegistry != null) {
             serverShopRegistry.load();
         }
+        if (serverShopPricingService != null) {
+            serverShopPricingService.load();
+        }
         if (headDatabaseHook != null) {
             headDatabaseHook.load();
         }
         if (placeholderApiHook != null) {
             placeholderApiHook.load();
+        }
+        if (discordWebhookService != null) {
+            discordWebhookService.load();
+        }
+        if (citizensHook != null) {
+            citizensHook.load();
+        }
+        if (multiServerSyncService != null) {
+            multiServerSyncService.load();
         }
         if (protectionService != null) {
             protectionService.loadHooks();
@@ -385,6 +412,10 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
         return serverShopTransactionService;
     }
 
+    public ServerShopPricingService getServerShopPricingService() {
+        return serverShopPricingService;
+    }
+
     public ServerShopAdminEditor getServerShopAdminEditor() {
         return serverShopAdminEditor;
     }
@@ -423,6 +454,14 @@ public class CraftplayShopPlugin extends JavaPlugin implements Listener {
 
     public FloodgateHook getFloodgateHook() {
         return floodgateHook;
+    }
+
+    public DiscordWebhookService getDiscordWebhookService() {
+        return discordWebhookService;
+    }
+
+    public CitizensHook getCitizensHook() {
+        return citizensHook;
     }
 
     public ProtectionService getProtectionService() {

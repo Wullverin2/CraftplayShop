@@ -371,6 +371,10 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             plugin.getPlayerShopService().openOwn(player);
             return;
         }
+        if (args.length > 1 && ("nearby".equalsIgnoreCase(args[1]) || "near".equalsIgnoreCase(args[1]) || "finder".equalsIgnoreCase(args[1]) || "nahe".equalsIgnoreCase(args[1]) || "in-der-naehe".equalsIgnoreCase(args[1]))) {
+            plugin.getPlayerShopService().openNearby(player);
+            return;
+        }
         plugin.getPlayerShopService().openHome(player);
     }
 
@@ -494,7 +498,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             return List.of("<amount>");
         }
         if (args.length == 2 && ("playershop".equalsIgnoreCase(args[0]) || "pshop".equalsIgnoreCase(args[0]))) {
-            return filter(List.of("search", "mine", "own"), args[1]);
+            return filter(List.of("search", "mine", "own", "nearby", "finder"), args[1]);
         }
         if (args.length == 2 && "admin".equalsIgnoreCase(args[0])) {
             return filter(List.of("editor", "reload", "servershop", "adminshop", "backup", "backups", "import", "debug"), args[1]);

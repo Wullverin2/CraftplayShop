@@ -218,13 +218,16 @@ public class ServerShopListGui {
         placeholders.put("category", category == null ? item.categoryId() : TextUtil.color(category.displayName()));
         placeholders.put("category_id", item.categoryId());
         placeholders.put("material", item.material().name());
-        placeholders.put("buy_price", plugin.getEconomyService().format(item.buyPrice()));
-        placeholders.put("sell_price", plugin.getEconomyService().format(item.sellPrice()));
+        placeholders.put("buy_price", plugin.getEconomyService().format(plugin.getServerShopPricingService().buyUnitPrice(item)));
+        placeholders.put("sell_price", plugin.getEconomyService().format(plugin.getServerShopPricingService().sellUnitPrice(item)));
+        placeholders.put("base_buy_price", plugin.getEconomyService().format(item.buyPrice()));
+        placeholders.put("base_sell_price", plugin.getEconomyService().format(item.sellPrice()));
+        placeholders.put("price_multiplier", String.format(Locale.US, "%.2f", plugin.getServerShopPricingService().multiplier(item)));
         placeholders.put("favorite_status", plugin.getLanguageService().get(player,
                 plugin.getServerShopFavoriteService().isFavorite(player, item) ? "serverShop.favoriteYes" : "serverShop.favoriteNo"));
         String unlimited = plugin.getLanguageService().get(player, "serverShop.limitUnlimited");
-        placeholders.put("stock", unlimited);
-        placeholders.put("max_stock", unlimited);
+        placeholders.put("stock", item.stockEnabled() ? Integer.toString(plugin.getServerShopRegistry().availableStock(item)) : unlimited);
+        placeholders.put("max_stock", item.stockEnabled() && item.hasStockMaximum() ? Integer.toString(item.maxStock()) : unlimited);
         return placeholders;
     }
 

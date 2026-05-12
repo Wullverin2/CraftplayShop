@@ -144,6 +144,7 @@ public class PlayerShopService implements Listener {
         Inventory inventory = Bukkit.createInventory(holder, size(gui, "home.size", 27), title(player, gui, "home.title", "&8PlayerShop"));
         addConfiguredButton(player, gui, inventory, holder, "home.buttons.allShops", PlayerShopMenuAction.ALL_SHOPS);
         addConfiguredButton(player, gui, inventory, holder, "home.buttons.ownShops", PlayerShopMenuAction.OWN_SHOPS);
+        addConfiguredButton(player, gui, inventory, holder, "home.buttons.nearbyShops", PlayerShopMenuAction.NEARBY_SHOPS);
         addConfiguredButton(player, gui, inventory, holder, "home.buttons.search", PlayerShopMenuAction.SEARCH);
         addConfiguredButton(player, gui, inventory, holder, "home.buttons.close", PlayerShopMenuAction.CLOSE);
         player.openInventory(inventory);
@@ -155,6 +156,10 @@ public class PlayerShopService implements Listener {
 
     public void openOwn(Player player) {
         openList(player, PlayerShopMenuView.OWN, "", 0);
+    }
+
+    public void openNearby(Player player) {
+        openList(player, PlayerShopMenuView.NEARBY, "", 0);
     }
 
     public void requestSearch(Player player) {
@@ -1189,6 +1194,7 @@ public class PlayerShopService implements Listener {
         YamlConfiguration gui = gui(player);
         String titlePath = switch (view) {
             case OWN -> "list.ownTitle";
+            case NEARBY -> "list.nearbyTitle";
             case SEARCH -> "list.searchTitle";
             default -> "list.allTitle";
         };
@@ -1198,7 +1204,7 @@ public class PlayerShopService implements Listener {
         }
         List<PlayerShop> shops = shopsForView(player, view, query).stream()
                 .filter(shop -> view == PlayerShopMenuView.OWN || shop.active())
-                .sorted(Comparator.comparing(PlayerShop::ownerName).thenComparing(PlayerShop::material).thenComparingLong(PlayerShop::id))
+                .sorted(shopComparator(player, view))
                 .toList();
         int perPage = Math.max(1, slots.size());
         int totalPages = Math.max(1, (int) Math.ceil(shops.size() / (double) perPage));
@@ -1243,11 +1249,45 @@ public class PlayerShopService implements Listener {
             case OWN -> snapshotShops().stream()
                     .filter(shop -> shop.ownerUuid().equals(player.getUniqueId()))
                     .toList();
+            case NEARBY -> snapshotShops().stream()
+                    .filter(shop -> isNearby(player, shop))
+                    .toList();
             case SEARCH -> snapshotShops().stream()
                     .filter(shop -> matchesSearch(shop, query))
                     .toList();
             default -> snapshotShops();
         };
+    }
+
+    private Comparator<PlayerShop> shopComparator(Player player, PlayerShopMenuView view) {
+        if (view == PlayerShopMenuView.NEARBY) {
+            return Comparator.comparingDouble((PlayerShop shop) -> distanceSquared(player, shop))
+                    .thenComparing(PlayerShop::ownerName)
+                    .thenComparing(PlayerShop::material)
+                    .thenComparingLong(PlayerShop::id);
+        }
+        return Comparator.comparing(PlayerShop::ownerName)
+                .thenComparing(PlayerShop::material)
+                .thenComparingLong(PlayerShop::id);
+    }
+
+    private boolean isNearby(Player player, PlayerShop shop) {
+        if (player == null || shop == null || !player.getWorld().getName().equals(shop.world())) {
+            return false;
+        }
+        double radius = Math.max(1.0D, plugin.getConfig().getDouble("playerShops.finder.nearbyRadius", 128.0D));
+        return distanceSquared(player, shop) <= radius * radius;
+    }
+
+    private double distanceSquared(Player player, PlayerShop shop) {
+        if (player == null || shop == null || !player.getWorld().getName().equals(shop.world())) {
+            return Double.MAX_VALUE;
+        }
+        Location location = player.getLocation();
+        double dx = location.getX() - (shop.signX() + 0.5D);
+        double dy = location.getY() - (shop.signY() + 0.5D);
+        double dz = location.getZ() - (shop.signZ() + 0.5D);
+        return dx * dx + dy * dy + dz * dz;
     }
 
     private void handleMenuClick(Player player, PlayerShopMenuHolder holder, InventoryClickEvent event) {
@@ -1261,6 +1301,7 @@ public class PlayerShopService implements Listener {
                 case HOME, BACK -> openHome(player);
                 case ALL_SHOPS -> openAll(player);
                 case OWN_SHOPS -> openOwn(player);
+                case NEARBY_SHOPS -> openNearby(player);
                 case SEARCH -> requestSearch(player);
                 case NEXT_PAGE -> openList(player, holder.view(), holder.query(), holder.page() + 1);
                 case PREVIOUS_PAGE -> openList(player, holder.view(), holder.query(), holder.page() - 1);
@@ -1559,12 +1600,21 @@ public class PlayerShopService implements Listener {
                 Map.entry("y", Integer.toString(shop.containerY())),
                 Map.entry("z", Integer.toString(shop.containerZ())),
                 Map.entry("display_type", shop.displayType().name()),
+                Map.entry("distance", distanceText(player, shop)),
                 Map.entry("active", shop.active()
                         ? plugin.getLanguageService().get(player, "playerShop.statusEnabled")
                         : plugin.getLanguageService().get(player, "playerShop.statusDisabled")),
                 Map.entry("active_raw", Boolean.toString(shop.active())),
                 Map.entry("trust_count", Integer.toString(trustCount))
         );
+    }
+
+    private String distanceText(Player player, PlayerShop shop) {
+        double distanceSquared = distanceSquared(player, shop);
+        if (distanceSquared == Double.MAX_VALUE) {
+            return "-";
+        }
+        return Integer.toString((int) Math.round(Math.sqrt(distanceSquared)));
     }
 
     private Map<String, String> trustPlaceholders(Player player, PlayerShop shop, PlayerShopTrustEntry entry) {

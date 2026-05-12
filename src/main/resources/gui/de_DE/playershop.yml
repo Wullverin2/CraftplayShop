@@ -22,7 +22,7 @@ home:
         - "&eKlicken zum Oeffnen"
     search:
       enabled: true
-      slot: 15
+      slot: 16
       material: COMPASS
       name: "&bSuche"
       lore:
@@ -30,6 +30,16 @@ home:
         - "&7Besitzer oder Shop-Typ."
         - ""
         - "&eKlicken zum Suchen"
+    nearbyShops:
+      enabled: true
+      slot: 15
+      material: ENDER_EYE
+      name: "&6Shops in der Nähe"
+      lore:
+        - "&7Zeigt aktive Shops"
+        - "&7in deinem Umkreis."
+        - ""
+        - "&eKlicken zum Öffnen"
     close:
       enabled: true
       slot: 26
@@ -40,6 +50,7 @@ home:
 list:
   allTitle: "&8Alle Spielershops %page%/%pages%"
   ownTitle: "&8Meine Spielershops %page%/%pages%"
+  nearbyTitle: "&8Shops in der Nähe %page%/%pages%"
   searchTitle: "&8Spielershop Suche: %query% %page%/%pages%"
   size: 54
   shopSlots: [10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34]
@@ -93,6 +104,7 @@ list:
       - "&7Preis: &a%price%"
       - "&7Tausch: &e%trade_amount%x %trade_item%"
       - "&7In Kiste: &e%stock%"
+      - "&7Entfernung: &e%distance% Blöcke"
       - "&7Status: %active%"
       - "&7Koordinaten: &f%world% %x% %y% %z%"
       - "&7Anzeige: &f%display_type%"

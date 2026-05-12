@@ -16,6 +16,9 @@ public class TransactionService {
 
     public void logAsync(TransactionType type, Player player, String source, ItemStack itemStack, int amount, double priceEach, double totalPrice) {
         plugin.getTaskService().runAsync(() -> log(type, player, source, itemStack, amount, priceEach, totalPrice));
+        if (plugin.getDiscordWebhookService() != null) {
+            plugin.getDiscordWebhookService().sendTransaction(type, player, source, itemStack, amount, priceEach, totalPrice);
+        }
     }
 
     private void log(TransactionType type, Player player, String source, ItemStack itemStack, int amount, double priceEach, double totalPrice) {

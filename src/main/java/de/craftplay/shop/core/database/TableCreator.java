@@ -43,6 +43,26 @@ public class TableCreator {
                         "updated_at BIGINT, " +
                         "PRIMARY KEY (category_id, item_id))");
 
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("server_shop_pricing_state") + " (" +
+                        shortTextColumn("category_id") + ", " +
+                        shortTextColumn("item_id") + ", " +
+                        "multiplier DOUBLE, " +
+                        "buy_count BIGINT, " +
+                        "sell_count BIGINT, " +
+                        "updated_at BIGINT, " +
+                        "PRIMARY KEY (category_id, item_id))");
+
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("server_shop_price_history") + " (" +
+                        idColumn() + ", " +
+                        shortTextColumn("category_id") + ", " +
+                        shortTextColumn("item_id") + ", " +
+                        shortTextColumn("type") + ", " +
+                        "amount INTEGER, " +
+                        "unit_price DOUBLE, " +
+                        "total_price DOUBLE, " +
+                        "multiplier DOUBLE, " +
+                        "created_at BIGINT)");
+
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + database.table("server_shop_favorites") + " (" +
                         uuidColumn("player_uuid") + ", " +
                         shortTextColumn("category_id") + ", " +

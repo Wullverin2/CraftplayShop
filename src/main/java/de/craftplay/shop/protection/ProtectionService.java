@@ -1,6 +1,7 @@
 package de.craftplay.shop.protection;
 
 import de.craftplay.shop.CraftplayShopPlugin;
+import de.craftplay.shop.core.permission.PermissionNodes;
 import de.craftplay.shop.protection.hooks.BentoBoxHook;
 import de.craftplay.shop.protection.hooks.LandsHook;
 import de.craftplay.shop.protection.hooks.PlotSquaredHook;
@@ -46,18 +47,36 @@ public class ProtectionService {
     }
 
     public boolean canCreateShop(Player player, Location location) {
+        if (bypass(player)) {
+            return true;
+        }
         return hooks.stream().allMatch(hook -> hook.canCreateShop(player, location));
     }
 
     public boolean canEditShop(Player player, Location location) {
+        if (bypass(player)) {
+            return true;
+        }
         return hooks.stream().allMatch(hook -> hook.canEditShop(player, location));
     }
 
     public boolean canUseShop(Player player, Location location) {
+        if (bypass(player)) {
+            return true;
+        }
         return hooks.stream().allMatch(hook -> hook.canUseShop(player, location));
     }
 
     public boolean canBreakShop(Player player, Location location) {
+        if (bypass(player)) {
+            return true;
+        }
         return hooks.stream().allMatch(hook -> hook.canBreakShop(player, location));
+    }
+
+    private boolean bypass(Player player) {
+        return player != null
+                && plugin.getConfig().getBoolean("protection.adminBypass", true)
+                && player.hasPermission(PermissionNodes.ADMIN);
     }
 }

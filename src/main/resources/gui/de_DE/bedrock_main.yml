@@ -21,26 +21,33 @@ buttons:
     label: "&6Auktionshaus"
     lore:
       - "&7Durchsuche globale Angebote."
-    openGui: "auctionhouse"
+    openForm: "auctionhouse"
     permission: "craftplayshop.auctionhouse.use"
   rankshop:
     enabled: true
     label: "&dRankShop"
     lore:
       - "&7Kaufe Raenge und Upgrades."
-    openGui: "rankshop"
+    openForm: "rankshop"
     permission: "craftplayshop.rankshop.use"
   permissionshop:
     enabled: true
     label: "&bPermissionShop"
     lore:
       - "&7Kaufe Rechte und Produkte."
-    openGui: "permissionshop"
+    openForm: "permissionshop"
     permission: "craftplayshop.permissionshop.use"
   referral:
     enabled: true
     label: "&bReferral"
     lore:
       - "&7Zeige Codes und loese sie ein."
-    openGui: "referral"
+    openForm: "referral"
     permission: "craftplayshop.referral.use"
+  autosellchest:
+    enabled: true
+    label: "&cAutoSellChest"
+    lore:
+      - "&7Verwalte deine Verkaufskisten."
+    openForm: "autosellchest"
+    permission: "craftplayshop.autosellchest.use"

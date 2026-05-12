@@ -96,6 +96,11 @@ public class FloodgateHook {
             case "main", "home" -> openMainForm(player);
             case "servershop" -> openServerShopCategoriesForm(player);
             case "playershop" -> openPlayerShopForm(player);
+            case "auctionhouse", "ah" -> openAuctionHouseForm(player);
+            case "autosellchest", "asc" -> openAutoSellChestForm(player);
+            case "rankshop" -> openInventoryBackedForm(player, PermissionNodes.RANK_SHOP_USE, () -> plugin.getRankShopService().open(player));
+            case "permissionshop" -> openInventoryBackedForm(player, PermissionNodes.PERMISSION_SHOP_USE, () -> plugin.getPermissionProductService().open(player));
+            case "referral" -> openInventoryBackedForm(player, PermissionNodes.REFERRAL_USE, () -> plugin.getReferralService().open(player));
             default -> false;
         };
     }
@@ -217,6 +222,7 @@ public class FloodgateHook {
         List<BedrockButton> buttons = List.of(
                 new BedrockButton("playershop_all", message(player, "floodgate.playerShopAll", "&aAlle Spielershops"), "", PermissionNodes.PLAYER_SHOP_USE),
                 new BedrockButton("playershop_own", message(player, "floodgate.playerShopOwn", "&eMeine Spielershops"), "", PermissionNodes.PLAYER_SHOP_USE),
+                new BedrockButton("playershop_nearby", message(player, "floodgate.playerShopNearby", "&6Shops in der Naehe"), "", PermissionNodes.PLAYER_SHOP_USE),
                 new BedrockButton("playershop_search", message(player, "floodgate.playerShopSearch", "&bSpielershop-Suche"), "", PermissionNodes.PLAYER_SHOP_USE),
                 new BedrockButton("main", message(player, "floodgate.back", "&eZurueck"), "", "")
         );
@@ -235,12 +241,86 @@ public class FloodgateHook {
                 switch (buttons.get(clicked).guiId()) {
                     case "playershop_all" -> plugin.getPlayerShopService().openAll(player);
                     case "playershop_own" -> plugin.getPlayerShopService().openOwn(player);
+                    case "playershop_nearby" -> plugin.getPlayerShopService().openNearby(player);
                     case "playershop_search" -> plugin.getPlayerShopService().requestSearch(player);
                     default -> openMainForm(player);
                 }
             });
         });
         return send(player, builder);
+    }
+
+    private boolean openAuctionHouseForm(Player player) {
+        if (!player.hasPermission(PermissionNodes.AUCTION_HOUSE_USE)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return true;
+        }
+        List<BedrockButton> buttons = List.of(
+                new BedrockButton("ah_browse", message(player, "floodgate.auctionHouseBrowse", "&aAngebote"), "", PermissionNodes.AUCTION_HOUSE_USE),
+                new BedrockButton("ah_search", message(player, "floodgate.auctionHouseSearch", "&bSuche"), "", PermissionNodes.AUCTION_HOUSE_USE),
+                new BedrockButton("ah_mine", message(player, "floodgate.auctionHouseMine", "&eMeine Angebote"), "", PermissionNodes.AUCTION_HOUSE_USE),
+                new BedrockButton("ah_claims", message(player, "floodgate.auctionHouseClaims", "&6Abholen"), "", PermissionNodes.AUCTION_HOUSE_USE),
+                new BedrockButton("main", message(player, "floodgate.back", "&eZurueck"), "", "")
+        );
+        SimpleForm.Builder builder = SimpleForm.builder()
+                .title(message(player, "floodgate.auctionHouseTitle", "&8Auktionshaus"))
+                .content(message(player, "floodgate.auctionHouseContent", "&7Waehle eine Aktion."));
+        for (BedrockButton button : buttons) {
+            builder.button(button.text());
+        }
+        builder.validResultHandler((form, response) -> {
+            int clicked = response.getClickedButtonId();
+            plugin.getTaskService().runSync(() -> {
+                if (clicked < 0 || clicked >= buttons.size()) {
+                    return;
+                }
+                switch (buttons.get(clicked).guiId()) {
+                    case "ah_browse" -> plugin.getAuctionHouseService().openBrowse(player, 0, "");
+                    case "ah_search" -> plugin.getAuctionHouseService().requestSearch(player);
+                    case "ah_mine" -> plugin.getAuctionHouseService().openMine(player, 0);
+                    case "ah_claims" -> plugin.getAuctionHouseService().openClaims(player, 0);
+                    default -> openMainForm(player);
+                }
+            });
+        });
+        return send(player, builder);
+    }
+
+    private boolean openAutoSellChestForm(Player player) {
+        if (!player.hasPermission(PermissionNodes.AUTOSELL_CHEST_USE)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return true;
+        }
+        List<BedrockButton> buttons = List.of(
+                new BedrockButton("asc_list", message(player, "floodgate.autoSellChestList", "&aMeine Verkaufskisten"), "", PermissionNodes.AUTOSELL_CHEST_USE),
+                new BedrockButton("main", message(player, "floodgate.back", "&eZurueck"), "", "")
+        );
+        SimpleForm.Builder builder = SimpleForm.builder()
+                .title(message(player, "floodgate.autoSellChestTitle", "&8AutoSellChest"))
+                .content(message(player, "floodgate.autoSellChestContent", "&7Waehle eine Aktion."));
+        for (BedrockButton button : buttons) {
+            builder.button(button.text());
+        }
+        builder.validResultHandler((form, response) -> {
+            int clicked = response.getClickedButtonId();
+            plugin.getTaskService().runSync(() -> {
+                if (clicked == 0) {
+                    plugin.getAutoSellChestService().gui().openList(player);
+                    return;
+                }
+                openMainForm(player);
+            });
+        });
+        return send(player, builder);
+    }
+
+    private boolean openInventoryBackedForm(Player player, String permission, Runnable openAction) {
+        if (!player.hasPermission(permission)) {
+            plugin.getLanguageService().send(player, "general.noPermission");
+            return true;
+        }
+        openAction.run();
+        return true;
     }
 
     private List<BedrockButton> buttons(Player player, ConfigurationSection section) {
@@ -269,10 +349,10 @@ public class FloodgateHook {
 
     private String itemButton(Player player, ServerShopItem item) {
         String buy = item.buyEnabled()
-                ? plugin.getEconomyService().format(item.buyPrice())
+                ? plugin.getEconomyService().format(plugin.getServerShopPricingService().buyUnitPrice(item))
                 : message(player, "floodgate.disabled", "&cdeaktiviert");
         String sell = item.sellEnabled()
-                ? plugin.getEconomyService().format(item.sellPrice())
+                ? plugin.getEconomyService().format(plugin.getServerShopPricingService().sellUnitPrice(item))
                 : message(player, "floodgate.disabled", "&cdeaktiviert");
         return TextUtil.color(item.displayName()) + "\n" + message(player, "floodgate.itemPriceLine", "&7Kauf: %buy% &8| &7Verkauf: %sell%")
                 .replace("%buy%", buy)
@@ -281,8 +361,8 @@ public class FloodgateHook {
 
     private String itemDetails(Player player, ServerShopItem item) {
         return message(player, "floodgate.itemDetails", "&7Kaufpreis: &e%buy%\n&7Verkaufspreis: &e%sell%\n&7Material: &f%material%")
-                .replace("%buy%", item.buyEnabled() ? plugin.getEconomyService().format(item.buyPrice()) : message(player, "floodgate.disabled", "&cdeaktiviert"))
-                .replace("%sell%", item.sellEnabled() ? plugin.getEconomyService().format(item.sellPrice()) : message(player, "floodgate.disabled", "&cdeaktiviert"))
+                .replace("%buy%", item.buyEnabled() ? plugin.getEconomyService().format(plugin.getServerShopPricingService().buyUnitPrice(item)) : message(player, "floodgate.disabled", "&cdeaktiviert"))
+                .replace("%sell%", item.sellEnabled() ? plugin.getEconomyService().format(plugin.getServerShopPricingService().sellUnitPrice(item)) : message(player, "floodgate.disabled", "&cdeaktiviert"))
                 .replace("%material%", item.material().name());
     }
 
